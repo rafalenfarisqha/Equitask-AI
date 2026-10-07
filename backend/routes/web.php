@@ -3,6 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
+// Mengarahkan halaman utama (/) langsung ke halaman login
+Route::get('/', function () {
+    return redirect('/login');
+});
+
 // Menampilkan halaman form login (GET)
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 
