@@ -32,7 +32,8 @@
         background: var(--card);
         border-radius: 14px;
         padding: 4px;
-        margin: 22px 0 4px;
+        margin: 22px auto 16px auto;
+        max-width: 400px;
         box-shadow: var(--shadow);
         border: 1px solid var(--border);
     }
@@ -48,10 +49,16 @@
         font-family: inherit;
         cursor: pointer;
         transition: background 0.2s, color 0.2s;
+        tetx-align: center;
     }
     .role-switch button.active {
         background: var(--primary);
         color: #fff;
+    }
+    .login-form {
+        max-width: 400px; /* Menyamakan lebar form dengan role-switch di atasnya */
+        margin: 0 auto;   /* Otomatis rata tengah */
+        padding: 22px 0;
     }
     .forgot {
         text-align: right;
@@ -83,8 +90,8 @@
                  alt="Logo EquiTask AI"
                  style="width: 60px; height: 60px; border-radius: 16px; object-fit: cover; background: white; padding: 4px; box-shadow: 0 6px 18px rgba(0,0,0,0.15);">
             <div>
-                <h2 style="margin:0; font-size: 30px; font-weight: 800;">EquiTask AI</h2>
-                <p style="margin:4px 0 0; font-size: 18px; opacity: 0.9;">Platform Assessment Adaptif</p>
+                <h2 style="margin:0; font-size: 22px; font-weight: 800;">EquiTask AI</h2>
+                <p style="margin:4px 0 0; font-size: 13px; opacity: 0.9;">Platform Assessment Adaptif</p>
             </div>
         </div>
     </div>
@@ -106,7 +113,7 @@
             <div class="forgot">Lupa Password?</div>
 
             <button type="submit" class="btn btn-primary btn-block">
-                <span class="material-symbols-outlined" style="font-size:20px;">login</span>Masuk
+                <span class="material-symbols-outlined" style="font-size:2px;">login</span>Masuk
             </button>
         </form>
     </div>
