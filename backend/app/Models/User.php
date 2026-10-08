@@ -2,31 +2,48 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use Notifiable;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $table = 'users';
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+    ];
+
+    protected $hidden = [
+        'password',
+    ];
+
+    public function studentProfile()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasOne(StudentProfile::class, 'user_id');
+    }
+
+    public function classes()
+    {
+        return $this->hasMany(ClassRoom::class, 'teacher_id');
+    }
+
+    public function classMembers()
+    {
+        return $this->hasMany(ClassMember::class, 'student_id');
+    }
+
+    public function materials()
+    {
+        return $this->hasMany(Material::class, 'teacher_id');
+    }
+
+    public function assessments()
+    {
+        return $this->hasMany(Assessment::class, 'teacher_id');
     }
 }

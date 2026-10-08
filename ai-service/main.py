@@ -2,8 +2,6 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from graph import run_workflow
 
-frommmmmm palen
-
 app = FastAPI(title="EquiTask AI Service", version="2.0")
 class ModulRequest(BaseModel):
     modul_teks: str

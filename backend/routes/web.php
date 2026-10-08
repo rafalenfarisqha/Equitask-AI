@@ -1,25 +1,32 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
-// Mengarahkan halaman utama (/) langsung ke halaman login
+// Halaman utama
 Route::get('/', function () {
     return redirect('/login');
 });
 
-// Route Login & Auth
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+// =========================
+// AUTHENTICATION
+// =========================
 
-Route::post('/login', function () {
-    return redirect('/dashboard');
-});
+// Menampilkan halaman login
+Route::get('/login', [AuthController::class, 'showLoginForm'])
+    ->name('login');
 
-// Tambahkan rute logout ini agar error hilang
-Route::post('/logout', function () {
-    return redirect('/login');
-})->name('logout');
+// Memproses login
+Route::post('/login', [AuthController::class, 'login']);
+
+// Logout
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->name('logout');
+
+
+// =========================
+// DASHBOARD
+// =========================
 
 // Dashboard Guru
 Route::get('/dashboard', function () {
@@ -31,11 +38,20 @@ Route::get('/student/dashboard', function () {
     return view('student.dashboard');
 })->name('student.dashboard');
 
+
+// =========================
+// STUDENT ASSESSMENT
+// =========================
+
 Route::get('/student/assessment', function () {
     return view('student.assessment');
 })->name('student.assessment');
 
-// Manajemen Assessments
+
+// =========================
+// ASSESSMENTS
+// =========================
+
 Route::get('/assessments', function () {
     return view('assessments.index');
 })->name('assessments.index');
@@ -52,7 +68,11 @@ Route::get('/assessments/{id}', function ($id) {
     return view('assessments.show');
 })->name('assessments.show');
 
-// Manajemen Materials / Modul Ajar
+
+// =========================
+// MATERIALS
+// =========================
+
 Route::get('/materials', function () {
     return view('materials.index');
 })->name('materials.index');

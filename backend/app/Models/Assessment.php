@@ -4,24 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Question extends Model
+class Assessment extends Model
 {
-    protected $table = 'questions';
+    protected $table = 'assessments';
 
     protected $fillable = [
         'teacher_id',
         'material_id',
-        'question_text',
-        'question_type',
-        'options',
-        'correct_answer',
-        'bloom_level',
-        'version_type',
-        'explanation',
-    ];
-
-    protected $casts = [
-        'options' => 'array',
+        'title',
+        'description',
+        'target_bloom',
+        'assessment_type',
+        'status',
+        'duration_minutes',
     ];
 
     public function teacher()
@@ -34,13 +29,21 @@ class Question extends Model
         return $this->belongsTo(Material::class, 'material_id');
     }
 
-    public function assessments()
+    public function questions()
     {
         return $this->belongsToMany(
-            Assessment::class,
+            Question::class,
             'assessment_questions',
-            'question_id',
-            'assessment_id'
+            'assessment_id',
+            'question_id'
         )->withPivot('question_order', 'points');
+    }
+
+    public function studentAssessments()
+    {
+        return $this->hasMany(
+            StudentAssessment::class,
+            'assessment_id'
+        );
     }
 }
