@@ -78,8 +78,15 @@
 @section('content')
 <div class="px">
     <div class="login-hero">
-        <h2 style="margin:0; font-size: 22px;">EquiTask AI</h2>
-        <p style="margin:4px 0 0; font-size: 13px; opacity: 0.9;">Platform Assessment Adaptif</p>
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <img src="{{ asset('images/logoequitask.png') }}"
+                 alt="Logo EquiTask AI"
+                 style="width: 60px; height: 60px; border-radius: 16px; object-fit: cover; background: white; padding: 4px; box-shadow: 0 6px 18px rgba(0,0,0,0.15);">
+            <div>
+                <h2 style="margin:0; font-size: 30px; font-weight: 800;">EquiTask AI</h2>
+                <p style="margin:4px 0 0; font-size: 18px; opacity: 0.9;">Platform Assessment Adaptif</p>
+            </div>
+        </div>
     </div>
 
     <div class="role-switch">
@@ -99,7 +106,7 @@
             <div class="forgot">Lupa Password?</div>
 
             <button type="submit" class="btn btn-primary btn-block">
-                <span class="material-symbols-outlined" style="font-size:18px;">login</span>Masuk
+                <span class="material-symbols-outlined" style="font-size:20px;">login</span>Masuk
             </button>
         </form>
     </div>
