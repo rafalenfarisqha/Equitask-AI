@@ -1,90 +1,87 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
 
-// Halaman utama
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Di sinilah Anda mendaftarkan rute-rute web untuk aplikasi Anda.
+|
+*/
+
+// 1. Rute Halaman Awal (Splash/Root) langsung diarahkan ke Login
 Route::get('/', function () {
-    return redirect('/login');
+    return redirect()->route('login');
 });
 
-// =========================
-// AUTHENTICATION
-// =========================
+// 2. Rute Autentikasi (Login)
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
 
-// Menampilkan halaman login
-Route::get('/login', [AuthController::class, 'showLoginForm'])
-    ->name('login');
-
-// Memproses login
-Route::post('/login', [AuthController::class, 'login']);
-
-// Logout
-Route::post('/logout', [AuthController::class, 'logout'])
-    ->name('logout');
+Route::get('/register', function () {
+    return view('auth.register');
+})->name('register');
 
 
-// =========================
-// DASHBOARD
-// =========================
+/*
+|--------------------------------------------------------------------------
+| RUTE UNTUK GURU
+|--------------------------------------------------------------------------
+*/
+Route::prefix('guru')->name('guru.')->group(function () {
 
-// Dashboard Guru
-Route::get('/dashboard', function () {
-    return view('dashboard.index');
-})->name('dashboard');
+    Route::get('/dashboard', function () {
+        return view('guru.dashboard'); // Akan mencari file resources/views/guru/dashboard.blade.php
+    })->name('dashboard');
 
-// Dashboard Siswa
-Route::get('/student/dashboard', function () {
-    return view('student.dashboard');
-})->name('student.dashboard');
+    Route::get('/kelas', function () {
+        return view('guru.kelas');
+    })->name('kelas');
 
+    Route::get('/kelas/{id}', function ($id) {
+        // $id akan berisi '7a', '7b', dll sesuai URL yang diklik
+        // Nantinya, Anda akan melakukan query database di sini (misal: Kelas::find($id))
 
-// =========================
-// STUDENT ASSESSMENT
-// =========================
+        return view('guru.detail-kelas', [
+            'id_kelas' => $id // Mengirim variabel ID ke Blade
+        ]);
+    })->name('detail-kelas');
 
-Route::get('/student/assessment', function () {
-    return view('student.assessment');
-})->name('student.assessment');
+    Route::get('/bank-soal', function () {
+        return view('guru.bank-soal');
+    })->name('bank-soal');
 
+    Route::get('/profil', function () {
+        return view('guru.profil');
+    })->name('profil');
 
-// =========================
-// ASSESSMENTS
-// =========================
-
-Route::get('/assessments', function () {
-    return view('assessments.index');
-})->name('assessments.index');
-
-Route::get('/assessments/create', function () {
-    return view('assessments.create');
-})->name('assessments.create');
-
-Route::get('/assessments/{id}/edit', function ($id) {
-    return view('assessments.edit');
-})->name('assessments.edit');
-
-Route::get('/assessments/{id}', function ($id) {
-    return view('assessments.show');
-})->name('assessments.show');
+});
 
 
-// =========================
-// MATERIALS
-// =========================
+/*
+|--------------------------------------------------------------------------
+| RUTE UNTUK SISWA
+|--------------------------------------------------------------------------
+*/
+Route::prefix('siswa')->name('siswa.')->group(function () {
 
-Route::get('/materials', function () {
-    return view('materials.index');
-})->name('materials.index');
+    Route::get('/dashboard', function () {
+        return view('siswa.dashboard'); // Akan mencari file resources/views/siswa/dashboard.blade.php
+    })->name('dashboard');
 
-Route::get('/materials/create', function () {
-    return view('materials.create');
-})->name('materials.create');
+    Route::get('/daftar-assessment', function () {
+        return view('siswa.daftar-assessment');
+    })->name('assessment');
 
-Route::get('/materials/{id}/edit', function ($id) {
-    return view('materials.edit');
-})->name('materials.edit');
+    Route::get('/riwayat', function () {
+        return view('siswa.riwayat');
+    })->name('riwayat');
 
-Route::get('/materials/{id}', function ($id) {
-    return view('materials.show');
-})->name('materials.show');
+    Route::get('/profil', function () {
+        return view('siswa.profil');
+    })->name('profil');
+
+});
