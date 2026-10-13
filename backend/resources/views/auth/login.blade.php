@@ -30,7 +30,8 @@
         background: var(--card);
         border-radius: 14px;
         padding: 4px;
-        margin: 22px 0 4px;
+        margin: 22px auto 16px auto;
+        max-width: 400px;
         box-shadow: var(--shadow);
         border: 1px solid var(--border);
     }
@@ -47,6 +48,7 @@
         font-family: inherit;
         cursor: pointer;
         transition: background 0.2s, color 0.2s;
+        tetx-align: center;
     }
 
     .role-switch button.active {
