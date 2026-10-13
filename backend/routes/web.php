@@ -1,29 +1,37 @@
+
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Di sinilah Anda mendaftarkan rute-rute web untuk aplikasi Anda.
-|
 */
 
-// 1. Rute Halaman Awal (Splash/Root) langsung diarahkan ke Login
+// 1. Rute Halaman Awal
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// 2. Rute Autentikasi (Login)
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+// 2. Rute Autentikasi (Login dan Register)
+Route::get('/login', [AuthController::class, 'showLoginForm'])
+    ->name('login');
 
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->name('logout');
+
+// Menampilkan halaman register
 Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
+
+// Memproses formulir pendaftaran
+Route::post('/register', [AuthController::class, 'register'])
+    ->name('register.store');
 
 
 /*
@@ -31,22 +39,20 @@ Route::get('/register', function () {
 | RUTE UNTUK GURU
 |--------------------------------------------------------------------------
 */
+
 Route::prefix('guru')->name('guru.')->group(function () {
 
     Route::get('/dashboard', function () {
-        return view('guru.dashboard'); // Akan mencari file resources/views/guru/dashboard.blade.php
-    })->name('dashboard');
-
+        return view('guru.dashboard');
+    })->middleware('auth')->name('dashboard');
+    
     Route::get('/kelas', function () {
         return view('guru.kelas');
     })->name('kelas');
 
     Route::get('/kelas/{id}', function ($id) {
-        // $id akan berisi '7a', '7b', dll sesuai URL yang diklik
-        // Nantinya, Anda akan melakukan query database di sini (misal: Kelas::find($id))
-
         return view('guru.detail-kelas', [
-            'id_kelas' => $id // Mengirim variabel ID ke Blade
+            'id_kelas' => $id
         ]);
     })->name('detail-kelas');
 
@@ -66,10 +72,11 @@ Route::prefix('guru')->name('guru.')->group(function () {
 | RUTE UNTUK SISWA
 |--------------------------------------------------------------------------
 */
+
 Route::prefix('siswa')->name('siswa.')->group(function () {
 
     Route::get('/dashboard', function () {
-        return view('siswa.dashboard'); // Akan mencari file resources/views/siswa/dashboard.blade.php
+        return view('siswa.dashboard');
     })->name('dashboard');
 
     Route::get('/daftar-assessment', function () {

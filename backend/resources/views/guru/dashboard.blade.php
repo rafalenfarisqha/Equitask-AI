@@ -84,10 +84,14 @@
 <!-- Header Profil -->
 <div class="topbar">
     <div class="row" style="flex:1;">
-        <div class="avatar">AN</div>
+        <div class="avatar">
+            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+        </div>
         <div>
-            <div style="font-size:15px;font-weight:800;">Halo, Bu Anita 👋</div>
-            <div class="muted">SMP Inklusif Harapan Bangsa</div>
+            <div style="font-size:15px;font-weight:800;">
+                Halo, {{ auth()->user()->name }} 👋
+            </div>
+            <div class="muted">Guru EquiTask AI</div>
         </div>
     </div>
     <button class="iconbtn"><span class="material-symbols-outlined">notifications</span></button>

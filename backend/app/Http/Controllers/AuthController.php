@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,32 +17,72 @@ class AuthController extends Controller
     }
 
     /**
-     * Memproses data saat tombol Masuk (POST) ditekan.
+     * Memproses login Guru dan Siswa.
      */
     public function login(Request $request)
     {
-        // 1. Validasi input dari user
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
+        // Validasi role dan password
+        $request->validate([
+            'role' => ['required', 'in:guru,siswa'],
             'password' => ['required'],
         ]);
 
-        // 2. Cek kecocokan data dengan database
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+        /*
+         * LOGIN GURU
+         * Guru login menggunakan email dan password.
+         */
+        if ($request->role === 'guru') {
 
-            // Jika berhasil, arahkan ke dashboard rekap hasil
-            return redirect()->intended('/dashboard');
+            $request->validate([
+                'email' => ['required', 'email'],
+            ]);
+
+            $credentials = [
+                'email' => $request->email,
+                'password' => $request->password,
+                'role' => 'guru',
+            ];
+
+            if (Auth::attempt($credentials)) {
+                $request->session()->regenerate();
+
+                return redirect()->route('guru.dashboard');
+            }
         }
 
-        // 3. Jika gagal, kembalikan ke halaman login dengan pesan error
-        return back()->withErrors([
-            'email' => 'Email atau kata sandi yang kamu masukkan salah.',
-        ])->onlyInput('email');
+        /*
+         * LOGIN SISWA
+         * Siswa login menggunakan NIS dan password.
+         */
+        if ($request->role === 'siswa') {
+
+            $request->validate([
+                'nis' => ['required'],
+            ]);
+
+            $credentials = [
+                'nis' => $request->nis,
+                'password' => $request->password,
+                'role' => 'siswa',
+            ];
+
+            if (Auth::attempt($credentials)) {
+                $request->session()->regenerate();
+
+                return redirect()->route('siswa.dashboard');
+            }
+        }
+
+        // Jika login gagal
+        return back()
+            ->withErrors([
+                'login' => 'Email/NIS atau kata sandi yang kamu masukkan salah.',
+            ])
+            ->withInput();
     }
 
     /**
-     * Memproses keluar (logout) akun.
+     * Memproses logout.
      */
     public function logout(Request $request)
     {
@@ -50,6 +91,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect()->route('login');
     }
 }
