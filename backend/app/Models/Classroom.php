@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ClassRoom extends Model
+class Classroom extends Model
 {
     protected $table = 'classes';
 
@@ -22,5 +22,12 @@ class ClassRoom extends Model
     public function members()
     {
         return $this->hasMany(ClassMember::class, 'class_id');
+    }
+
+    // Perbaiki relasi students di sini
+    public function students()
+    {
+        return $this->belongsToMany(User::class, 'class_members', 'class_id', 'student_id')
+                    ->withPivot('joined_at');
     }
 }
