@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <style>
+        html {
+            overflow-y: scroll; /* Memastikan scrollbar selalu ada di semua halaman, baik panjang maupun pendek */
+        }
         :root {
             --primary: #2563eb;
             --primary-dark: #1d4ed8;
@@ -178,10 +181,12 @@
         .bottomnav {
             position: fixed;
             bottom: 0;
-            /* Mengikuti batas max-width dari app-wrapper */
+            left: 50%;
+            transform: translateX(-50%);
             max-width: 1024px;
             width: 100%;
             display: flex;
+            justify-content: space-around; /* Agar jarak antar ikon merata */
             background: rgba(255, 255, 255, 0.9);
             border-top: 1px solid var(--border);
             padding: 12px 6px calc(12px + env(safe-area-inset-bottom, 0px));
