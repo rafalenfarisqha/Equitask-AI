@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->nullable()->unique(); // Untuk Guru
-            $table->string('nis')->nullable()->unique();   // Untuk Siswa
+            $table->string('nisn')->nullable()->unique();   // Untuk Siswa
             $table->string('role');                        // Menyimpan 'guru' atau 'siswa'
             $table->string('password');
             $table->timestamps();
