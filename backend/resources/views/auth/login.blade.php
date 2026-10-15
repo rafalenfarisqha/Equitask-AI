@@ -105,7 +105,7 @@
                     EquiTask AI
                 </h2>
                 <p style="margin:4px 0 0; font-size: 18px; opacity: 0.9;">
-                    Platform Assessment Adaptif
+                    Platform Asesmen Adaptif
                 </p>
             </div>
         </div>
@@ -225,11 +225,11 @@
             tombolSiswa.classList.add('active');
             tombolGuru.classList.remove('active');
 
-            labelIdentitas.innerText = 'NIS (Nomor Induk Siswa)';
+            labelIdentitas.innerText = 'NISN (Nomor Induk Siswa Nasional)';
             inputIdentitas.name = 'nis';
             inputIdentitas.type = 'text';
-            inputIdentitas.placeholder = 'Masukkan NIS Anda...';
-            inputIdentitas.value = @json(old('nis', ''));
+            inputIdentitas.placeholder = 'Masukkan NISN Anda...';
+            inputIdentitas.value = @json(old('nisn', ''));
         }
     }
 </script>
