@@ -4,7 +4,7 @@
 <div class="screen" style="position: relative; width: 100%; height: auto; background: var(--bg); padding-bottom: 40px;">
     <!-- Topbar -->
     <div class="topbar" style="background: transparent; padding: 20px 24px 10px;">
-        <h1 style="font-size: 20px; font-weight: 800; flex: 1;">Daftar Assessment</h1>
+        <h1 style="font-size: 20px; font-weight: 800; flex: 1;">Daftar Asesmen</h1>
         <a href="{{ route('assessments.create') }}" class="btn btn-primary btn-sm" style="text-decoration: none;">
             <span class="material-symbols-outlined" style="font-size: 16px;">add</span> Buat Baru
         </a>
@@ -55,6 +55,7 @@
                 </div>
             </div>
 
+            <!-- Tombol Aksi -->
             <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;">
                 <a href="#" class="btn btn-outline btn-sm" style="text-decoration: none; text-align: center; display: block;">Preview</a>
                 <a href="#" class="btn btn-outline btn-sm" style="text-decoration: none; text-align: center; display: block;">Edit</a>
@@ -63,6 +64,15 @@
                     <button class="btn btn-secondary btn-sm" style="width: 100%;">Publish</button>
                 @else
                     <button class="btn btn-outline btn-sm" style="width: 100%; color: var(--danger); border-color: #fecaca;">Arsip</button>
+                @endif
+
+                @if($a->visibility === 'private')
+                    <form action="{{ route('guru.assessments.share', $a->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-outline btn-sm" style="width: 100%;">Bagikan ke Publik</button>
+                    </form>
+                @else
+                    <span class="badge badge-green">Sudah di Bank Soal Publik</span>
                 @endif
             </div>
         </div>
