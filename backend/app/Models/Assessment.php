@@ -9,41 +9,17 @@ class Assessment extends Model
     protected $table = 'assessments';
 
     protected $fillable = [
-        'teacher_id',
-        'material_id',
-        'title',
-        'description',
-        'target_bloom',
-        'assessment_type',
+        'user_id',
+        'nama',
+        'mapel',
         'status',
-        'duration_minutes',
+        'visibility',
+        'icon',
+        'color',
     ];
 
     public function teacher()
     {
-        return $this->belongsTo(User::class, 'teacher_id');
-    }
-
-    public function material()
-    {
-        return $this->belongsTo(Material::class, 'material_id');
-    }
-
-    public function questions()
-    {
-        return $this->belongsToMany(
-            Question::class,
-            'assessment_questions',
-            'assessment_id',
-            'question_id'
-        )->withPivot('question_order', 'points');
-    }
-
-    public function studentAssessments()
-    {
-        return $this->hasMany(
-            StudentAssessment::class,
-            'assessment_id'
-        );
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

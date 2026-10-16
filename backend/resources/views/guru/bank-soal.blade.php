@@ -55,3 +55,43 @@
     </div>
 </div>
 @endsection
+
+
+@section('bottom_nav')
+    <nav class="bottomnav">
+        <a href="{{ route('guru.dashboard') }}"
+           class="navitem"
+           style="text-decoration: none;">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="{{ route('guru.kelas') }}"
+           class="navitem"
+           style="text-decoration: none;">
+            <span class="material-symbols-outlined">groups</span>
+            <span>Kelas</span>
+        </a>
+
+        <a href="{{ route('guru.assessments.index') }}"
+           class="navitem"
+           style="text-decoration: none;">
+            <span class="material-symbols-outlined">library_books</span>
+            <span>Asesmen</span>
+        </a>
+
+        <a href="{{ route('guru.bank-soal') }}"
+           class="navitem active"
+           style="text-decoration: none;">
+            <span class="material-symbols-outlined">folder_open</span>
+            <span>Bank Soal</span>
+        </a>
+
+        <a href="{{ route('guru.profil') }}"
+           class="navitem"
+           style="text-decoration: none;">
+            <span class="material-symbols-outlined">person</span>
+            <span>Profil</span>
+        </a>
+    </nav>
+@endsection

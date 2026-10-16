@@ -6,42 +6,24 @@ use Illuminate\Http\Request;
 use App\Models\Assessment;
 use App\Helpers\NotificationHelper;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class AssessmentController extends Controller
 {
-    public function dashboard()
-    {
-    $guru = auth()->user();
-
-    // 1. Hitung data asli dari database
-    $totalAssessments = Assessment::where('user_id', $guru->id)->count();
-    $publishedCount = Assessment::where('user_id', $guru->id)->where('status', 'Published')->count();
-    $publicCount = Assessment::where('visibility', 'public')->count();
-
-    // 2. Ambil 4 asesmen terbaru buatan guru ini
-    $recentAssessments = Assessment::where('user_id', $guru->id)->latest()->take(4)->get();
-
-    // Data kelas & siswa (bisa disesuaikan nanti jika tabel kelas sudah dibuat, sementara menggunakan angka atau relasi)
-    $totalKelas = 3;
-    $totalSiswa = 84;
-
-    return view('guru.dashboard', compact(
-        'guru',
-        'totalAssessments',
-        'publishedCount',
-        'publicCount',
-        'recentAssessments',
-        'totalKelas',
-        'totalSiswa'
-    ));
-    }
+    
 
     // 1. Menampilkan Asesmen Milik Guru Sendiri (Privat / Daftar Buatan Sendiri)
+
+    
     public function index()
     {
-        $assessments = Assessment::where('user_id', auth()->id())->latest()->get();
+        $assessments = Assessment::where('user_id', auth()->id())
+            ->latest()
+            ->get();
+
         return view('assessments.index', compact('assessments'));
     }
+
 
     // 2. Menampilkan Bank Soal Publik (Komunitas Guru dari Sekolah Lain)
     public function bankSoal(Request $request)
@@ -75,6 +57,11 @@ class AssessmentController extends Controller
         );
 
         return back()->with('success', 'Soal berhasil dibagikan ke Bank Soal Publik!');
+    }
+    // 4. Create Asesmen
+    public function create()
+    {
+        return view('assessments.create');
     }
 
     public function store(Request $request)
