@@ -10,11 +10,23 @@ use Illuminate\Support\Facades\Auth;
 
 class AssessmentController extends Controller
 {
-    
+    // Dashboard Guru
+    public function dashboard()
+    {
+        $userId = auth()->id();
+
+        // Menghitung ringkasan data untuk guru yang sedang login
+        $totalKelas = \App\Models\ClassRoom::where('teacher_id', $userId)->count();
+        $totalAsesmen = Assessment::where('user_id', $userId)->count();
+        $totalSiswa = \App\Models\ClassRoom::where('teacher_id', $userId)
+            ->withCount('students')
+            ->get()
+            ->sum('students_count');
+
+        return view('guru.dashboard', compact('totalKelas', 'totalAsesmen', 'totalSiswa'));
+    }
 
     // 1. Menampilkan Asesmen Milik Guru Sendiri (Privat / Daftar Buatan Sendiri)
-
-    
     public function index()
     {
         $assessments = Assessment::where('user_id', auth()->id())
@@ -23,7 +35,6 @@ class AssessmentController extends Controller
 
         return view('assessments.index', compact('assessments'));
     }
-
 
     // 2. Menampilkan Bank Soal Publik (Komunitas Guru dari Sekolah Lain)
     public function bankSoal(Request $request)
@@ -58,6 +69,7 @@ class AssessmentController extends Controller
 
         return back()->with('success', 'Soal berhasil dibagikan ke Bank Soal Publik!');
     }
+
     // 4. Create Asesmen
     public function create()
     {
@@ -89,7 +101,7 @@ class AssessmentController extends Controller
             'ai_generation'
         );
 
-        // 2. Kirim notifikasi ke Semua Siswa (Opsional / Jika ada fitur kelas)
+        // 2. Kirim notifikasi ke Semua Siswa
         $siswaList = User::where('role', 'siswa')->get();
         foreach ($siswaList as $siswa) {
             NotificationHelper::send(
@@ -100,7 +112,7 @@ class AssessmentController extends Controller
             );
         }
 
-        return redirect()->route('assessments.index')->with('success', 'Asesmen berhasil dibuat!');
+        return redirect()->route('guru.assessments.index')->with('success', 'Asesmen berhasil dibuat!');
     }
 
 }
