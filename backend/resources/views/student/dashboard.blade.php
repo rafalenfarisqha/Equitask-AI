@@ -55,19 +55,73 @@
 <!-- Topbar Siswa -->
 <div class="topbar">
     <div class="row" style="flex:1;">
-        <div class="avatar-siswa">DA</div>
+        <div class="avatar-siswa">
+            {{ strtoupper($initials ?: 'S') }}
+        </div>
+
         <div>
-            <div style="font-size:15px;font-weight:800;">Halo, Dinda 👋</div>
-            <div class="muted">Kelas 7A · Adaptif</div>
+            <div style="font-size:15px;font-weight:800;">
+                Halo, {{ $user->name }} 👋
+            </div>
+
+            <div class="muted">
+                @if($classes->isNotEmpty())
+                    {{ $classes->pluck('name')->join(', ') }}
+                @else
+                    Belum bergabung ke kelas
+                @endif
+            </div>
         </div>
     </div>
-    <button class="iconbtn"><span class="material-symbols-outlined">notifications</span></button>
+
+    <a href="{{ route('siswa.notifikasi') }}"
+       class="iconbtn"
+       aria-label="Buka notifikasi"
+       style="text-decoration:none;">
+        <span class="material-symbols-outlined">notifications</span>
+    </a>
 </div>
 
 <div class="px" style="padding-top: 16px;">
 
     <!-- Hero Banner Siswa -->
     <div class="card student-dashboard-hero">
+        <div class="row" style="justify-content:space-between; align-items:flex-start;">
+            <div style="flex:1;">
+        <div class="student-badge">
+            <span class="material-symbols-outlined" style="font-size:11px;">
+                auto_awesome
+            </span>
+            Fokus hari ini
+        </div>
+
+        <div style="font-size:18px;font-weight:800;margin-top:8px;line-height:1.35;">
+            Selamat belajar, {{ $user->name }}!
+        </div>
+
+        <div class="muted" style="margin-top:8px;line-height:1.5;">
+            Yuk, cek assessment yang tersedia dan lanjutkan proses belajarmu.
+        </div>
+    </div>
+
+    <div class="thumb"
+         style="background:linear-gradient(135deg,var(--primary-soft),#dbeafe);
+                color:var(--primary);width:48px;height:48px;border-radius:14px;">
+        <span class="material-symbols-outlined">auto_stories</span>
+    </div>
+</div>
+
+<div class="student-quick-grid">
+    <div>
+        <strong>{{ $totalAssessment }}</strong>
+        <small>assessment tersedia</small>
+    </div>
+
+    <div>
+        <strong>{{ $totalKelas }}</strong>
+        <small>kelas diikuti</small>
+    </div>
+</div>
         <div class="row" style="justify-content:space-between; align-items:flex-start;">
             <div style="flex:1;">
                 <div class="student-badge"><span class="material-symbols-outlined" style="font-size:11px;">spark</span> Fokus hari ini</div>
@@ -85,55 +139,149 @@
     </div>
 
     <!-- Fokus Assessment Hari Ini -->
-    <a href="#" class="card card-tap student-focus-card" style="margin-top:14px; padding:14px 16px;">
-        <div class="row" style="justify-content:space-between; gap:10px;">
-            <div class="row" style="flex:1;">
-                <div class="thumb" style="background:linear-gradient(135deg,var(--primary-soft),#dbeafe);">
-                    <span class="material-symbols-outlined" style="color:var(--primary);">play_circle</span>
-                </div>
-                <div style="flex:1;">
-                    <div style="font-weight:800; font-size:13.5px;">Assessment Hari Ini</div>
-                    <div class="muted">IPA — Ekosistem & Rantai Makanan · 10 soal</div>
-                </div>
-            </div>
-            <div class="student-focus-pill">
-                <span class="material-symbols-outlined" style="font-size:13px;">rocket_launch</span>Mulai
-            </div>
-        </div>
-    </a>
+    @if($assessments->isNotEmpty())
+    @foreach($assessments->take(1) as $assessment)
+        <a href="{{ route('siswa.assessment') }}"
+           class="card card-tap student-focus-card"
+           style="margin-top:14px;padding:14px 16px;text-decoration:none;">
 
-    <!-- Kartu Statistik Singkat -->
-    <div class="stat-grid" style="margin-top:14px;">
-        <div class="stat-card">
-            <span class="material-symbols-outlined" style="color:var(--primary); background:var(--primary-soft); padding:7px; border-radius:10px;">trending_up</span>
-            <div class="num" style="font-size:22px; font-weight:800; margin-top:10px;">76%</div>
-            <div class="lbl" style="font-size:11.5px; color:var(--muted); font-weight:600;">Progress Belajar</div>
+            <div class="row" style="justify-content:space-between;gap:10px;">
+                <div class="row" style="flex:1;min-width:0;">
+                    <div class="thumb"
+                         style="background:linear-gradient(135deg,var(--primary-soft),#dbeafe);">
+                        <span class="material-symbols-outlined"
+                              style="color:var(--primary);">
+                            {{ $assessment->icon ?: 'assignment' }}
+                        </span>
+                    </div>
+
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:800;font-size:13.5px;">
+                            {{ $assessment->nama }}
+                        </div>
+
+                        <div class="muted" style="margin-top:4px;">
+                            {{ $assessment->mapel }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="student-focus-pill">
+                    Lihat
+                    <span class="material-symbols-outlined" style="font-size:13px;">
+                        arrow_forward
+                    </span>
+                </div>
+            </div>
+        </a>
+    @endforeach
+@else
+    <div class="card" style="margin-top:14px;text-align:center;padding:24px;">
+        <span class="material-symbols-outlined"
+              style="font-size:36px;color:var(--muted);">
+            assignment
+        </span>
+
+        <div style="font-weight:800;margin-top:8px;">
+            Belum ada assessment tersedia
         </div>
-        <div class="stat-card">
-            <span class="material-symbols-outlined" style="color:var(--secondary); background:var(--secondary-soft); padding:7px; border-radius:10px;">military_tech</span>
-            <div class="num" style="font-size:22px; font-weight:800; margin-top:10px;">88</div>
-            <div class="lbl" style="font-size:11.5px; color:var(--muted); font-weight:600;">Nilai Terakhir</div>
+
+        <div class="muted" style="margin-top:5px;">
+            Assessment publik yang sudah diterbitkan guru akan muncul di sini.
+        </div>
+
+        <a href="{{ route('siswa.assessment') }}"
+           class="btn btn-primary"
+           style="margin-top:14px;text-decoration:none;">
+            Lihat daftar assessment
+        </a>
+    </div>
+@endif
+
+    <!-- Statistik Dashboard Siswa -->
+<div class="stat-grid" style="margin-top:14px;">
+
+    <div class="stat-card">
+        <span class="material-symbols-outlined"
+              style="color:var(--primary);background:var(--primary-soft);
+                     padding:7px;border-radius:10px;">
+            assignment
+        </span>
+
+        <div class="num" style="font-size:22px;font-weight:800;margin-top:10px;">
+            {{ $totalAssessment }}
+        </div>
+
+        <div class="lbl" style="font-size:11.5px;color:var(--muted);font-weight:600;">
+            Assessment tersedia
         </div>
     </div>
+
+    <div class="stat-card">
+        <span class="material-symbols-outlined"
+              style="color:var(--secondary);background:var(--secondary-soft);
+                     padding:7px;border-radius:10px;">
+            groups
+        </span>
+
+        <div class="num" style="font-size:22px;font-weight:800;margin-top:10px;">
+            {{ $totalKelas }}
+        </div>
+
+        <div class="lbl" style="font-size:11.5px;color:var(--muted);font-weight:600;">
+            Kelas yang diikuti
+        </div>
+    </div>
+
+</div>
 
     <!-- Rencana Belajar -->
-    <div class="section-title">Rencana Belajarmu</div>
-    <div class="card" style="padding:12px 14px;">
-        <div class="row" style="margin-bottom:10px; align-items:flex-start;">
-            <span class="material-symbols-outlined" style="color:var(--secondary);">task_alt</span>
+    <div class="section-title">Kelas Saya</div>
+
+<div class="card" style="padding:12px 14px;">
+
+    @forelse($classes as $class)
+        <div class="row"
+             style="margin-bottom:12px;align-items:flex-start;">
+
+            <div class="thumb"
+                 style="background:var(--primary-soft);">
+                <span class="material-symbols-outlined"
+                      style="color:var(--primary);">
+                    school
+                </span>
+            </div>
+
             <div style="flex:1;">
-                <div style="font-weight:700; font-size:13px;">Kerjakan assessment IPA</div>
-                <div class="muted" style="margin-top:3px;">Selesai sebelum Jumat agar nilai tetap aman.</div>
+                <div style="font-weight:800;font-size:13px;">
+                    {{ $class->name }}
+                </div>
+
+                <div class="muted" style="margin-top:4px;">
+                    {{ $class->description ?: 'Kelas belajar EquiTask AI' }}
+                </div>
             </div>
         </div>
-        <div class="row" style="align-items:flex-start;">
-            <span class="material-symbols-outlined" style="color:var(--primary);">menu_book</span>
-            <div style="flex:1;">
-                <div style="font-weight:700; font-size:13px;">Review materi rantai makanan</div>
-                <div class="muted" style="margin-top:3px;">Cukup 10 menit sebelum istirahat siang.</div>
+    @empty
+        <div style="text-align:center;padding:20px 8px;">
+            <span class="material-symbols-outlined"
+                  style="font-size:36px;color:var(--muted);">
+                school
+            </span>
+
+            <div style="font-weight:800;margin-top:8px;">
+                Kamu belum bergabung ke kelas
+            </div>
+
+            <div class="muted" style="margin-top:5px;">
+                Setelah guru menambahkanmu ke kelas, informasi kelas akan muncul di sini.
             </div>
         </div>
-    </div>
+    @endforelse
+
+</div>
+
+<div style="height:24px;"></div>
 
     <div style="height:24px;"></div>
 </div>

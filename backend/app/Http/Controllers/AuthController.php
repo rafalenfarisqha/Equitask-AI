@@ -18,38 +18,48 @@ class AuthController extends Controller
 
     // Memproses Login (Guru & Siswa sama-sama pakai Email)
     public function login(Request $request)
-    {
-        $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+{
+    $validated = $request->validate([
+        'role' => ['required', 'in:guru,siswa'],
+        'email' => ['nullable', 'required_if:role,guru', 'email'],
+        'nisn' => ['nullable', 'required_if:role,siswa', 'string'],
+        'password' => ['required', 'string'],
+    ]);
 
-        // Cek autentikasi hanya berdasarkan email dan password
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            $request->session()->regenerate();
-
-            $user = Auth::user();
-
-            // Kirim notifikasi login ke database
-            NotificationHelper::send(
-                $user->id,
-                'Aktivitas Masuk Akun',
-                'Halo <b>' . $user->name . '</b>, akun Anda baru saja masuk ke sistem EquiTask AI.',
-                'security'
-            );
-
-            // Redirect otomatis berdasarkan role user di database
-            if ($user->role === 'guru') {
-                return redirect()->route('guru.dashboard');
-            } else {
-                return redirect()->route('siswa.dashboard');
-            }
-        }
-
-        return back()
-            ->withErrors(['login' => 'Email atau kata sandi yang kamu masukkan salah.'])
-            ->withInput();
+    if ($validated['role'] === 'guru') {
+        $user = User::where('email', $validated['email'])
+            ->where('role', 'guru')
+            ->first();
+    } else {
+        $user = User::where('nisn', $validated['nisn'])
+            ->where('role', 'siswa')
+            ->first();
     }
+
+    if ($user && Hash::check($validated['password'], $user->password)) {
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        NotificationHelper::send(
+            $user->id,
+            'Aktivitas Masuk Akun',
+            'Halo <b>' . e($user->name) .
+                '</b>, akun Anda baru saja masuk ke sistem EquiTask AI.',
+            'security'
+        );
+
+        return $user->role === 'guru'
+            ? redirect()->route('guru.dashboard')
+            : redirect()->route('siswa.dashboard');
+    }
+
+    return back()
+        ->withErrors([
+            'login' => 'Identitas atau kata sandi yang kamu masukkan salah.',
+        ])
+        ->withInput($request->only('email', 'nisn', 'role'));
+}
+
     // Menampilkan form register
     public function showRegistrationForm()
     {
@@ -58,40 +68,57 @@ class AuthController extends Controller
 
     // Memproses reg
     public function register(Request $request)
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', 'in:guru,siswa'],
-            'institution' => ['required', 'string', 'max:255'], // Ubah jadi required jika wajib diisi, atau nullable jika opsional
-        ]);
+{
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'role' => ['required', 'in:guru,siswa'],
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'institution' => $request->institution, // Langsung mengambil dari input form tanpa template bawaan
-        ]);
+        'email' => [
+            'nullable',
+            'required_if:role,guru',
+            'email',
+            'max:255',
+            'unique:users,email',
+        ],
 
-        // Otomatis login setelah mendaftar
-        Auth::login($user);
+        'nisn' => [
+            'nullable',
+            'required_if:role,siswa',
+            'string',
+            'max:255',
+            'unique:users,nisn',
+        ],
 
-        // Kirim notifikasi selamat datang ke database
-        NotificationHelper::send(
-            $user->id,
-            'Akun Berhasil Dibuat',
-            'Halo <b>' . $user->name . '</b>, selamat datang di EquiTask AI! Akun Anda berhasil didaftarkan.',
-            'security'
-        );
+        'password' => ['required', 'string', 'min:8', 'confirmed'],
+        'institution' => ['required', 'string', 'max:150'],
+    ]);
 
-        if ($user->role === 'guru') {
-            return redirect()->route('guru.dashboard');
-        } else {
-            return redirect()->route('siswa.dashboard');
-        }
+    $user = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'] ?? null,
+        'nisn' => $validated['nisn'] ?? null,
+        'password' => $validated['password'],
+        'role' => $validated['role'],
+        'institution' => $validated['institution'],
+    ]);
+
+    Auth::login($user);
+    $request->session()->regenerate();
+
+    NotificationHelper::send(
+        $user->id,
+        'Akun Berhasil Dibuat',
+        'Halo <b>' . e($user->name) .
+            '</b>, selamat datang di EquiTask AI!',
+        'security'
+    );
+
+    if ($user->role === 'guru') {
+        return redirect()->route('guru.dashboard');
     }
+
+    return redirect()->route('siswa.dashboard');
+}
 
     // Memproses logout
     public function logout(Request $request)

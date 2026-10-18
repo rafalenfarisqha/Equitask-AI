@@ -226,7 +226,7 @@
             tombolGuru.classList.remove('active');
 
             labelIdentitas.innerText = 'NISN (Nomor Induk Siswa Nasional)';
-            inputIdentitas.name = 'nis';
+            inputIdentitas.name = 'nisn';
             inputIdentitas.type = 'text';
             inputIdentitas.placeholder = 'Masukkan NISN Anda...';
             inputIdentitas.value = @json(old('nisn', ''));

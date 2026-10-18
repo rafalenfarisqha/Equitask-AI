@@ -7,6 +7,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Siswa\NotificationController as SiswaNotificationController;
 use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\Siswa\DashboardController;
+use App\Http\Controllers\Siswa\StudentPageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,10 +71,12 @@ Route::middleware(['auth'])->prefix('guru')->name('guru.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->prefix('siswa')->name('siswa.')->group(function () {
-    Route::get('/dashboard', fn() => view('siswa.dashboard'))->name('dashboard');
-    Route::get('/daftar-assessment', fn() => view('siswa.daftar-assessment'))->name('assessment');
-    Route::get('/riwayat', fn() => view('siswa.riwayat'))->name('riwayat');
-    Route::get('/profil', fn() => view('siswa.profil'))->name('profil');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/daftar-assessment', [DashboardController::class, 'assessments'])->name('assessment');
+    Route::get('/riwayat', [StudentPageController::class, 'riwayat'])->name('riwayat');
+
+Route::get('/profil', [StudentPageController::class, 'profil'])
+    ->name('profil');
 
     // Rute Notifikasi Siswa
     Route::get('/notifikasi', [SiswaNotificationController::class, 'index'])->name('notifikasi');
