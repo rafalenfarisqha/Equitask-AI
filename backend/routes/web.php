@@ -77,10 +77,10 @@ Route::middleware(['auth'])->prefix('siswa')->name('siswa.')->group(function () 
     Route::get('/daftar-assessment', [DashboardController::class, 'assessments'])->name('assessment');
     Route::get('/riwayat', [StudentPageController::class, 'riwayat'])->name('riwayat');
     // Rute untuk menampilkan halaman simulasi assessment
-    Route::get('/assessment-demo/{id}', function ($id) {
+    /* Route::get('/assessment-demo/{id}', function ($id) {
         abort_unless(in_array((int) $id, [1, 2, 3], true), 404);
         return view('student.assessment');
-    })->name('assessment-demo');
+    })->name('assessment-demo'); */
 
 Route::get('/profil', [StudentPageController::class, 'profil'])
     ->name('profil');

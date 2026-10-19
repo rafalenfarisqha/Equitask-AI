@@ -67,7 +67,7 @@
         bukan assessment asli dari guru.
     </div>
 @endif
-
+<!-- 
 /* SIMULASI */
 <div class="assessment-list">
     @foreach ($displayAssessments as $assessment)
@@ -114,8 +114,8 @@
     @endforeach
 </div>
 
-
-    <!-- @forelse($assessments as $assessment)
+ -->
+    @forelse($assessments as $assessment)
         <div class="card" style="padding:16px;">
             <div class="row" style="align-items:flex-start;">
                 <div class="thumb"
@@ -161,7 +161,7 @@
                 Belum ada assessment publik yang diterbitkan guru.
             </div>
         </div>
-    @endforelse -->
+    @endforelse
 
     <div style="height:20px;"></div>
 </div>

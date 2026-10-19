@@ -295,8 +295,8 @@
 }
 .result-card h2 { margin: 8px 0; }
 .result-card p { color: var(--assessment-muted); }
-.result-score { font-size: 28px; font-weight: 800; color: var(--assessment-text) !important; }
 .result-card .btn { margin: 5px; }
+.result-score { font-size: 28px; font-weight: 800; color: var(--assessment-text) !important; }
 @media (max-width: 820px) {
     .assessment-layout { grid-template-columns: 1fr; }
     .question-sidebar { grid-template-columns: 1fr; }
@@ -312,7 +312,7 @@
 </style>
 @endpush
 
-@push('scripts')
+<!-- @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // DATA SIMULASI: nanti diganti dengan data dari database.
@@ -620,12 +620,12 @@ document.addEventListener('DOMContentLoaded', function () {
     timerInterval = setInterval(tick, 1000);
 });
 </script>
-@endpush
+@endpush -->
+//end simulasi
 
 
 
-
-<!-- @extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Pengerjaan Assessment — EquiTask AI')
 
@@ -742,4 +742,4 @@ document.addEventListener('DOMContentLoaded', function () {
         element.classList.add('sel');
     }
 </script>
-@endpush -->
+@endpush
