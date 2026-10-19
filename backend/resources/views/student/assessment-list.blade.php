@@ -25,7 +25,97 @@
         </div>
     </div>
 
-    @forelse($assessments as $assessment)
+
+@php
+    $isDemo = $assessments->isEmpty();
+
+    $demoAssessments = collect([
+        (object) [
+            'id' => 1,
+            'nama' => 'Ekosistem dan Rantai Makanan',
+            'mapel' => 'IPA',
+            'icon' => 'eco',
+            'color' => '#16A34A',
+            'created_at' => now(),
+        ],
+        (object) [
+            'id' => 2,
+            'nama' => 'Keanekaragaman Hayati',
+            'mapel' => 'IPA',
+            'icon' => 'science',
+            'color' => '#2563EB',
+            'created_at' => now(),
+        ],
+        (object) [
+            'id' => 3,
+            'nama' => 'Perubahan Lingkungan',
+            'mapel' => 'IPA',
+            'icon' => 'psychology',
+            'color' => '#9333EA',
+            'created_at' => now(),
+        ],
+    ]);
+
+    $displayAssessments = $isDemo ? $demoAssessments : $assessments;
+@endphp
+
+@if ($isDemo)
+    <div style="margin-bottom: 16px; padding: 12px 16px;
+                background: #FEF3C7; color: #92400E;
+                border-radius: 10px; font-size: 13px;">
+        Mode demo — assessment di bawah ini adalah data contoh,
+        bukan assessment asli dari guru.
+    </div>
+@endif
+
+/* SIMULASI */
+<div class="assessment-list">
+    @foreach ($displayAssessments as $assessment)
+        <div class="assessment-item"
+             style="margin-bottom: 16px; padding: 20px;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 14px; background: #fff;">
+
+            <div style="display: flex; gap: 14px; align-items: flex-start;">
+                <div style="width: 46px; height: 46px; flex-shrink: 0;
+                            border-radius: 12px;
+                            background: {{ $assessment->color ?? '#2563EB' }}20;
+                            display: grid; place-items: center;
+                            font-size: 22px;">
+                    📝
+                </div>
+
+                <div style="flex: 1; min-width: 0;">
+                    <h3 style="margin: 0 0 8px; font-size: 17px;">
+                        {{ $assessment->nama }}
+                    </h3>
+
+                    <p style="margin: 0 0 12px; color: #64748B;
+                              font-size: 14px;">
+                        Mata pelajaran: {{ $assessment->mapel ?? 'Umum' }}
+                    </p>
+
+                    @if ($isDemo)
+                        <a href="{{ route('siswa.assessment-demo', $assessment->id) }}"
+                           style="display: inline-block; padding: 10px 15px;
+                                  border-radius: 9px; background: #2563EB;
+                                  color: #fff; text-decoration: none;
+                                  font-size: 14px; font-weight: 600;">
+                            Coba Simulasi →
+                        </a>
+                    @else
+                        <span style="font-size: 13px; color: #64748B;">
+                            Assessment tersedia
+                        </span>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endforeach
+</div>
+
+
+    <!-- @forelse($assessments as $assessment)
         <div class="card" style="padding:16px;">
             <div class="row" style="align-items:flex-start;">
                 <div class="thumb"
@@ -71,7 +161,7 @@
                 Belum ada assessment publik yang diterbitkan guru.
             </div>
         </div>
-    @endforelse
+    @endforelse -->
 
     <div style="height:20px;"></div>
 </div>
