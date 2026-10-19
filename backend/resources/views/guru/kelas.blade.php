@@ -13,11 +13,11 @@
     }
 
     .class-card {
-        background: var(--card-bg, #fff);
-        border: 1px solid var(--border);
+        background: #ffffff;
+        border: 1px solid var(--border, #e2e8f0);
         border-radius: 16px;
         padding: 20px;
-        box-shadow: 0 10px 24px -15px rgba(15, 23, 42, 0.1);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -26,7 +26,7 @@
 
     .class-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 14px 28px -15px rgba(15, 23, 42, 0.18);
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
     }
 
     .class-header {
@@ -40,8 +40,8 @@
         width: 48px;
         height: 48px;
         border-radius: 14px;
-        background: var(--primary-soft);
-        color: var(--primary);
+        background: #edf4ff;
+        color: #2563eb;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -51,13 +51,13 @@
     .class-title {
         font-size: 16px;
         font-weight: 800;
-        color: var(--text);
+        color: #0f172a;
         margin: 0;
     }
 
     .class-meta {
         font-size: 12.5px;
-        color: var(--muted);
+        color: #64748b;
         margin-top: 2px;
         font-weight: 600;
     }
@@ -65,18 +65,18 @@
     .btn-buka-kelas {
         display: block;
         text-align: center;
-        background: var(--primary-soft);
-        color: var(--primary);
+        background: #edf4ff;
+        color: #2563eb;
         font-weight: 700;
         font-size: 13px;
         padding: 10px 16px;
-        border-radius: 10px;
+        border-radius: 12px;
         text-decoration: none;
         transition: background 0.2s, color 0.2s;
     }
 
     .btn-buka-kelas:hover {
-        background: var(--primary);
+        background: #2563eb;
         color: #fff;
     }
 
@@ -86,15 +86,16 @@
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(15, 23, 42, 0.5);
-        z-index: 100;
+        z-index: 1050;
         align-items: center;
         justify-content: center;
         padding: 16px;
+        backdrop-filter: blur(4px);
     }
-    .modal-content {
+    .modal-content-custom {
         background: #fff;
         width: 100%;
-        max-width: 400px;
+        max-width: 420px;
         border-radius: 20px;
         padding: 24px;
         box-shadow: 0 20px 40px rgba(0,0,0,0.15);
@@ -103,21 +104,23 @@
 @endpush
 
 @section('content')
-<div class="px" style="padding-bottom: 90px;">
-    
+<div class="px py-4" style="max-width: 1024px; margin: 0 auto;">
+
     <!-- Judul Halaman & Tombol Buat Kelas -->
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-        <h2 style="font-size: 20px; font-weight: 800; margin: 0;">Kelas Saya</h2>
-        <button onclick="openModal()" class="btn btn-primary" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: 13px; border-radius: 10px; font-weight: 700; background: var(--primary); color: #fff; border: none; cursor: pointer;">
-            <span class="material-symbols-outlined" style="font-size: 18px;">add</span> Buat Kelas
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="fw-bold fs-4 mb-0 text-dark">Kelas Saya</h2>
+        <button onclick="openModal()" class="btn btn-primary d-flex align-items-center gap-2 px-3 py-2 rounded-3 fw-bold shadow-sm" style="font-size: 13px;">
+            <span class="material-symbols-outlined fs-5">add</span> Buat Kelas
         </button>
     </div>
 
-    <!-- Kotak Pencarian Kelas (Search Bar) -->
-    <div style="margin-bottom: 16px;">
-        <div style="position: relative;">
-            <span class="material-symbols-outlined" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 20px;">search</span>
-            <input type="text" id="search-class" placeholder="Cari nama kelas (misal: 7A, 8B)..." class="input" style="padding-left: 48px;" onkeyup="filterClasses()">
+    <!-- Kotak Pencarian Kelas (Search Bar ala Bootstrap Clean) -->
+    <div class="mb-4">
+        <div class="input-group shadow-sm rounded-3 overflow-hidden bg-white border">
+            <span class="input-group-text bg-white border-0 text-muted ps-3">
+                <span class="material-symbols-outlined fs-5">search</span>
+            </span>
+            <input type="text" id="search-class" placeholder="Cari nama kelas (misal: 7A, 8B)..." class="form-control border-0 py-2 ps-0 shadow-none" onkeyup="filterClasses()">
         </div>
     </div>
 
@@ -128,7 +131,7 @@
             <div>
                 <div class="class-header">
                     <div class="class-thumb">
-                        <span class="material-symbols-outlined" style="font-size: 24px;">groups</span>
+                        <span class="material-symbols-outlined fs-4">groups</span>
                     </div>
                     <div>
                         <h3 class="class-title">{{ $kelas->nama ?? $kelas->name }}</h3>
@@ -144,12 +147,14 @@
             </a>
         </div>
         @empty
-        <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
-            <span class="material-symbols-outlined" style="font-size: 48px; color: var(--muted); opacity: 0.5; margin-bottom: 8px;">groups</span>
-            <div style="font-weight: 700; font-size: 15px; margin-bottom: 4px;">Belum ada kelas</div>
-            <div class="muted" style="font-size: 13px; margin-bottom: 16px;">Mulai buat kelas pertama Anda untuk mengelola siswa dan asesmen.</div>
-            <button onclick="openModal()" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 13px; border-radius: 10px; font-weight: 700; background: var(--primary); color: #fff; border: none; cursor: pointer;">
-                <span class="material-symbols-outlined" style="font-size: 18px;">add</span> Buat Kelas Sekarang
+        <div class="card border-0 shadow-sm rounded-4 text-center py-5 bg-white" style="grid-column: 1 / -1;">
+            <div class="text-muted mb-2">
+                <span class="material-symbols-outlined fs-1 text-secondary">groups</span>
+            </div>
+            <h5 class="fw-bold text-dark">Belum ada kelas</h5>
+            <p class="text-muted small mb-3">Mulai buat kelas pertama Anda untuk mengelola siswa dan asesmen.</p>
+            <button onclick="openModal()" class="btn btn-primary btn-sm px-4 py-2 fw-bold rounded-3">
+                <span class="material-symbols-outlined fs-5 align-middle me-1">add</span> Buat Kelas Sekarang
             </button>
         </div>
         @endforelse
@@ -158,24 +163,24 @@
 
 <!-- Modal Form Buat Kelas Baru -->
 <div id="classModal" class="modal-overlay">
-    <div class="modal-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="font-size: 18px; font-weight: 800; margin: 0;">Tambah Kelas Baru</h3>
-            <button onclick="closeModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted);">×</button>
+    <div class="modal-content-custom">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fs-5 fw-bold mb-0 text-dark">Tambah Kelas Baru</h3>
+            <button onclick="closeModal()" class="btn-close shadow-none"></button>
         </div>
         <form action="{{ route('guru.kelas.store') }}" method="POST">
             @csrf
-            <div style="margin-bottom: 14px;">
-                <label class="field-label" style="display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px;">Nama Kelas</label>
-                <input type="text" name="name" placeholder="Contoh: Kelas 7A - Informatika" class="input" required>
+            <div class="mb-3">
+                <label class="form-label fw-bold text-muted small">Nama Kelas</label>
+                <input type="text" name="name" placeholder="Contoh: Kelas 7A - Informatika" class="form-control rounded-3 py-2" required>
             </div>
-            <div style="margin-bottom: 20px;">
-                <label class="field-label" style="display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px;">Deskripsi (Opsional)</label>
-                <textarea name="description" placeholder="Keterangan singkat tentang kelas..." class="input" style="height: 80px; resize: none;"></textarea>
+            <div class="mb-4">
+                <label class="form-label fw-bold text-muted small">Deskripsi (Opsional)</label>
+                <textarea name="description" placeholder="Keterangan singkat tentang kelas..." class="form-control rounded-3 py-2" style="height: 80px; resize: none;"></textarea>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button type="button" onclick="closeModal()" class="btn" style="flex: 1; background: var(--border); color: var(--text); border: none; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer;">Batal</button>
-                <button type="submit" class="btn btn-primary" style="flex: 1; background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer;">Simpan Kelas</button>
+            <div class="d-flex gap-2">
+                <button type="button" onclick="closeModal()" class="btn btn-light w-50 py-2 fw-bold rounded-3 text-secondary border">Batal</button>
+                <button type="submit" class="btn btn-primary w-50 py-2 fw-bold rounded-3">Simpan Kelas</button>
             </div>
         </form>
     </div>

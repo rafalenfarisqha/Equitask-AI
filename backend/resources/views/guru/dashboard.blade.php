@@ -12,10 +12,17 @@
         font-weight: 800; font-size: 16px; flex-shrink: 0;
     }
     .dashboard-hero {
-        background: linear-gradient(135deg, #173f8f 0%, #2563eb 48%, #0f766e 100%);
-        color: #fff; border: none;
+        /* Kombinasi gradient biru transparan di atas background gambar agar teks tetap kontras & terbaca */
+        background: linear-gradient(135deg, rgba(23, 63, 143, 0.90) 0%, rgba(37, 99, 235, 0.85) 48%, rgba(15, 118, 110, 0.90) 100%),
+                    url('https://pin.it/kjEaZ00JL');
+        background-size: cover;
+        background-position: center;
+        color: #fff;
+        border: none;
         box-shadow: 0 24px 44px -24px rgba(15, 23, 42, 0.42);
-        position: relative; overflow: hidden; padding: 18px;
+        position: relative;
+        overflow: hidden;
+        padding: 24px;
     }
     .hero-pill {
         display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px;

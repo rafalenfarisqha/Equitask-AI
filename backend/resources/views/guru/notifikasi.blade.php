@@ -1,87 +1,95 @@
 @extends('layouts.app')
 
-@section('title', 'Notifikasi Guru')
+@section('title', 'Notifikasi Aktivitas — EquiTask AI')
 
 @section('content')
-<div class="screen" style="position: relative; width: 100%; min-height: 100vh; background: var(--bg); padding-bottom: 90px;">
+<div class="px py-4" style="max-width: 900px; margin: 0 auto; padding-bottom: 90px;">
 
-    <!-- Topbar / Header -->
-    <div class="topbar" style="background: transparent; padding: 20px 24px 16px; display: flex; align-items: center; gap: 12px;">
-        <a href="{{ route('guru.dashboard') }}" style="color: var(--text); text-decoration: none; display: flex; align-items: center;">
-            <span class="material-symbols-outlined">arrow_back</span>
+    <!-- Header -->
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ route('guru.dashboard') }}" class="btn btn-light border rounded-3 p-2 me-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
+            <span class="material-symbols-outlined fs-5">arrow_back</span>
         </a>
-        <h1 style="font-size: 18px; font-weight: 800; color: var(--text);">Notifikasi Aktivitas</h1>
+        <div>
+            <h1 class="h4 fw-bold text-dark mb-1">Notifikasi Aktivitas</h1>
+            <p class="text-muted small mb-0">Pantau seluruh aktivitas asesmen, siswa, dan sistem secara real-time.</p>
+        </div>
     </div>
 
-    <div class="px" style="padding: 0 24px; display: flex; flex-direction: column; gap: 12px;">
+    <!-- Daftar Notifikasi -->
+    <div class="row g-3">
+        @forelse($notifications as $notif)
+            @php
+                // Tentukan warna dan ikon berdasarkan tipe notifikasi
+                $icon = 'notifications';
+                $bgClass = 'bg-primary bg-opacity-10 text-primary';
+                $borderLeft = '#2563eb';
 
-        <!-- Item Notifikasi 1: Siswa Mengerjakan Asesmen -->
-        <div class="card" style="padding: 16px; display: flex; gap: 14px; align-items: flex-start; background: var(--card-bg); border-left: 4px solid var(--primary);">
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(37, 99, 235, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <span class="material-symbols-outlined" style="font-size: 20px;">assignment_turned_in</span>
-            </div>
-            <div style="flex: 1;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                    <span style="font-size: 13.5px; font-weight: 800; color: var(--text);">Asesmen Telah Dikerjakan</span>
-                    <span style="font-size: 11px; color: var(--muted);">Baru saja</span>
-                </div>
-                <div style="font-size: 13px; color: var(--text); line-height: 1.4;">
-                    Siswa <b>Ahmad Fauzan</b> telah menyelesaikan asesmen <i>Matematika Inklusif C2</i> dengan nilai 85.
-                </div>
-            </div>
-        </div>
+                if ($notif->type == 'assessment' || $notif->type == 'pengerjaan') {
+                    $icon = 'assignment_turned_in';
+                    $bgClass = 'bg-success bg-opacity-10 text-success';
+                    $borderLeft = '#10b981';
+                } elseif ($notif->type == 'bank_soal') {
+                    $icon = 'library_books';
+                    $bgClass = 'bg-info bg-opacity-10 text-info';
+                    $borderLeft = '#0ea5e9';
+                } elseif ($notif->type == 'ai_generation' || $notif->type == 'login') {
+                    $icon = 'auto_awesome';
+                    $bgClass = 'bg-warning bg-opacity-10 text-warning';
+                    $borderLeft = '#f59e0b';
+                }
+            @endphp
 
-        <!-- Item Notifikasi 2: Soal Disimpan di Bank Soal -->
-        <div class="card" style="padding: 16px; display: flex; gap: 14px; align-items: flex-start; background: var(--card-bg); border-left: 4px solid #10B981;">
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); color: #10B981; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <span class="material-symbols-outlined" style="font-size: 20px;">bookmark_added</span>
-            </div>
-            <div style="flex: 1;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                    <span style="font-size: 13.5px; font-weight: 800; color: var(--text);">Bank Soal Publik</span>
-                    <span style="font-size: 11px; color: var(--muted);">2 jam lalu</span>
-                </div>
-                <div style="font-size: 13px; color: var(--text); line-height: 1.4;">
-                    Guru <b>Siti Rahma</b> telah menyimpan soal buatan Anda ke dalam koleksi Bank Soal mereka.
-                </div>
-            </div>
-        </div>
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white position-relative overflow-hidden" style="border-left: 5px solid {{ $borderLeft }} !important;">
+                    <div class="d-flex align-items-start gap-3">
+                        <!-- Ikon Kotak -->
+                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 {{ $bgClass }}" style="width: 46px; height: 46px;">
+                            <span class="material-symbols-outlined fs-5">{{ $icon }}</span>
+                        </div>
 
-        <!-- Item Notifikasi 3: Asesmen AI Berhasil Dibuat -->
-        <div class="card" style="padding: 16px; display: flex; gap: 14px; align-items: flex-start; background: var(--card-bg); border-left: 4px solid #8B5CF6;">
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(139, 92, 246, 0.1); color: #8B5CF6; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <span class="material-symbols-outlined" style="font-size: 20px;">auto_awesome</span>
-            </div>
-            <div style="flex: 1;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                    <span style="font-size: 13.5px; font-weight: 800; color: var(--text);">Generasi AI Selesai</span>
-                    <span style="font-size: 11px; color: var(--muted);">Kemarin</span>
-                </div>
-                <div style="font-size: 13px; color: var(--text); line-height: 1.4;">
-                    Multi-agent AI berhasil menyusun 15 butir soal adaptif tingkat C3 untuk materi <i>Bahasa Indonesia</i>.
+                        <!-- Konten Pesan -->
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <h6 class="fw-bold text-dark mb-0 fs-6">{{ $notif->title }}</h6>
+                                <span class="text-muted" style="font-size: 11.5px;">{{ $notif->created_at->diffForHumans() }}</span>
+                            </div>
+                            <p class="text-muted small mb-0 lh-base">{!! $notif->message !!}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-
+        @empty
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 text-center py-5 bg-white">
+                    <div class="text-muted mb-2">
+                        <span class="material-symbols-outlined fs-1 text-secondary opacity-50">notifications_off</span>
+                    </div>
+                    <h6 class="fw-bold text-dark">Belum ada notifikasi</h6>
+                    <p class="text-muted small mb-0">Semua pemberitahuan aktivitas terbaru akan muncul di sini.</p>
+                </div>
+            </div>
+        @endforelse
     </div>
+
 </div>
 @endsection
 
 @section('bottom_nav')
 <div class="bottomnav">
-    <a href="{{ route('guru.dashboard') }}" class="navitem" style="text-decoration:none;">
+    <a href="{{ route('guru.dashboard') }}" class="navitem {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}" style="text-decoration:none;">
         <span class="material-symbols-outlined">space_dashboard</span>Dashboard
     </a>
-    <a href="{{ route('guru.kelas') }}" class="navitem" style="text-decoration:none;">
+    <a href="{{ route('guru.kelas') }}" class="navitem {{ request()->routeIs('guru.kelas') ? 'active' : '' }}" style="text-decoration:none;">
         <span class="material-symbols-outlined">groups</span>Kelas
     </a>
-    <a href="{{ route('guru.assessments.index') }}" class="navitem" style="text-decoration:none;">
+    <a href="{{ route('guru.assessments.index') }}" class="navitem {{ request()->routeIs('assessments*') || request()->routeIs('guru.assessments*') ? 'active' : '' }}" style="text-decoration:none;">
         <span class="material-symbols-outlined">library_books</span>Asesmen
     </a>
-    <a href="{{ route('guru.bank-soal') }}" class="navitem" style="text-decoration:none;">
+    <a href="{{ route('guru.bank-soal') }}" class="navitem {{ request()->routeIs('guru.bank-soal') ? 'active' : '' }}" style="text-decoration:none;">
         <span class="material-symbols-outlined">folder_open</span>Bank Soal
     </a>
-    <a href="{{ route('guru.profil') }}" class="navitem" style="text-decoration:none;">
+    <a href="{{ route('guru.profil') }}" class="navitem {{ request()->routeIs('guru.profil') ? 'active' : '' }}" style="text-decoration:none;">
         <span class="material-symbols-outlined">person</span>Profil
     </a>
 </div>
