@@ -9,6 +9,7 @@ use App\Http\Controllers\Siswa\NotificationController as SiswaNotificationContro
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\Siswa\DashboardController;
 use App\Http\Controllers\Siswa\StudentPageController;
+use App\Http\Controllers\BankSoalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,8 +44,9 @@ Route::middleware(['auth'])->prefix('guru')->name('guru.')->group(function () {
     // Dashboard Guru
     Route::get('/dashboard', [AssessmentController::class, 'dashboard'])->name('dashboard');
 
-    // Bank Soal Publik
-    Route::get('/bank-soal', [AssessmentController::class, 'bankSoal'])->name('bank-soal');
+    // Bank Soal Publik & Fitur Salin Soal
+    Route::get('/bank-soal', [BankSoalController::class, 'index'])->name('bank-soal');
+    Route::post('/bank-soal/{id}/gunakan', [BankSoalController::class, 'gunakanSoal'])->name('bank-soal.gunakan');
 
     // Asesmen Pribadi Guru
     Route::get('/assessments', [AssessmentController::class, 'index'])->name('assessments.index');
