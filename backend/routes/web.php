@@ -86,9 +86,9 @@ Route::get('/profil', [StudentPageController::class, 'profil'])
     ->name('profil');
 
     // Rute Notifikasi Siswa
-    Route::get('/notifikasi', [SiswaNotificationController::class, 'index'])->name('notifikasi');
+    Route::get('/notifikasi', [SiswaNotificationController::class, 'index'])
+        ->name('notifikasi');
+    });
 
     // Siswa bergabung ke kelas via link
     Route::get('/kelas/{id}/join', [ClassroomController::class, 'joinViaLink'])->name('kelas.join');
-
-});
