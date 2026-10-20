@@ -4,21 +4,22 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Assessment;
+use App\Models\ClassRoom;
 use App\Helpers\NotificationHelper;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AssessmentController extends Controller
 {
     // Dashboard Guru
     public function dashboard()
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
-        $totalKelas = \App\Models\ClassRoom::where('teacher_id', $userId)->count();
+        $totalKelas = ClassRoom::where('teacher_id', $userId)->count();
         $totalAsesmen = Assessment::where('user_id', $userId)->count();
-        $totalSiswa = \App\Models\ClassRoom::where('teacher_id', $userId)
+        $totalSiswa = ClassRoom::where('teacher_id', $userId)
             ->withCount('students')
             ->get()
             ->sum('students_count');
@@ -29,7 +30,7 @@ class AssessmentController extends Controller
     // 1. Menampilkan Asesmen Milik Guru Sendiri
     public function index(Request $request)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
         $query = Assessment::where('user_id', $userId);
 
         if ($request->has('status') && $request->status != '') {
@@ -53,10 +54,10 @@ class AssessmentController extends Controller
         return view('guru.assessments.index', compact('assessments', 'totalAsesmen', 'totalDraft', 'totalPublished'));
     }
 
-    // 2. Menampilkan Detail Asesmen (Fungsi show dipindah ke luar dengan benar)
-    public function show($id)
+    // 2. Menampilkan Detail Asesmen
+    public function show(int $id)
     {
-        $assessment = Assessment::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $assessment = Assessment::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         return view('guru.assessments.show', compact('assessment'));
     }
 
@@ -85,14 +86,14 @@ class AssessmentController extends Controller
     }
 
     // 4. Aksi Guru untuk Membagikan Soal ke Bank Soal Publik
-    public function shareToPublic($id)
+    public function shareToPublic(int $id)
     {
-        $assessment = Assessment::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $assessment = Assessment::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 
         $assessment->update(['visibility' => 'public']);
 
         NotificationHelper::send(
-            auth()->id(),
+            (int) Auth::id(),
             'Bank Soal Publik',
             'Soal <b>' . $assessment->nama . '</b> telah berhasil dibagikan ke koleksi Bank Soal Publik.',
             'bank_soal'
@@ -102,7 +103,7 @@ class AssessmentController extends Controller
     }
 
     // 5. Aksi Guru untuk Menyalin Soal dari Bank Soal
-    public function gunakanSoal($id)
+    public function gunakanSoal(int $id)
     {
         $source = Assessment::findOrFail($id);
 
@@ -125,6 +126,10 @@ class AssessmentController extends Controller
     // 7. Store Asesmen & Integrasi Dify Workflow
     public function store(Request $request)
     {
+        // Naikkan batas waktu eksekusi PHP khusus fungsi ini menjadi 5 menit (300 detik)
+        set_time_limit(300);
+        ini_set('max_execution_time', '300');
+
         $request->validate([
             'nama' => 'required|string|max:255',
             'mata_pelajaran' => 'required|string|max:255',
@@ -148,29 +153,29 @@ class AssessmentController extends Controller
             // 1. UPLOAD FILE KE SERVER DIFY
             $file = $request->file('materi_ajar');
 
-            $uploadResponse = Http::withHeaders([
+            $uploadResponse = Http::withoutVerifying()->withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
             ])->attach(
                 'file', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
             )->post($difyUploadUrl, [
-                'user' => 'guru-' . auth()->id(),
+                'user' => 'guru-' . Auth::id(),
             ]);
 
             if ($uploadResponse->successful()) {
                 $uploadData = $uploadResponse->json();
                 $uploadedFileId = $uploadData['id'] ?? null;
             } else {
-                \Log::error('Gagal upload file ke Dify: ' . $uploadResponse->body());
+                Log::error('Gagal upload file ke Dify: ' . $uploadResponse->body());
             }
         } catch (\Exception $e) {
-            \Log::error('Exception saat upload ke Dify: ' . $e->getMessage());
+            Log::error('Exception saat upload ke Dify: ' . $e->getMessage());
         }
 
         // 2. SIMPAN INFORMASI ASESMEN KE DATABASE LOKAL
         $localPath = $request->file('materi_ajar')->store('materi_ajar', 'public');
 
         $assessment = Assessment::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'nama' => $request->nama,
             'mapel' => $request->mata_pelajaran,
             'kelas' => $request->kelas,
@@ -200,8 +205,7 @@ class AssessmentController extends Controller
                 'name' => $request->file('materi_ajar')->getClientOriginalName(),
             ] : null;
 
-            // Tambahkan timeout(120) agar koneksi tidak terputus saat Dify memproses
-            $response = Http::timeout(120)->withHeaders([
+            $response = Http::timeout(180)->withoutVerifying()->withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
             ])->post($difyWorkflowUrl, [
@@ -221,13 +225,12 @@ class AssessmentController extends Controller
                     'c6'                   => $request->has('c6') ? true : false,
                 ],
                 'response_mode' => 'blocking',
-                'user' => 'guru-' . auth()->id(),
+                'user' => 'guru-' . Auth::id(),
             ]);
 
             if ($response->successful()) {
                 $difyResult = $response->json();
 
-                // Ambil hasil output secara fleksibel
                 $outputs = $difyResult['data']['outputs'] ?? [];
                 $aiOutputs = $outputs['result'] ?? $outputs['text'] ?? $outputs['output'] ?? (is_array($outputs) ? reset($outputs) : null);
 
@@ -236,20 +239,20 @@ class AssessmentController extends Controller
                         'description' => is_array($aiOutputs) ? json_encode($aiOutputs) : $aiOutputs,
                     ]);
                 } else {
-                    \Log::warning('Respons Dify diterima tetapi kunci outputs tidak cocok: ' . json_encode($difyResult));
+                    Log::warning('Respons Dify diterima tetapi kunci outputs tidak cocok: ' . json_encode($difyResult));
                 }
 
                 NotificationHelper::send(
-                    auth()->id(),
+                    (int) Auth::id(),
                     'Generasi AI Selesai',
                     'Multi-agent Dify AI berhasil memproses materi ajar dan menyusun soal untuk asesmen <b>' . $assessment->nama . '</b>.',
                     'ai_generation'
                 );
             } else {
-                \Log::error('Dify Workflow Error Response: ' . $response->body());
+                Log::error('Dify Workflow Error Response: ' . $response->body());
             }
         } catch (\Exception $e) {
-            \Log::error('Gagal menjalankan Dify Workflow: ' . $e->getMessage());
+            Log::error('Gagal menjalankan Dify Workflow: ' . $e->getMessage());
         }
 
         return redirect()->route('guru.assessments.index')->with('success', 'Asesmen berhasil dibuat dan disimpan!');
