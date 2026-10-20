@@ -6,6 +6,7 @@ use App\Helpers\NotificationHelper;
 use App\Models\Assessment;
 use App\Models\AIGeneration;
 use App\Models\AIAgentResult;
+use App\Models\ClassRoom;
 use App\Services\DifyWorkflowService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,12 +15,14 @@ use Illuminate\Support\Facades\Log;
 
 class AssessmentController extends Controller
 {
-    // Dashboard Guru
+    /**
+     * Dashboard guru.
+     */
     public function dashboard()
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
-        $totalKelas = \App\Models\ClassRoom::where(
+        $totalKelas = ClassRoom::where(
             'teacher_id',
             $userId
         )->count();
@@ -29,7 +32,7 @@ class AssessmentController extends Controller
             $userId
         )->count();
 
-        $totalSiswa = \App\Models\ClassRoom::where(
+        $totalSiswa = ClassRoom::where(
             'teacher_id',
             $userId
         )
@@ -39,19 +42,31 @@ class AssessmentController extends Controller
 
         return view(
             'guru.dashboard',
-            compact('totalKelas', 'totalAsesmen', 'totalSiswa')
+            compact(
+                'totalKelas',
+                'totalAsesmen',
+                'totalSiswa'
+            )
         );
     }
 
-    // 1. Menampilkan asesmen milik guru
+    /**
+     * Daftar asesmen milik guru.
+     */
     public function index(Request $request)
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
-        $query = Assessment::where('user_id', $userId);
+        $query = Assessment::where(
+            'user_id',
+            $userId
+        );
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->where(
+                'status',
+                $request->status
+            );
         }
 
         if ($request->filled('search')) {
@@ -80,12 +95,16 @@ class AssessmentController extends Controller
         $totalDraft = Assessment::where(
             'user_id',
             $userId
-        )->where('status', 'Draft')->count();
+        )
+            ->where('status', 'Draft')
+            ->count();
 
         $totalPublished = Assessment::where(
             'user_id',
             $userId
-        )->where('status', 'Published')->count();
+        )
+            ->where('status', 'Published')
+            ->count();
 
         return view(
             'guru.assessments.index',
@@ -98,17 +117,315 @@ class AssessmentController extends Controller
         );
     }
 
-    // Menampilkan detail asesmen milik guru yang sedang login.
+    /**
+     * Detail asesmen guru.
+     *
+     * Membaca soal dan gambar dari PostgreSQL.
+     * Tidak menjalankan workflow Dify kembali.
+     */
     public function show(int $id)
     {
+        $userId = Auth::id();
+
         $assessment = Assessment::where('id', $id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', $userId)
             ->firstOrFail();
 
-        return view('guru.assessments.show', compact('assessment'));
+        // Ambil generasi AI terakhir yang berhasil.
+        $generation = AIGeneration::where(
+            'assessment_id',
+            $assessment->id
+        )
+            ->where('teacher_id', $userId)
+            ->where('status', 'success')
+            ->latest('id')
+            ->first();
+
+        $outputs = [];
+
+        if ($generation) {
+            $result = AIAgentResult::where(
+                'generation_id',
+                $generation->id
+            )
+                ->where('status', 'success')
+                ->latest('id')
+                ->first();
+
+            if ($result) {
+                $stored = $result->output_data;
+
+                if (is_string($stored)) {
+                    $stored = json_decode($stored, true);
+                }
+
+                if (is_array($stored)) {
+                    $outputs = $stored['outputs'] ?? [];
+                }
+
+                if (is_string($outputs)) {
+                    $outputs = json_decode($outputs, true);
+                }
+
+                if (!is_array($outputs)) {
+                    $outputs = [];
+                }
+            }
+        }
+
+        // Output Dify bisa berupa JSON string.
+        $decodeOutput = static function ($value): array {
+            if (is_string($value)) {
+                $value = json_decode($value, true);
+            }
+
+            return is_array($value) ? $value : [];
+        };
+
+        // Utamakan output dari jalur revisi Dify.
+        $reguler = $decodeOutput(
+            $outputs['asesmen_reguler_revisi']
+            ?? $outputs['asesmen_reguler']
+            ?? []
+        );
+
+        $adaptif = $decodeOutput(
+            $outputs['asesmen_inklusif_revisi']
+            ?? $outputs['asesmen_inklusif']
+            ?? []
+        );
+
+        $evaluasi = $decodeOutput(
+            $outputs['evaluasi_teks']
+            ?? $outputs['evaluasi_kesetaraan']
+            ?? []
+        );
+
+        // Jika guru sudah menyimpan revisi,
+        // tampilkan versi yang telah diedit guru.
+        // Output Dify asli tidak diubah.
+        $review = DB::table('assessment_reviews')
+            ->where('assessment_id', $assessment->id)
+            ->first();
+
+        if ($review) {
+            $reviewReguler = $decodeOutput(
+                $review->reguler
+            );
+
+            $reviewAdaptif = $decodeOutput(
+                $review->adaptif
+            );
+
+            if ($reviewReguler !== []) {
+                $reguler = $reviewReguler;
+            }
+
+            if ($reviewAdaptif !== []) {
+                $adaptif = $reviewAdaptif;
+            }
+        }
+
+        // Ambil soal Reguler dan Adaptif.
+        $soalReguler = $reguler['soal'] ?? [];
+
+        $soalAdaptif = $adaptif['soal_inklusif']
+            ?? $adaptif['soal_adaptif']
+            ?? $adaptif['soal']
+            ?? [];
+
+        if (!is_array($soalReguler)) {
+            $soalReguler = [];
+        }
+
+        if (!is_array($soalAdaptif)) {
+            $soalAdaptif = [];
+        }
+
+        // ==========================================
+        // GAMBAR DIFY OTOMATIS PER SOAL ADAPTIF
+        // ==========================================
+
+        // Dify memiliki dua kemungkinan nama output.
+        // Hasil revisi diprioritaskan jika tersedia.
+        $gambarRaw = $decodeOutput(
+            $outputs['gambar_asesmen_revisi']
+            ?? $outputs['gambar_asesmen']
+            ?? []
+        );
+
+        $gambarAsesmen = [];
+        $gambarPerSoal = [];
+
+        // Mendukung:
+        // 1. Array[Object]
+        // 2. Array bertingkat dari Iteration Dify
+        // 3. Objek dengan key "output"
+        // 4. Objek dengan key "gambar_per_soal"
+        // 5. Format file Dify lama
+        $queue = [$gambarRaw];
+
+        while ($queue !== []) {
+            $item = array_shift($queue);
+
+            if (!is_array($item)) {
+                continue;
+            }
+
+            // Bungkus output dari node Dify.
+            if (
+                isset($item['output'])
+                && is_array($item['output'])
+            ) {
+                $queue[] = $item['output'];
+                continue;
+            }
+
+            // Bungkus dari GABUNGKAN HASIL GAMBAR.
+            if (
+                isset($item['gambar_per_soal'])
+                && is_array($item['gambar_per_soal'])
+            ) {
+                $queue[] = $item['gambar_per_soal'];
+                continue;
+            }
+
+            // Pecah array gambar, termasuk array bertingkat.
+            if (array_is_list($item)) {
+                foreach ($item as $nested) {
+                    $queue[] = $nested;
+                }
+
+                continue;
+            }
+
+            // Ambil alamat PNG.
+            $url = $item['url']
+                ?? $item['gambar_url']
+                ?? $item['download_url']
+                ?? $item['preview_url']
+                ?? null;
+
+            if (
+                !is_string($url)
+                || !filter_var($url, FILTER_VALIDATE_URL)
+            ) {
+                continue;
+            }
+
+            $scheme = strtolower(
+                (string) parse_url(
+                    $url,
+                    PHP_URL_SCHEME
+                )
+            );
+
+            if (
+                !in_array(
+                    $scheme,
+                    ['https', 'http'],
+                    true
+                )
+            ) {
+                continue;
+            }
+
+            // ID soal adalah kunci pemasangan gambar.
+            $idSoal = trim(
+                (string) ($item['id_soal_asal'] ?? '')
+            );
+
+            $gambar = [
+                'id_soal_asal' => $idSoal,
+                'id_visual' => $item['id_visual'] ?? null,
+                'url' => $url,
+                'filename' => $item['filename']
+                    ?? 'Ilustrasi asesmen',
+                'teks_alternatif' => $item['teks_alternatif']
+                    ?? null,
+                'type' => $item['type'] ?? 'image',
+            ];
+
+            // Semua gambar valid tetap disimpan
+            // untuk kompatibilitas tampilan lama.
+            $gambarAsesmen[] = $gambar;
+
+            // Jangan menebak gambar berdasarkan urutan.
+            // Hanya pasangkan jika ID soal tersedia.
+            if ($idSoal !== '') {
+                if (!isset($gambarPerSoal[$idSoal])) {
+                    $gambarPerSoal[$idSoal] = [];
+                }
+
+                $gambarPerSoal[$idSoal][] = $gambar;
+            }
+        }
+
+        // ==========================================
+        // STATUS DAN EVALUASI ASESMEN
+        // ==========================================
+
+        $statusKesetaraan = $outputs['status_kesetaraan']
+            ?? $outputs['status_akhir']
+            ?? null;
+
+        $hasilValidasi = $outputs['hasil_validasi_revisi']
+            ?? $outputs['hasil_validasi']
+            ?? null;
+
+        $jumlahPerluRevisi =
+            $outputs['jumlah_soal_perlu_revisi_cabang']
+            ?? $outputs['jumlah_soal_perlu_revisi']
+            ?? null;
+
+        $jumlahSoalDiperiksa =
+            $outputs['jumlah_soal_diperiksa']
+            ?? null;
+
+        $statusValidasiGambar =
+            $outputs['status_validasi_gambar']
+            ?? null;
+
+        // ==========================================
+        // KIRIM DATA KE HALAMAN DETAIL GURU
+        // ==========================================
+
+        return view('guru.assessments.show', [
+            'assessment' => $assessment,
+
+            'soalReguler' => array_values($soalReguler),
+            'soalAdaptif' => array_values($soalAdaptif),
+
+            'catatanReguler' =>
+                $reguler['catatan'] ?? null,
+
+            'catatanAdaptif' =>
+                $adaptif['catatan'] ?? null,
+
+            'statusKesetaraan' => $statusKesetaraan,
+            'hasilValidasi' => $hasilValidasi,
+
+            'jumlahPerluRevisi' => $jumlahPerluRevisi,
+            'jumlahSoalDiperiksa' => $jumlahSoalDiperiksa,
+
+            'statusValidasiGambar' =>
+                $statusValidasiGambar,
+
+            'evaluasi' => $evaluasi,
+
+            'gambarAsesmen' => $gambarAsesmen,
+
+            // Dipakai Blade untuk menempatkan
+            // gambar langsung pada soal yang benar.
+            'gambarPerSoal' => $gambarPerSoal,
+
+            'outputs' => $outputs,
+        ]);
     }
 
-    // 2. Menampilkan Bank Soal Publik
+    /**
+     * Menampilkan Bank Soal Publik.
+     */
     public function bankSoal(Request $request)
     {
         $query = Assessment::where(
@@ -119,10 +436,13 @@ class AssessmentController extends Controller
             ->latest();
 
         if (
-            $request->filled('mapel') &&
-            $request->mapel !== 'Semua'
+            $request->filled('mapel')
+            && $request->mapel !== 'Semua'
         ) {
-            $query->where('mapel', $request->mapel);
+            $query->where(
+                'mapel',
+                $request->mapel
+            );
         }
 
         if ($request->filled('search')) {
@@ -149,11 +469,13 @@ class AssessmentController extends Controller
         );
     }
 
-    // 3. Membagikan soal ke Bank Soal Publik
-    public function shareToPublic($id)
+    /**
+     * Membagikan asesmen ke Bank Soal Publik.
+     */
+    public function shareToPublic(int $id)
     {
         $assessment = Assessment::where('id', $id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::id())
             ->firstOrFail();
 
         if ($assessment->status !== 'Published') {
@@ -168,7 +490,7 @@ class AssessmentController extends Controller
         ]);
 
         NotificationHelper::send(
-            auth()->id(),
+            Auth::id(),
             'Bank Soal Publik',
             'Soal <b>' . e($assessment->nama) .
             '</b> telah dibagikan ke Bank Soal Publik.',
@@ -181,8 +503,10 @@ class AssessmentController extends Controller
         );
     }
 
-    // 4. Menyalin soal publik ke asesmen pribadi
-    public function gunakanSoal($id)
+    /**
+     * Menyalin soal publik ke daftar asesmen guru.
+     */
+    public function gunakanSoal(int $id)
     {
         $source = Assessment::where(
             'visibility',
@@ -208,19 +532,30 @@ class AssessmentController extends Controller
             );
     }
 
-    // 5. Menampilkan form Buat Asesmen
+    /**
+     * Menampilkan form Buat Asesmen.
+     */
     public function create()
     {
         return view('guru.assessments.create');
     }
 
-    // 6. Membuat asesmen menggunakan Dify AI
+    /**
+     * Generate asesmen menggunakan Dify.
+     *
+     * Alur Generate dan penyimpanan PostgreSQL
+     * tetap mengikuti controller asli.
+     */
     public function store(
         Request $request,
         DifyWorkflowService $dify
     ) {
-        set_time_limit(600);
-        // Tahap 1: Validasi input
+        // Maksimal 1 jam sesuai kebutuhan pengujian.
+        // Batas HTTP Dify juga perlu disesuaikan
+        // pada DifyWorkflowService jika diperlukan.
+        set_time_limit(3600);
+
+        // Tahap 1: Validasi input.
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'mata_pelajaran' => 'required|string|max:255',
@@ -244,14 +579,18 @@ class AssessmentController extends Controller
             'visibility' => 'required|in:private,public',
         ]);
 
-        // Tahap 2: Susun input START workflow Dify
+        // Tahap 2: Susun input START workflow Dify.
         $dataDify = [
-            'mata_pelajaran' => $validated['mata_pelajaran'],
+            'mata_pelajaran' =>
+                $validated['mata_pelajaran'],
+
             'kelas' => $validated['kelas'],
+
             'tujuan_pembelajaran' =>
                 $validated['tujuan_pembelajaran'],
 
-            'versi_asesmen' => $validated['versi_asesmen'],
+            'versi_asesmen' =>
+                $validated['versi_asesmen'],
 
             'jumlah_pilihan_ganda' =>
                 (int) $validated['jumlah_pilihan_ganda'],
@@ -267,15 +606,15 @@ class AssessmentController extends Controller
             'c6' => $request->boolean('c6'),
         ];
 
-        // Tahap 3: Jalankan Dify
+        // Tahap 3: Jalankan Dify.
         try {
             $hasilDify = $dify->generateAsesmen(
                 $dataDify,
                 $request->file('materi_ajar'),
-                (string) auth()->id()
+                (string) Auth::id()
             );
 
-            // Pastikan workflow benar-benar berhasil
+            // Pastikan workflow benar-benar berhasil.
             $workflowStatus = strtolower(
                 (string) ($hasilDify['status'] ?? '')
             );
@@ -287,12 +626,12 @@ class AssessmentController extends Controller
                 );
             }
 
-            // Tahap 4: Simpan file materi ajar
+            // Tahap 4: Simpan file materi ajar.
             $materiPath = $request->file('materi_ajar')
                 ->store('materi-ajar', 'local');
 
             // Tahap 5: Simpan metadata dan output AI
-            // dalam satu transaksi database
+            // dalam satu transaksi database.
             $assessment = DB::transaction(function () use (
                 $validated,
                 $request,
@@ -301,7 +640,7 @@ class AssessmentController extends Controller
                 $hasilDify
             ) {
                 $assessment = Assessment::create([
-                    'user_id' => auth()->id(),
+                    'user_id' => Auth::id(),
                     'nama' => $validated['nama'],
                     'mapel' => $validated['mata_pelajaran'],
                     'kelas' => $validated['kelas'],
@@ -327,7 +666,7 @@ class AssessmentController extends Controller
                     'c5' => (int) $request->boolean('c5'),
                     'c6' => (int) $request->boolean('c6'),
 
-                    // Tetap Draft sampai diperiksa guru
+                    // Tetap Draft sampai diperiksa guru.
                     'status' => 'Draft',
                     'visibility' => 'private',
 
@@ -335,9 +674,9 @@ class AssessmentController extends Controller
                     'color' => '#2563EB',
                 ]);
 
-                // Tahap 6: Catat proses generasi AI
+                // Tahap 6: Catat generasi AI.
                 $generation = AIGeneration::create([
-                    'teacher_id' => auth()->id(),
+                    'teacher_id' => Auth::id(),
                     'assessment_id' => $assessment->id,
                     'status' => 'success',
                     'total_agents' => 1,
@@ -345,13 +684,14 @@ class AssessmentController extends Controller
                     'completed_at' => now(),
                 ]);
 
-                // Tahap 7: Simpan JSON output akhir Dify
+                // Tahap 7: Simpan output Dify lengkap.
                 AIAgentResult::create([
                     'generation_id' => $generation->id,
 
-                    'agent_name' => 'Dify Workflow Final Output',
-                    'agent_order' => 1,
+                    'agent_name' =>
+                        'Dify Workflow Final Output',
 
+                    'agent_order' => 1,
                     'input_data' => $dataDify,
 
                     'output_data' => [
@@ -361,6 +701,8 @@ class AssessmentController extends Controller
                         'workflow_status' =>
                             $hasilDify['status'] ?? null,
 
+                        // Termasuk gambar_asesmen atau
+                        // gambar_asesmen_revisi dari Dify.
                         'outputs' =>
                             $hasilDify['outputs'] ?? [],
                     ],
@@ -373,13 +715,15 @@ class AssessmentController extends Controller
                 return $assessment;
             });
 
-            // Tahap 8: Catat informasi workflow ke log
-            // tanpa mencatat API key atau isi materi
+            // Tahap 8: Catat informasi workflow.
             Log::info('Workflow Dify berhasil disimpan', [
                 'assessment_id' => $assessment->id,
+
                 'workflow_run_id' =>
                     $hasilDify['workflow_run_id'] ?? null,
+
                 'status' => $hasilDify['status'] ?? null,
+
                 'output_keys' => array_keys(
                     $hasilDify['outputs'] ?? []
                 ),
@@ -387,7 +731,7 @@ class AssessmentController extends Controller
 
         } catch (\Throwable $e) {
             Log::error('Gagal membuat asesmen AI', [
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
             ]);
 
@@ -400,20 +744,23 @@ class AssessmentController extends Controller
                 );
         }
 
-        // Tahap 9: Kirim notifikasi ke guru
+        // Tahap 9: Kirim notifikasi kepada guru.
         try {
             NotificationHelper::send(
-                auth()->id(),
+                Auth::id(),
                 'Asesmen AI Selesai',
                 'Asesmen <b>' . e($assessment->nama) .
                 '</b> telah dibuat sebagai draft.',
                 'ai_generation'
             );
         } catch (\Throwable $e) {
-            Log::warning('Gagal mengirim notifikasi asesmen', [
-                'assessment_id' => $assessment->id,
-                'error' => $e->getMessage(),
-            ]);
+            Log::warning(
+                'Gagal mengirim notifikasi asesmen',
+                [
+                    'assessment_id' => $assessment->id,
+                    'error' => $e->getMessage(),
+                ]
+            );
         }
 
         return redirect()

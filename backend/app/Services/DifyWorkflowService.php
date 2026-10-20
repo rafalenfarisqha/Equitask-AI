@@ -11,14 +11,38 @@ use Throwable;
 class DifyWorkflowService
 {
     /**
+     * Batas waktu workflow Generate:
+     * 60 menit = 3600 detik.
+     */
+    private const WORKFLOW_TIMEOUT = 3600;
+
+    /**
+     * Batas koneksi awal.
+     */
+    private const CONNECT_TIMEOUT = 30;
+
+    /**
+     * Batas upload PDF.
+     * Upload dipisahkan dari proses Generate.
+     */
+    private const UPLOAD_TIMEOUT = 120;
+
+    /**
+     * Interval pemeriksaan hasil workflow
+     * jika streaming terputus.
+     */
+    private const POLLING_INTERVAL = 5;
+
+    /**
      * Upload PDF, jalankan workflow,
-     * dan kembalikan output Dify.
+     * lalu kembalikan output Dify.
      */
     public function generateAsesmen(
         array $inputs,
         UploadedFile $materiAjar,
         string $userId
     ): array {
+
         $baseUrl = rtrim(
             (string) config(
                 'services.dify.base_url',
@@ -37,12 +61,12 @@ class DifyWorkflowService
             'materi_ajar'
         );
 
-        $timeout = max(
-            60,
-            (int) config('services.dify.timeout', 600)
-        );
+        // Tetapkan Generate maksimal 60 menit.
+        $timeout = self::WORKFLOW_TIMEOUT;
 
-        $certificatePath = base_path('certs/cacert.pem');
+        $certificatePath = base_path(
+            'certs/cacert.pem'
+        );
 
         if ($apiKey === '') {
             throw new RuntimeException(
@@ -51,8 +75,8 @@ class DifyWorkflowService
         }
 
         if (
-            !is_file($certificatePath) ||
-            !is_readable($certificatePath)
+            !is_file($certificatePath)
+            || !is_readable($certificatePath)
         ) {
             throw new RuntimeException(
                 'Sertifikat certs/cacert.pem tidak ditemukan.'
@@ -65,7 +89,10 @@ class DifyWorkflowService
             );
         }
 
-        // 1. Upload PDF ke Dify
+        // ==========================================
+        // TAHAP 1: UPLOAD PDF KE DIFY
+        // ==========================================
+
         $fileId = $this->uploadPdf(
             $baseUrl,
             $apiKey,
@@ -74,14 +101,20 @@ class DifyWorkflowService
             $userId
         );
 
-        // 2. Tambahkan PDF ke input START
+        // ==========================================
+        // TAHAP 2: MASUKKAN PDF KE INPUT START
+        // ==========================================
+
         $inputs[$fileVariable] = [
             'type' => 'document',
             'transfer_method' => 'local_file',
             'upload_file_id' => $fileId,
         ];
 
-        // 3. Jalankan workflow Dify
+        // ==========================================
+        // TAHAP 3: JALANKAN WORKFLOW
+        // ==========================================
+
         return $this->jalankanWorkflow(
             $baseUrl,
             $apiKey,
@@ -93,7 +126,7 @@ class DifyWorkflowService
     }
 
     /**
-     * Upload PDF dengan Laravel HTTP Client.
+     * Upload PDF menggunakan Laravel HTTP Client.
      */
     private function uploadPdf(
         string $baseUrl,
@@ -102,9 +135,13 @@ class DifyWorkflowService
         UploadedFile $materiAjar,
         string $userId
     ): string {
+
         $filePath = $materiAjar->getRealPath();
 
-        if (!$filePath || !is_readable($filePath)) {
+        if (
+            !$filePath
+            || !is_readable($filePath)
+        ) {
             throw new RuntimeException(
                 'PDF tidak dapat dibaca.'
             );
@@ -119,7 +156,10 @@ class DifyWorkflowService
         }
 
         try {
-            Log::info('Memulai upload PDF ke Dify');
+
+            Log::info(
+                'Memulai upload PDF ke Dify'
+            );
 
             $response = Http::withToken($apiKey)
                 ->withOptions([
@@ -127,14 +167,19 @@ class DifyWorkflowService
                     'version' => '1.1',
                 ])
                 ->acceptJson()
-                ->connectTimeout(30)
-                ->timeout(120)
+                ->connectTimeout(
+                    self::CONNECT_TIMEOUT
+                )
+                ->timeout(
+                    self::UPLOAD_TIMEOUT
+                )
                 ->attach(
                     'file',
                     $handle,
                     $materiAjar->getClientOriginalName(),
                     [
-                        'Content-Type' => 'application/pdf',
+                        'Content-Type' =>
+                            'application/pdf',
                     ]
                 )
                 ->post(
@@ -145,6 +190,7 @@ class DifyWorkflowService
                 );
 
         } finally {
+
             if (is_resource($handle)) {
                 fclose($handle);
             }
@@ -152,31 +198,39 @@ class DifyWorkflowService
 
         if (!$response->successful()) {
             throw new RuntimeException(
-                'Upload PDF ditolak Dify. HTTP ' .
-                $response->status() .
-                '. ' .
-                $this->pesanError($response->json())
+                'Upload PDF ditolak Dify. HTTP '
+                . $response->status()
+                . '. '
+                . $this->pesanError(
+                    $response->json()
+                )
             );
         }
 
         $fileId = $response->json('id');
 
-        if (!is_string($fileId) || $fileId === '') {
+        if (
+            !is_string($fileId)
+            || $fileId === ''
+        ) {
             throw new RuntimeException(
                 'Dify tidak mengembalikan ID file PDF.'
             );
         }
 
-        Log::info('Upload PDF Dify berhasil');
+        Log::info(
+            'Upload PDF Dify berhasil'
+        );
 
         return $fileId;
     }
 
     /**
-     * Jalankan workflow menggunakan streaming SSE.
+     * Jalankan workflow dengan streaming SSE.
      *
-     * Jika stream putus setelah mendapatkan workflow ID,
-     * cek hasil eksekusi yang sama, bukan menjalankan ulang.
+     * Jika streaming terputus dan workflow ID
+     * sudah diperoleh, ambil hasil eksekusi
+     * yang sama, bukan melakukan Generate ulang.
      */
     private function jalankanWorkflow(
         string $baseUrl,
@@ -186,7 +240,17 @@ class DifyWorkflowService
         string $userId,
         int $timeout
     ): array {
-        Log::info('Memulai workflow Dify mode streaming');
+
+        Log::info(
+            'Memulai workflow Dify mode streaming',
+            [
+                'timeout_seconds' => $timeout,
+            ]
+        );
+
+        // Batas waktu bersama untuk streaming
+        // dan pemulihan hasil workflow.
+        $deadline = microtime(true) + $timeout;
 
         $response = Http::withToken($apiKey)
             ->withOptions([
@@ -198,7 +262,9 @@ class DifyWorkflowService
                 'Accept' => 'text/event-stream',
             ])
             ->asJson()
-            ->connectTimeout(30)
+            ->connectTimeout(
+                self::CONNECT_TIMEOUT
+            )
             ->timeout($timeout)
             ->post(
                 $baseUrl . '/workflows/run',
@@ -211,10 +277,12 @@ class DifyWorkflowService
 
         if (!$response->successful()) {
             throw new RuntimeException(
-                'Dify menolak workflow. HTTP ' .
-                $response->status() .
-                '. ' .
-                $this->pesanError($response->json())
+                'Dify menolak workflow. HTTP '
+                . $response->status()
+                . '. '
+                . $this->pesanError(
+                    $response->json()
+                )
             );
         }
 
@@ -225,19 +293,33 @@ class DifyWorkflowService
         $buffer = '';
         $workflowRunId = null;
         $streamError = null;
+        $streamTimedOut = false;
 
         try {
+
             while (!$stream->eof()) {
+
+                if (microtime(true) >= $deadline) {
+                    $streamTimedOut = true;
+                    break;
+                }
+
                 try {
+
                     $chunk = $stream->read(4096);
+
                 } catch (Throwable $e) {
+
                     $streamError = $e;
 
                     Log::warning(
                         'Koneksi streaming Dify terputus',
                         [
-                            'workflow_run_id' => $workflowRunId,
-                            'error' => $e->getMessage(),
+                            'workflow_run_id' =>
+                                $workflowRunId,
+
+                            'error' =>
+                                $e->getMessage(),
                         ]
                     );
 
@@ -248,11 +330,11 @@ class DifyWorkflowService
                     continue;
                 }
 
-                // Simpan chunk terlebih dahulu agar
-                // event yang terpotong tetap bisa digabung.
+                // Gabungkan potongan data agar
+                // event SSE yang terpecah tetap terbaca.
                 $buffer .= $chunk;
 
-                // Pisahkan event SSE dengan baris kosong.
+                // Pemisah SSE adalah baris kosong.
                 while (
                     preg_match(
                         "/\r\n\r\n|\n\n|\r\r/",
@@ -261,6 +343,7 @@ class DifyWorkflowService
                         PREG_OFFSET_CAPTURE
                     )
                 ) {
+
                     $separator = $matches[0][0];
                     $position = $matches[0][1];
 
@@ -283,15 +366,27 @@ class DifyWorkflowService
                         continue;
                     }
 
-                    $eventType = $event['event'] ?? '';
+                    $eventType = $event['event']
+                        ?? '';
 
-                    if ($eventType === 'workflow_started') {
+                    // ==================================
+                    // WORKFLOW DIMULAI
+                    // ==================================
+
+                    if (
+                        $eventType ===
+                        'workflow_started'
+                    ) {
+
                         $id = $event['workflow_run_id']
-                            ?? ($event['data']['id'] ?? null);
+                            ?? (
+                                $event['data']['id']
+                                ?? null
+                            );
 
                         if (
-                            is_string($id) &&
-                            $id !== ''
+                            is_string($id)
+                            && $id !== ''
                         ) {
                             $workflowRunId = $id;
                         }
@@ -305,9 +400,17 @@ class DifyWorkflowService
                         );
                     }
 
+                    // ==================================
+                    // WORKFLOW ERROR
+                    // ==================================
+
                     if ($eventType === 'error') {
+
                         $message = $event['message']
-                            ?? 'Dify mengirim event error.';
+                            ?? (
+                                $event['data']['message']
+                                ?? 'Dify mengirim event error.'
+                            );
 
                         throw new RuntimeException(
                             is_string($message)
@@ -316,8 +419,17 @@ class DifyWorkflowService
                         );
                     }
 
-                    if ($eventType === 'workflow_finished') {
-                        $data = $event['data'] ?? [];
+                    // ==================================
+                    // WORKFLOW SELESAI
+                    // ==================================
+
+                    if (
+                        $eventType ===
+                        'workflow_finished'
+                    ) {
+
+                        $data = $event['data']
+                            ?? [];
 
                         if (!is_array($data)) {
                             throw new RuntimeException(
@@ -326,28 +438,36 @@ class DifyWorkflowService
                         }
 
                         $id = $event['workflow_run_id']
-                            ?? ($data['id'] ?? null);
+                            ?? (
+                                $data['id']
+                                ?? null
+                            );
 
                         if (
-                            is_string($id) &&
-                            $id !== ''
+                            is_string($id)
+                            && $id !== ''
                         ) {
                             $workflowRunId = $id;
                         }
 
                         $status = (string) (
-                            $data['status'] ?? ''
+                            $data['status']
+                            ?? ''
                         );
 
                         if ($status !== 'succeeded') {
+
                             $error = $data['error']
                                 ?? 'Workflow tidak berhasil.';
 
                             throw new RuntimeException(
-                                'Workflow Dify berstatus ' .
-                                ($status ?: 'tidak diketahui') .
-                                '. ' .
-                                (
+                                'Workflow Dify berstatus '
+                                . (
+                                    $status
+                                    ?: 'tidak diketahui'
+                                )
+                                . '. '
+                                . (
                                     is_string($error)
                                         ? $error
                                         : 'Error tidak dikenali.'
@@ -355,7 +475,8 @@ class DifyWorkflowService
                             );
                         }
 
-                        $outputs = $data['outputs'] ?? [];
+                        $outputs = $data['outputs']
+                            ?? [];
 
                         if (!is_array($outputs)) {
                             throw new RuntimeException(
@@ -368,6 +489,7 @@ class DifyWorkflowService
                             [
                                 'workflow_run_id' =>
                                     $workflowRunId,
+
                                 'output_keys' =>
                                     array_keys($outputs),
                             ]
@@ -376,25 +498,39 @@ class DifyWorkflowService
                         return [
                             'workflow_run_id' =>
                                 $workflowRunId,
-                            'status' => 'succeeded',
-                            'outputs' => $outputs,
+
+                            'status' =>
+                                'succeeded',
+
+                            'outputs' =>
+                                $outputs,
                         ];
                     }
                 }
             }
+
         } finally {
+
             $stream->close();
         }
 
-        // Jangan memulai workflow baru ketika
-        // respons streaming terputus.
+        // ==========================================
+        // PEMULIHAN JIKA STREAMING TERPUTUS
+        // ==========================================
+
         if (
-            !is_string($workflowRunId) ||
-            $workflowRunId === ''
+            !is_string($workflowRunId)
+            || $workflowRunId === ''
         ) {
+
+            $message = $streamTimedOut
+                ? 'Streaming Dify mencapai batas 60 menit.'
+                : 'Streaming Dify terputus sebelum ID workflow diterima.';
+
             throw new RuntimeException(
-                'Streaming Dify terputus sebelum ID workflow diterima. ' .
-                'Jangan ulangi Generate sebelum memeriksa eksekusi Dify.',
+                $message
+                . ' Jangan ulangi Generate sebelum '
+                . 'memeriksa riwayat eksekusi Dify.',
                 0,
                 $streamError
             );
@@ -403,7 +539,8 @@ class DifyWorkflowService
         Log::warning(
             'Mencoba memulihkan hasil workflow Dify',
             [
-                'workflow_run_id' => $workflowRunId,
+                'workflow_run_id' =>
+                    $workflowRunId,
             ]
         );
 
@@ -411,74 +548,109 @@ class DifyWorkflowService
             $baseUrl,
             $apiKey,
             $certificatePath,
-            $workflowRunId
+            $workflowRunId,
+            $deadline
         );
     }
 
     /**
      * Ambil hasil dari workflow run yang sama.
      *
-     * Tidak membuat workflow baru.
+     * Pemantauan menggunakan sisa waktu
+     * dari batas total workflow 60 menit.
+     *
+     * Tidak memulai workflow baru.
      */
     private function ambilHasilWorkflow(
         string $baseUrl,
         string $apiKey,
         string $certificatePath,
-        string $workflowRunId
+        string $workflowRunId,
+        float $deadline
     ): array {
-        $maxAttempts = 12;
 
-        for (
-            $attempt = 1;
-            $attempt <= $maxAttempts;
-            $attempt++
-        ) {
+        $attempt = 0;
+
+        while (microtime(true) < $deadline) {
+
+            $attempt++;
+
+            $remainingSeconds = (int) ceil(
+                $deadline - microtime(true)
+            );
+
+            if ($remainingSeconds <= 0) {
+                break;
+            }
+
             try {
+
                 $response = Http::withToken($apiKey)
                     ->withOptions([
                         'verify' => $certificatePath,
                         'version' => '1.1',
                     ])
                     ->acceptJson()
-                    ->connectTimeout(15)
-                    ->timeout(30)
+                    ->connectTimeout(
+                        min(
+                            15,
+                            $remainingSeconds
+                        )
+                    )
+                    ->timeout(
+                        min(
+                            30,
+                            $remainingSeconds
+                        )
+                    )
                     ->get(
-                        $baseUrl .
-                        '/workflows/run/' .
-                        rawurlencode($workflowRunId)
+                        $baseUrl
+                        . '/workflows/run/'
+                        . rawurlencode(
+                            $workflowRunId
+                        )
                     );
 
             } catch (Throwable $e) {
+
                 Log::warning(
                     'Gagal memeriksa hasil workflow Dify',
                     [
                         'workflow_run_id' =>
                             $workflowRunId,
-                        'attempt' => $attempt,
-                        'error' => $e->getMessage(),
+
+                        'attempt' =>
+                            $attempt,
+
+                        'error' =>
+                            $e->getMessage(),
                     ]
                 );
 
-                if ($attempt >= $maxAttempts) {
-                    throw new RuntimeException(
-                        'Tidak dapat mengambil hasil workflow. ' .
-                        'Workflow run ID: ' .
-                        $workflowRunId,
+                $sleepSeconds = min(
+                    self::POLLING_INTERVAL,
+                    max(
                         0,
-                        $e
-                    );
+                        (int) floor(
+                            $deadline - microtime(true)
+                        )
+                    )
+                );
+
+                if ($sleepSeconds > 0) {
+                    sleep($sleepSeconds);
                 }
 
-                sleep(5);
                 continue;
             }
 
             if (!$response->successful()) {
+
                 throw new RuntimeException(
-                    'API hasil workflow Dify mengembalikan HTTP ' .
-                    $response->status() .
-                    '. Workflow run ID: ' .
-                    $workflowRunId
+                    'API hasil workflow Dify mengembalikan HTTP '
+                    . $response->status()
+                    . '. Workflow run ID: '
+                    . $workflowRunId
                 );
             }
 
@@ -490,14 +662,19 @@ class DifyWorkflowService
                 );
             }
 
-            // Endpoint detail eksekusi Dify
-            // mengembalikan status dan outputs.
             $status = (string) (
-                $data['status'] ?? ''
+                $data['status']
+                ?? ''
             );
 
+            // ======================================
+            // WORKFLOW SUKSES
+            // ======================================
+
             if ($status === 'succeeded') {
-                $outputs = $data['outputs'] ?? [];
+
+                $outputs = $data['outputs']
+                    ?? [];
 
                 if (!is_array($outputs)) {
                     throw new RuntimeException(
@@ -510,6 +687,7 @@ class DifyWorkflowService
                     [
                         'workflow_run_id' =>
                             $workflowRunId,
+
                         'output_keys' =>
                             array_keys($outputs),
                     ]
@@ -518,24 +696,35 @@ class DifyWorkflowService
                 return [
                     'workflow_run_id' =>
                         $workflowRunId,
-                    'status' => 'succeeded',
-                    'outputs' => $outputs,
+
+                    'status' =>
+                        'succeeded',
+
+                    'outputs' =>
+                        $outputs,
                 ];
             }
 
-            if (in_array(
-                $status,
-                ['failed', 'stopped'],
-                true
-            )) {
+            // ======================================
+            // WORKFLOW GAGAL / DIHENTIKAN
+            // ======================================
+
+            if (
+                in_array(
+                    $status,
+                    ['failed', 'stopped'],
+                    true
+                )
+            ) {
+
                 $error = $data['error']
                     ?? 'Tidak ada detail error.';
 
                 throw new RuntimeException(
-                    'Workflow Dify berstatus ' .
-                    $status .
-                    '. ' .
-                    (
+                    'Workflow Dify berstatus '
+                    . $status
+                    . '. '
+                    . (
                         is_string($error)
                             ? $error
                             : 'Error tidak dikenali.'
@@ -543,10 +732,18 @@ class DifyWorkflowService
                 );
             }
 
+            // ======================================
+            // WORKFLOW MASIH BERJALAN
+            // ======================================
+
             if ($status !== 'running') {
+
                 throw new RuntimeException(
-                    'Status workflow Dify tidak dikenali: ' .
-                    ($status ?: 'kosong')
+                    'Status workflow Dify tidak dikenali: '
+                    . (
+                        $status
+                        ?: 'kosong'
+                    )
                 );
             }
 
@@ -555,20 +752,40 @@ class DifyWorkflowService
                 [
                     'workflow_run_id' =>
                         $workflowRunId,
-                    'attempt' => $attempt,
+
+                    'attempt' =>
+                        $attempt,
+
+                    'remaining_seconds' =>
+                        max(
+                            0,
+                            (int) (
+                                $deadline - microtime(true)
+                            )
+                        ),
                 ]
             );
 
-            if ($attempt < $maxAttempts) {
-                sleep(5);
+            $sleepSeconds = min(
+                self::POLLING_INTERVAL,
+                max(
+                    0,
+                    (int) floor(
+                        $deadline - microtime(true)
+                    )
+                )
+            );
+
+            if ($sleepSeconds > 0) {
+                sleep($sleepSeconds);
             }
         }
 
         throw new RuntimeException(
-            'Workflow Dify belum selesai dalam waktu pemantauan. ' .
-            'Workflow run ID: ' .
-            $workflowRunId .
-            '. Jangan ulangi Generate sebelum memeriksa statusnya.'
+            'Workflow Dify belum selesai dalam batas waktu 60 menit. '
+            . 'Workflow run ID: '
+            . $workflowRunId
+            . '. Jangan ulangi Generate sebelum memeriksa statusnya.'
         );
     }
 
@@ -578,6 +795,7 @@ class DifyWorkflowService
     private function parseSseEvent(
         string $block
     ): ?array {
+
         $block = str_replace(
             ["\r\n", "\r"],
             "\n",
@@ -589,7 +807,14 @@ class DifyWorkflowService
         foreach (
             explode("\n", $block) as $line
         ) {
-            if (str_starts_with($line, 'data:')) {
+
+            if (
+                str_starts_with(
+                    $line,
+                    'data:'
+                )
+            ) {
+
                 $dataLines[] = ltrim(
                     substr($line, 5),
                     ' '
@@ -614,8 +839,10 @@ class DifyWorkflowService
     /**
      * Ambil pesan error dari API Dify.
      */
-    private function pesanError($response): string
-    {
+    private function pesanError(
+        $response
+    ): string {
+
         if (!is_array($response)) {
             return 'Tidak ada detail error.';
         }
@@ -625,7 +852,11 @@ class DifyWorkflowService
             ?? 'Tidak ada detail error.';
 
         return is_string($message)
-            ? mb_substr($message, 0, 500)
+            ? mb_substr(
+                $message,
+                0,
+                500
+            )
             : 'Format error tidak dikenali.';
     }
 }
