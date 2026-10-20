@@ -262,76 +262,15 @@ Route::middleware(['auth'])
 | Seluruh bagian siswa dipertahankan.
 |--------------------------------------------------------------------------
 */
+Route::middleware(['auth'])->prefix('siswa')->name('siswa.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/daftar-assessment', [DashboardController::class, 'assessments'])->name('assessment');
+    Route::get('/riwayat', [StudentPageController::class, 'riwayat'])->name('riwayat');
+    Route::get('/profil', [StudentPageController::class, 'profil'])->name('profil');
 
-Route::middleware(['auth'])
-    ->prefix('siswa')
-    ->name('siswa.')
-    ->group(function () {
+    // Notifikasi Siswa
+    Route::get('/notifikasi', [SiswaNotificationController::class, 'index'])->name('notifikasi');
 
-        /*
-        |--------------------------------------------------------------
-        | Dashboard Siswa
-        |--------------------------------------------------------------
-        */
-
-        Route::get(
-            '/dashboard',
-            [DashboardController::class, 'index']
-        )->name('dashboard');
-
-        /*
-        |--------------------------------------------------------------
-        | Daftar Asesmen Siswa
-        |--------------------------------------------------------------
-        */
-
-        Route::get(
-            '/daftar-assessment',
-            [DashboardController::class, 'assessments']
-        )->name('assessment');
-
-        /*
-        |--------------------------------------------------------------
-        | Riwayat Siswa
-        |--------------------------------------------------------------
-        */
-
-        Route::get(
-            '/riwayat',
-            [StudentPageController::class, 'riwayat']
-        )->name('riwayat');
-
-        /*
-        |--------------------------------------------------------------
-        | Profil Siswa
-        |--------------------------------------------------------------
-        */
-
-        Route::get(
-            '/profil',
-            [StudentPageController::class, 'profil']
-        )->name('profil');
-
-        /*
-        |--------------------------------------------------------------
-        | Notifikasi Siswa
-        |--------------------------------------------------------------
-        */
-
-        Route::get(
-            '/notifikasi',
-            [SiswaNotificationController::class, 'index']
-        )->name('notifikasi');
-
-        /*
-        |--------------------------------------------------------------
-        | Join Kelas
-        |--------------------------------------------------------------
-        */
-
-        Route::get(
-            '/kelas/{id}/join',
-            [ClassroomController::class, 'joinViaLink']
-        )->whereNumber('id')
-         ->name('kelas.join');
-    });
+    // Join Kelas
+    Route::get('/kelas/{id}/join', [ClassroomController::class, 'joinViaLink'])->name('kelas.join');
+});
