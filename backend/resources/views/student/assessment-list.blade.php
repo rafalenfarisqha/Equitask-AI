@@ -1,200 +1,363 @@
+
 @extends('layouts.app')
 
 @section('title', 'Daftar Assessment')
 
+@push('styles')
+<style>
+    .assessment-page {
+        padding: 28px 24px 36px;
+    }
+
+    .assessment-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .assessment-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 11px;
+        border-radius: 999px;
+        background: #edf4ff;
+        color: #2563eb;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+
+    .assessment-heading h1 {
+        font-size: clamp(24px, 4vw, 30px);
+        line-height: 1.3;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 8px;
+        color: #0f172a;
+    }
+
+    .assessment-heading p {
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.7;
+        max-width: 520px;
+        margin: 0;
+    }
+
+    .assessment-count {
+        flex-shrink: 0;
+        min-width: 76px;
+        text-align: center;
+        padding: 13px 15px;
+        border: 1px solid #dbeafe;
+        border-radius: 16px;
+        background: #fff;
+    }
+
+    .assessment-count strong {
+        display: block;
+        font-size: 24px;
+        line-height: 1.2;
+        color: #2563eb;
+    }
+
+    .assessment-count span {
+        font-size: 11px;
+        color: #64748b;
+        font-weight: 700;
+    }
+
+    .assessment-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .assessment-card {
+        min-width: 0;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 21px;
+        box-shadow: 0 8px 24px -18px rgba(15, 23, 42, .22);
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .assessment-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 28px -18px rgba(37, 99, 235, .35);
+    }
+
+    .assessment-card-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+        margin-bottom: 18px;
+    }
+
+    .assessment-icon {
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 15px;
+        color: #2563eb;
+        background: #edf4ff;
+    }
+
+    .assessment-icon .material-symbols-outlined {
+        font-size: 28px;
+    }
+
+    .assessment-card h2 {
+        font-size: 16px;
+        font-weight: 800;
+        line-height: 1.5;
+        color: #0f172a;
+        margin: 1px 0 6px;
+        overflow-wrap: anywhere;
+    }
+
+    .assessment-subject {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .assessment-divider {
+        border: 0;
+        border-top: 1px solid #f1f5f9;
+        margin: 0 0 16px;
+        opacity: 1;
+    }
+
+    .assessment-meta {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #64748b;
+        font-size: 12px;
+        margin-bottom: 19px;
+    }
+
+    .assessment-meta .material-symbols-outlined {
+        font-size: 17px;
+    }
+
+    .assessment-btn {
+        width: 100%;
+        min-height: 44px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 14px;
+        border: none;
+        border-radius: 12px;
+        background: #2563eb;
+        color: #fff;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 800;
+        transition: background .2s ease;
+    }
+
+    .assessment-btn:hover {
+        background: #1d4ed8;
+        color: #fff;
+    }
+
+    .assessment-empty {
+        padding: 44px 24px;
+        text-align: center;
+        border: 1px dashed #cbd5e1;
+        border-radius: 20px;
+        background: #fff;
+    }
+
+    .assessment-empty-icon {
+        display: grid;
+        place-items: center;
+        width: 66px;
+        height: 66px;
+        margin: 0 auto 16px;
+        background: #f1f5f9;
+        border-radius: 20px;
+        color: #64748b;
+    }
+
+    .assessment-empty-icon .material-symbols-outlined {
+        font-size: 32px;
+    }
+
+    .assessment-empty h2 {
+        font-size: 17px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .assessment-empty p {
+        font-size: 13px;
+        line-height: 1.7;
+        color: #64748b;
+        margin: 0;
+    }
+
+    @media (max-width: 640px) {
+        .assessment-page {
+            padding: 24px 16px 30px;
+        }
+
+        .assessment-heading {
+            gap: 10px;
+        }
+
+        .assessment-heading h1 {
+            font-size: 24px;
+        }
+
+        .assessment-count {
+            min-width: 63px;
+            padding: 11px 10px;
+        }
+
+        .assessment-count strong {
+            font-size: 21px;
+        }
+
+        .assessment-list {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .assessment-card {
+            padding: 18px;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="topbar">
     <a href="{{ route('siswa.dashboard') }}"
-       class="iconbtn"
-       style="text-decoration:none;">
+       aria-label="Kembali ke dashboard"
+       style="display:flex;align-items:center;color:#0f172a;text-decoration:none;">
         <span class="material-symbols-outlined">arrow_back</span>
     </a>
 
-    <h1>Daftar Assessment</h1>
+    <div style="font-size:15px;font-weight:700;">Daftar Assessment</div>
 </div>
 
-<div class="px" style="padding-top:20px;">
+<div class="assessment-page">
+    <div class="assessment-heading">
+        <div>
+            <div class="assessment-eyebrow">
+                <span class="material-symbols-outlined"
+                      style="font-size:16px;">school</span>
+                Ruang Belajar
+            </div>
 
-    <div style="margin-bottom:18px;">
-        <div style="font-size:22px;font-weight:800;">
-            Assessment untukmu
+            <h1>Assessment untukmu</h1>
+            <p>
+                Pilih assessment yang tersedia untuk melihat petunjuk
+                dan menentukan versi pengerjaan yang sesuai.
+            </p>
         </div>
 
-        <div class="muted" style="margin-top:6px;">
-            Pilih assessment yang tersedia untuk melihat daftar tugas belajar.
+        <div class="assessment-count">
+            <strong>{{ $assessments->count() }}</strong>
+            <span>Assessment</span>
         </div>
     </div>
 
-
-@php
-    $isDemo = $assessments->isEmpty();
-
-    $demoAssessments = collect([
-        (object) [
-            'id' => 1,
-            'nama' => 'Ekosistem dan Rantai Makanan',
-            'mapel' => 'IPA',
-            'icon' => 'eco',
-            'color' => '#16A34A',
-            'created_at' => now(),
-        ],
-        (object) [
-            'id' => 2,
-            'nama' => 'Keanekaragaman Hayati',
-            'mapel' => 'IPA',
-            'icon' => 'science',
-            'color' => '#2563EB',
-            'created_at' => now(),
-        ],
-        (object) [
-            'id' => 3,
-            'nama' => 'Perubahan Lingkungan',
-            'mapel' => 'IPA',
-            'icon' => 'psychology',
-            'color' => '#9333EA',
-            'created_at' => now(),
-        ],
-    ]);
-
-    $displayAssessments = $isDemo ? $demoAssessments : $assessments;
-@endphp
-
-@if ($isDemo)
-    <div style="margin-bottom: 16px; padding: 12px 16px;
-                background: #FEF3C7; color: #92400E;
-                border-radius: 10px; font-size: 13px;">
-        Mode demo — assessment di bawah ini adalah data contoh,
-        bukan assessment asli dari guru.
-    </div>
-@endif
-<!-- 
-/* SIMULASI */
-<div class="assessment-list">
-    @foreach ($displayAssessments as $assessment)
-        <div class="assessment-item"
-             style="margin-bottom: 16px; padding: 20px;
-                    border: 1px solid #E2E8F0;
-                    border-radius: 14px; background: #fff;">
-
-            <div style="display: flex; gap: 14px; align-items: flex-start;">
-                <div style="width: 46px; height: 46px; flex-shrink: 0;
-                            border-radius: 12px;
-                            background: {{ $assessment->color ?? '#2563EB' }}20;
-                            display: grid; place-items: center;
-                            font-size: 22px;">
-                    📝
-                </div>
-
-                <div style="flex: 1; min-width: 0;">
-                    <h3 style="margin: 0 0 8px; font-size: 17px;">
-                        {{ $assessment->nama }}
-                    </h3>
-
-                    <p style="margin: 0 0 12px; color: #64748B;
-                              font-size: 14px;">
-                        Mata pelajaran: {{ $assessment->mapel ?? 'Umum' }}
-                    </p>
-
-                    @if ($isDemo)
-                        <a href="{{ route('siswa.assessment-demo', $assessment->id) }}"
-                           style="display: inline-block; padding: 10px 15px;
-                                  border-radius: 9px; background: #2563EB;
-                                  color: #fff; text-decoration: none;
-                                  font-size: 14px; font-weight: 600;">
-                            Coba Simulasi →
-                        </a>
-                    @else
-                        <span style="font-size: 13px; color: #64748B;">
-                            Assessment tersedia
-                        </span>
-                    @endif
-                </div>
-            </div>
-        </div>
-    @endforeach
-</div>
-
- -->
-    @forelse($assessments as $assessment)
-        <div class="card" style="padding:16px;">
-            <div class="row" style="align-items:flex-start;">
-                <div class="thumb"
-                     style="background:var(--primary-soft);">
-                    <span class="material-symbols-outlined"
-                          style="color:var(--primary);">
-                        {{ $assessment->icon ?: 'assignment' }}
-                    </span>
-                </div>
-
-                <div style="flex:1;">
-                    <div style="font-weight:800;font-size:14px;">
-                        {{ $assessment->nama }}
-                    </div>
-
-                    <div class="muted" style="margin-top:5px;">
-                        Mata pelajaran: {{ $assessment->mapel }}
-                    </div>
-
-                    <div class="muted" style="margin-top:5px;">
-                        Dipublikasikan:
-                        {{ \Carbon\Carbon::parse($assessment->created_at)->format('d M Y') }}
-                    </div>
-                </div>
+    @if ($assessments->isEmpty())
+        <div class="assessment-empty">
+            <div class="assessment-empty-icon">
+                <span class="material-symbols-outlined">assignment_late</span>
             </div>
 
-            <div style="margin-top:14px;">
-                <span class="badge badge-green">Tersedia</span>
-            </div>
-        </div>
-    @empty
-        <div class="card" style="text-align:center;padding:32px 18px;">
-            <span class="material-symbols-outlined"
-                  style="font-size:44px;color:var(--muted);">
-                assignment_late
-            </span>
-
-            <div style="font-weight:800;margin-top:12px;">
-                Belum ada assessment
-            </div>
-
-            <div class="muted" style="margin-top:6px;">
+            <h2>Belum ada assessment</h2>
+            <p>
                 Belum ada assessment publik yang diterbitkan guru.
-            </div>
+                Assessment akan muncul di sini setelah tersedia.
+            </p>
         </div>
-    @endforelse
+    @else
+        <div class="assessment-list">
+            @foreach ($assessments as $assessment)
+                <article class="assessment-card">
+                    <div class="assessment-card-top">
+                        <div class="assessment-icon">
+                            <span class="material-symbols-outlined">
+                                {{ $assessment->icon ?: 'assignment' }}
+                            </span>
+                        </div>
 
-    <div style="height:20px;"></div>
+                        <div style="min-width:0;">
+                            <h2>{{ $assessment->nama }}</h2>
+
+                            <div class="assessment-subject">
+                                <span class="material-symbols-outlined"
+                                      style="font-size:16px;">menu_book</span>
+                                {{ $assessment->mapel ?: 'Mata pelajaran umum' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="assessment-divider">
+
+                    <div class="assessment-meta">
+                        <span class="material-symbols-outlined">event</span>
+
+                        Diterbitkan
+                        @if ($assessment->created_at)
+                            {{ \Illuminate\Support\Carbon::parse($assessment->created_at)->format('d M Y') }}
+                        @else
+                            oleh guru
+                        @endif
+                    </div>
+
+                    <a class="assessment-btn"
+                       href="{{ route('siswa.assessment.instructions', ['id' => $assessment->id]) }}">
+                        Lihat Petunjuk
+                        <span class="material-symbols-outlined"
+                              style="font-size:18px;">arrow_forward</span>
+                    </a>
+                </article>
+            @endforeach
+        </div>
+    @endif
 </div>
 @endsection
 
 @section('bottom_nav')
-<div class="bottomnav">
-    <a href="{{ route('siswa.dashboard') }}"
-       class="navitem"
-       style="text-decoration:none;">
+<nav class="bottomnav" aria-label="Navigasi siswa">
+    <a class="navitem" href="{{ route('siswa.dashboard') }}">
         <span class="material-symbols-outlined">home</span>
-        Beranda
+        <span>Beranda</span>
     </a>
 
-    <a href="{{ route('siswa.assessment') }}"
-       class="navitem active"
-       style="text-decoration:none;">
+    <a class="navitem active" href="{{ route('siswa.assessment') }}">
         <span class="material-symbols-outlined">assignment</span>
-        Assessment
+        <span>Assessment</span>
     </a>
 
-    <a href="{{ route('siswa.riwayat') }}"
-       class="navitem"
-       style="text-decoration:none;">
+    <a class="navitem" href="{{ route('siswa.riwayat') }}">
         <span class="material-symbols-outlined">history</span>
-        Riwayat
+        <span>Riwayat</span>
     </a>
 
-    <a href="{{ route('siswa.profil') }}"
-       class="navitem"
-       style="text-decoration:none;">
+    <a class="navitem" href="{{ route('siswa.profil') }}">
         <span class="material-symbols-outlined">person</span>
-        Profil
+        <span>Profil</span>
     </a>
-</div>
+</nav>
 @endsection

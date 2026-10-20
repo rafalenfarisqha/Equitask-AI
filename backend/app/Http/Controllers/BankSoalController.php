@@ -34,7 +34,7 @@ class BankSoalController extends Controller
     }
 
     // Fungsi untuk tombol "Gunakan Soal Ini" (menyalin ke akun guru yang login)
-    public function gunakanSoal($id)
+    public function gunakanSoal(int $id)
     {
         $source = Assessment::findOrFail($id);
 

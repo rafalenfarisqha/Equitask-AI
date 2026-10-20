@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EquiTask AI — @yield('title', 'Platform Assessment Adaptif')</title>
 
-    <!-- Google Fonts & Material Symbols -->
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Material Icons & Symbols -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -54,7 +58,7 @@
             vertical-align: middle;
         }
 
-        /* ===== Layout Responsif Utama ===== */
+        /* Layout Responsif Utama */
         .app-wrapper {
             display: flex;
             flex-direction: column;
@@ -68,10 +72,10 @@
 
         .main-content {
             flex: 1;
-            padding-bottom: 90px; /* Ruang untuk bottom nav */
+            padding-bottom: 90px;
         }
 
-        /* ===== Global UI Components ===== */
+        /* Topbar Global */
         .topbar {
             display: flex;
             align-items: center;
@@ -84,23 +88,8 @@
             z-index: 40;
             border-bottom: 1px solid var(--border);
         }
-        .topbar h1 {
-            font-size: 18px;
-            font-weight: 700;
-            flex: 1;
-            margin: 0;
-        }
 
-        .card {
-            background: var(--card);
-            border-radius: var(--radius);
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-            padding: 20px;
-            border: 1px solid var(--border);
-            margin-bottom: 14px;
-        }
-
-        /* ===== Bottom Navigation (Fixed di bawah layer) ===== */
+        /* Bottom Navigation Fixed */
         .bottomnav {
             position: fixed;
             bottom: 0;
@@ -135,11 +124,7 @@
         .bottomnav .navitem.active {
             color: var(--primary);
         }
-        .bottomnav .navitem .material-symbols-outlined {
-            font-size: 24px;
-        }
 
-        /* Media Query untuk Desktop/Tablet */
         @media (min-width: 768px) {
             .bottomnav {
                 border-radius: 20px 20px 0 0;
@@ -153,16 +138,16 @@
 <body>
 
     <div class="app-wrapper">
-        <!-- Area Konten Dinamis -->
+        <!-- Area Konten Utama -->
         <main class="main-content">
             @yield('content')
         </main>
 
-        <!-- Area Navigasi Bawah Dinamis -->
+        <!-- Area Navigasi Bawah Dinamis (Hanya jika diset pada view) -->
         @yield('bottom_nav')
     </div>
 
-    <!-- Bootstrap 5 JS Bundle CDN -->
+    <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     @stack('scripts')
 </body>

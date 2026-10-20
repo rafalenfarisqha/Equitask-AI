@@ -1,450 +1,86 @@
--- =====================================================
--- DATABASE EQUITASK AI
--- PostgreSQL
--- =====================================================
-
-
--- =====================================================
--- 1. TABLE USERS
--- Menyimpan akun guru dan siswa
--- =====================================================
-
-CREATE TABLE users (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(150) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-
-    role VARCHAR(20) NOT NULL
-        CHECK (role IN ('guru', 'siswa', 'admin')),
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-
--- =====================================================
--- 2. TABLE STUDENT PROFILES
--- Menyimpan kebutuhan dan profil siswa
--- =====================================================
-
-CREATE TABLE student_profiles (
-    id BIGSERIAL PRIMARY KEY,
-
-    user_id BIGINT NOT NULL UNIQUE,
-
-    disability_type VARCHAR(100),
-    support_needs TEXT,
-    learning_notes TEXT,
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_student_profile_user
-        FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
-);
-
-
--- =====================================================
--- 3. TABLE CLASSES
--- Menyimpan kelas yang dibuat oleh guru
--- =====================================================
-
-CREATE TABLE classes (
-    id BIGSERIAL PRIMARY KEY,
-
-    teacher_id BIGINT NOT NULL,
-
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_class_teacher
-        FOREIGN KEY (teacher_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
-);
-
-
--- =====================================================
--- 4. TABLE CLASS MEMBERS
--- Menghubungkan siswa dengan kelas
--- =====================================================
-
-CREATE TABLE class_members (
-    id BIGSERIAL PRIMARY KEY,
-
-    class_id BIGINT NOT NULL,
-    student_id BIGINT NOT NULL,
-
-    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_class_member_class
-        FOREIGN KEY (class_id)
-        REFERENCES classes(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_class_member_student
-        FOREIGN KEY (student_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT unique_class_student
-        UNIQUE (class_id, student_id)
-);
-
-
--- =====================================================
--- 5. TABLE MATERIALS
--- Menyimpan materi yang diupload guru
--- =====================================================
-
-CREATE TABLE materials (
-    id BIGSERIAL PRIMARY KEY,
-
-    teacher_id BIGINT NOT NULL,
-
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-
-    file_name VARCHAR(255),
-    file_path TEXT,
-    file_type VARCHAR(50),
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_material_teacher
-        FOREIGN KEY (teacher_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
-);
-
-
--- =====================================================
--- 6. TABLE ASSESSMENTS
--- Menyimpan asesmen yang dibuat guru
--- =====================================================
-
-CREATE TABLE assessments (
-    id BIGSERIAL PRIMARY KEY,
-
-    teacher_id BIGINT NOT NULL,
-    material_id BIGINT,
-
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-
-    target_bloom VARCHAR(10)
-        CHECK (
-            target_bloom IN
-            ('C1', 'C2', 'C3', 'C4', 'C5', 'C6')
-        ),
-
-    assessment_type VARCHAR(20) NOT NULL
-        CHECK (
-            assessment_type IN
-            ('reguler', 'adaptif')
-        ),
-
-    status VARCHAR(20) NOT NULL DEFAULT 'draft'
-        CHECK (
-            status IN
-            ('draft', 'published', 'closed')
-        ),
-
-    duration_minutes INTEGER,
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_assessment_teacher
-        FOREIGN KEY (teacher_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_assessment_material
-        FOREIGN KEY (material_id)
-        REFERENCES materials(id)
-        ON DELETE SET NULL
-);
-
-
--- =====================================================
--- 7. TABLE QUESTIONS
--- Menyimpan bank soal
--- =====================================================
-
-CREATE TABLE questions (
-    id BIGSERIAL PRIMARY KEY,
-
-    teacher_id BIGINT NOT NULL,
-    material_id BIGINT,
-
-    question_text TEXT NOT NULL,
-
-    question_type VARCHAR(30) NOT NULL
-        CHECK (
-            question_type IN
-            (
-                'pilihan_ganda',
-                'benar_salah',
-                'isian',
-                'essay'
-            )
-        ),
-
-    options JSONB,
-
-    correct_answer TEXT,
-
-    bloom_level VARCHAR(10)
-        CHECK (
-            bloom_level IN
-            ('C1', 'C2', 'C3', 'C4', 'C5', 'C6')
-        ),
-
-    version_type VARCHAR(20) NOT NULL
-        CHECK (
-            version_type IN
-            ('reguler', 'adaptif')
-        ),
-
-    explanation TEXT,
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_question_teacher
-        FOREIGN KEY (teacher_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_question_material
-        FOREIGN KEY (material_id)
-        REFERENCES materials(id)
-        ON DELETE SET NULL
-);
-
-
--- =====================================================
--- 8. TABLE ASSESSMENT QUESTIONS
--- Menghubungkan soal dengan asesmen
--- =====================================================
-
-CREATE TABLE assessment_questions (
-    id BIGSERIAL PRIMARY KEY,
-
-    assessment_id BIGINT NOT NULL,
-    question_id BIGINT NOT NULL,
-
-    question_order INTEGER NOT NULL,
-
-    points NUMERIC(5,2) DEFAULT 1,
-
-    CONSTRAINT fk_assessment_question_assessment
-        FOREIGN KEY (assessment_id)
-        REFERENCES assessments(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_assessment_question_question
-        FOREIGN KEY (question_id)
-        REFERENCES questions(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT unique_assessment_question
-        UNIQUE (assessment_id, question_id)
-);
-
-
--- =====================================================
--- 9. TABLE AI GENERATIONS
--- Mencatat proses generate asesmen menggunakan AI
--- =====================================================
-
-CREATE TABLE ai_generations (
-    id BIGSERIAL PRIMARY KEY,
-
-    teacher_id BIGINT NOT NULL,
-    material_id BIGINT,
-    assessment_id BIGINT,
-
-    target_bloom VARCHAR(10),
-
-    status VARCHAR(20) NOT NULL DEFAULT 'processing'
-        CHECK (
-            status IN
-            ('processing', 'success', 'failed')
-        ),
-
-    total_agents INTEGER DEFAULT 4,
-
-    error_message TEXT,
-
-    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    completed_at TIMESTAMP,
-
-    CONSTRAINT fk_ai_generation_teacher
-        FOREIGN KEY (teacher_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_ai_generation_material
-        FOREIGN KEY (material_id)
-        REFERENCES materials(id)
-        ON DELETE SET NULL,
-
-    CONSTRAINT fk_ai_generation_assessment
-        FOREIGN KEY (assessment_id)
-        REFERENCES assessments(id)
-        ON DELETE SET NULL
-);
-
-
--- =====================================================
--- 10. TABLE AI AGENT RESULTS
--- Menyimpan hasil dari masing-masing agent
--- =====================================================
-
-CREATE TABLE ai_agent_results (
-    id BIGSERIAL PRIMARY KEY,
-
-    generation_id BIGINT NOT NULL,
-
-    agent_name VARCHAR(100) NOT NULL,
-
-    agent_order INTEGER NOT NULL,
-
-    input_data JSONB,
-    output_data JSONB,
-
-    status VARCHAR(20) NOT NULL DEFAULT 'processing'
-        CHECK (
-            status IN
-            ('processing', 'success', 'failed')
-        ),
-
-    error_message TEXT,
-
-    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    completed_at TIMESTAMP,
-
-    CONSTRAINT fk_agent_generation
-        FOREIGN KEY (generation_id)
-        REFERENCES ai_generations(id)
-        ON DELETE CASCADE
-);
-
-
--- =====================================================
--- 11. TABLE STUDENT ASSESSMENTS
--- Mencatat asesmen yang dikerjakan siswa
--- =====================================================
-
-CREATE TABLE student_assessments (
-    id BIGSERIAL PRIMARY KEY,
-
-    assessment_id BIGINT NOT NULL,
-    student_id BIGINT NOT NULL,
-
-    status VARCHAR(20) NOT NULL DEFAULT 'not_started'
-        CHECK (
-            status IN
-            ('not_started', 'in_progress', 'submitted')
-        ),
-
-    started_at TIMESTAMP,
-    submitted_at TIMESTAMP,
-
-    score NUMERIC(5,2),
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_student_assessment_assessment
-        FOREIGN KEY (assessment_id)
-        REFERENCES assessments(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_student_assessment_student
-        FOREIGN KEY (student_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT unique_student_assessment
-        UNIQUE (assessment_id, student_id)
-);
-
-
--- =====================================================
--- 12. TABLE STUDENT ANSWERS
--- Menyimpan jawaban siswa
--- =====================================================
-
-CREATE TABLE student_answers (
-    id BIGSERIAL PRIMARY KEY,
-
-    student_assessment_id BIGINT NOT NULL,
-    question_id BIGINT NOT NULL,
-
-    answer TEXT,
-
-    is_correct BOOLEAN,
-
-    points_obtained NUMERIC(5,2) DEFAULT 0,
-
-    answered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_student_answer_assessment
-        FOREIGN KEY (student_assessment_id)
-        REFERENCES student_assessments(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_student_answer_question
-        FOREIGN KEY (question_id)
-        REFERENCES questions(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT unique_student_question
-        UNIQUE (student_assessment_id, question_id)
-);
-
-
--- =====================================================
--- INDEX
--- Membantu pencarian data agar lebih efisien
--- =====================================================
-
-CREATE INDEX idx_classes_teacher
-    ON classes(teacher_id);
-
-CREATE INDEX idx_class_members_class
-    ON class_members(class_id);
-
-CREATE INDEX idx_class_members_student
-    ON class_members(student_id);
-
-CREATE INDEX idx_materials_teacher
-    ON materials(teacher_id);
-
-CREATE INDEX idx_assessments_teacher
-    ON assessments(teacher_id);
-
-CREATE INDEX idx_assessments_material
-    ON assessments(material_id);
-
-CREATE INDEX idx_questions_material
-    ON questions(material_id);
-
-CREATE INDEX idx_assessment_questions_assessment
-    ON assessment_questions(assessment_id);
-
-CREATE INDEX idx_student_assessments_student
-    ON student_assessments(student_id);
-
-CREATE INDEX idx_student_answers_assessment
-    ON student_answers(student_assessment_id);
+-- =========================================================
+-- QUERY INSERT DATA DUMMY PRESISI UNTUK 16 TABEL db_equitaskai
+-- =========================================================
+
+-- 1. Tabel users
+INSERT INTO public.users (id, name, email, nisn, role, password, first_name, last_name, phone, institution, avatar, created_at, updated_at) VALUES
+(1, 'Budi Santoso', 'guru@equitaskai.com', NULL, 'teacher', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Budi', 'Santoso', '081234567890', 'SMA Negeri 1', 'avatar1.png', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'Siti Rahma', 'siswa@equitaskai.com', '1234567890', 'student', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Siti', 'Rahma', '089876543210', 'SMA Negeri 1', 'avatar2.png', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 2. Tabel student_profiles
+INSERT INTO public.student_profiles (id, user_id, disability_type, support_needs, learning_notes, created_at, updated_at) VALUES
+(1, 2, 'Low Vision', 'Teks berukuran besar dan kontras tinggi', 'Siswa lebih mudah memahami materi visual', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 3. Tabel classes
+INSERT INTO public.classes (id, teacher_id, name, description, created_at, updated_at) VALUES
+(1, 1, 'Matematika Kelas X', 'Kelas Matematika Dasar Semester Ganjil', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 4. Tabel class_members
+INSERT INTO public.class_members (id, class_id, student_id, joined_at) VALUES
+(1, 1, 2, CURRENT_TIMESTAMP);
+
+-- 5. Tabel materials
+INSERT INTO public.materials (id, teacher_id, title, description, file_name, file_path, file_type, created_at, updated_at) VALUES
+(1, 1, 'Modul Aljabar Dasar', 'Materi dasar aljabar', 'aljabar.pdf', '/storage/materials/aljabar.pdf', 'pdf', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 6. Tabel questions
+INSERT INTO public.questions (id, teacher_id, material_id, question_text, question_type, options, correct_answer, bloom_level, version_type, explanation, created_at, updated_at) VALUES
+(1, 1, 1, 'Berapakah hasil dari 2x + 4 = 10?', 'pilihan_ganda', '{"A": "2", "B": "3", "C": "4", "D": "5"}'::jsonb, 'B', 'C2', 'reguler', '2x = 6 maka x = 3', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 7. Tabel assessments
+INSERT INTO public.assessments (id, user_id, nama, mapel, status, visibility, icon, color, created_at, updated_at) VALUES
+(1, 1, 'Kuis Aljabar 1', 'Matematika', 'Published', 'public', 'eco', '#2563EB', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 8. Tabel assessment_questions
+INSERT INTO public.assessment_questions (id, assessment_id, question_id, question_order, points) VALUES
+(1, 1, 1, 1, 10.00);
+
+-- 9. Tabel ai_generations
+INSERT INTO public.ai_generations (id, teacher_id, material_id, assessment_id, target_bloom, status, total_agents, error_message, started_at, completed_at) VALUES
+(1, 1, 1, 1, 'C3', 'success', 4, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 10. Tabel ai_agent_results
+INSERT INTO public.ai_agent_results (id, generation_id, agent_name, agent_order, input_data, output_data, status, error_message, started_at, completed_at) VALUES
+(1, 1, 'Bloom Analyzer Agent', 1, '{"input": "aljabar"}'::jsonb, '{"output": "C3 taxonomy validated"}'::jsonb, 'success', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 11. Tabel student_assessments
+INSERT INTO public.student_assessments (id, assessment_id, student_id, status, started_at, submitted_at, score, created_at, updated_at) VALUES
+(1, 1, 2, 'submitted', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 100.00, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 12. Tabel student_answers
+INSERT INTO public.student_answers (id, student_assessment_id, question_id, answer, is_correct, points_obtained, answered_at) VALUES
+(1, 1, 1, 'B', true, 10.00, CURRENT_TIMESTAMP);
+
+-- 13. Tabel notifications
+INSERT INTO public.notifications (id, user_id, title, message, type, is_read, created_at, updated_at) VALUES
+(1, 2, 'Kuis Baru Ditambahkan', 'Guru menambahkan Kuis Aljabar 1', 'assessment', false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- 14. Tabel cache
+INSERT INTO public.cache (key, value, expiration) VALUES
+('laravel_cache_key', 'sample_value', 1800000000);
+
+-- 15. Tabel cache_locks
+INSERT INTO public.cache_locks (key, owner, expiration) VALUES
+('laravel_lock_key', 'system', 1800000000);
+
+-- 16. Tabel migrations
+INSERT INTO public.migrations (id, migration, batch) VALUES
+(1, '2024_01_01_000000_create_users_table', 1);
+
+-- =========================================================
+-- SYNCHRONIZE SEQUENCES (DARI FILE BACKUP ORIGINAL)
+-- =========================================================
+SELECT setval('public.users_id_seq', 2, true);
+SELECT setval('public.classes_id_seq', 5, true);
+SELECT setval('public.class_members_id_seq', 1, true);
+SELECT setval('public.migrations_id_seq', 11, true);
+SELECT setval('public.notifications_id_seq', 26, true);
+SELECT setval('public.ai_agent_results_id_seq', 1, true);
+SELECT setval('public.ai_generations_id_seq', 1, true);
+SELECT setval('public.assessment_questions_id_seq', 1, true);
+SELECT setval('public.assessments_id_seq', 1, true);
+SELECT setval('public.materials_id_seq', 1, true);
+SELECT setval('public.questions_id_seq', 1, true);
+SELECT setval('public.student_answers_id_seq', 1, true);
+SELECT setval('public.student_assessments_id_seq', 1, true);
+SELECT setval('public.student_profiles_id_seq', 1, true);

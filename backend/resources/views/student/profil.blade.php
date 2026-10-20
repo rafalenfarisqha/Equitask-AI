@@ -5,262 +5,536 @@
 
 @push('styles')
 <style>
-    .profile-hero {
-        text-align: center;
-        padding: 28px 20px;
-        background: linear-gradient(135deg, #eff6ff, #dbeafe 55%, #e0f2fe);
-        border: 1px solid rgba(37, 99, 235, .12);
+    .profile-page {
+        --pf-primary: #2563eb;
+        --pf-primary-light: #eff6ff;
+        --pf-text: #172033;
+        --pf-muted: #718096;
+        --pf-border: #e5eaf2;
+        padding: 22px 20px 28px;
+        color: var(--pf-text);
     }
 
-    .profile-avatar {
-        width: 88px;
-        height: 88px;
-        border-radius: 28px;
-        margin: 0 auto 14px;
+    /* Judul halaman */
+    .pf-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+
+    .pf-heading-icon {
+        width: 46px;
+        height: 46px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 28px;
-        font-weight: 800;
-        color: white;
-        background: linear-gradient(135deg, #2563eb, #0f766e);
-        box-shadow: 0 12px 24px -12px rgba(37, 99, 235, .65);
-        overflow: hidden;
+        flex-shrink: 0;
+        border-radius: 15px;
+        background: var(--pf-primary-light);
+        color: var(--pf-primary);
     }
 
-    .profile-avatar img {
+    .pf-heading-icon .material-symbols-outlined {
+        font-size: 25px;
+    }
+
+    .pf-heading h2 {
+        margin: 0;
+        font-size: 21px;
+        font-weight: 800;
+        letter-spacing: -.5px;
+    }
+
+    .pf-heading p {
+        margin: 4px 0 0;
+        font-size: 12px;
+        color: var(--pf-muted);
+    }
+
+    /* Kartu profil */
+    .pf-hero {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 17px;
+        padding: 22px;
+        margin-bottom: 26px;
+        border: 1px solid #dbeafe;
+        border-radius: 20px;
+        background: linear-gradient(115deg, #eff6ff 0%, #f8fbff 60%, #ecfeff 100%);
+    }
+
+    .pf-hero::after {
+        content: "";
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        right: -65px;
+        top: -85px;
+        border-radius: 50%;
+        background: rgba(59, 130, 246, .08);
+        pointer-events: none;
+    }
+
+    .pf-avatar {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 76px;
+        height: 76px;
+        overflow: hidden;
+        border-radius: 23px;
+        background: linear-gradient(135deg, #2563eb, #0f766e);
+        box-shadow: 0 8px 18px rgba(37, 99, 235, .2);
+        color: #fff;
+        font-size: 25px;
+        font-weight: 800;
+    }
+
+    .pf-avatar img {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
 
-    .profile-role {
+    .pf-hero-info {
+        min-width: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .pf-hero-info h2 {
+        font-size: 19px;
+        line-height: 1.35;
+        font-weight: 800;
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .pf-hero-info p {
+        margin: 5px 0 10px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .pf-role {
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        margin-top: 10px;
-        padding: 6px 11px;
+        padding: 6px 10px;
+        border-radius: 999px;
         background: #dbeafe;
         color: #1d4ed8;
-        border-radius: 999px;
         font-size: 11px;
-        font-weight: 800;
+        font-weight: 700;
     }
 
-    .profile-section-title {
+    .pf-role .material-symbols-outlined {
+        font-size: 15px;
+    }
+
+    /* Judul bagian */
+    .pf-section {
+        margin-bottom: 26px;
+    }
+
+    .pf-section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .pf-section-heading h3 {
+        margin: 0;
         font-size: 15px;
         font-weight: 800;
-        margin: 24px 0 12px;
     }
 
-    .profile-info {
+    .pf-section-heading span {
+        font-size: 11px;
+        color: var(--pf-muted);
+    }
+
+    /* Daftar informasi */
+    .pf-list {
+        overflow: hidden;
+        border: 1px solid var(--pf-border);
+        border-radius: 17px;
+        background: #fff;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, .025);
+    }
+
+    .pf-info {
         display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 15px 0;
-        border-bottom: 1px solid var(--border);
+        align-items: center;
+        gap: 13px;
+        padding: 15px 16px;
+        min-height: 72px;
     }
 
-    .profile-info:last-child {
-        border-bottom: none;
+    .pf-info + .pf-info {
+        border-top: 1px solid var(--pf-border);
     }
 
-    .profile-info-icon {
-        width: 42px;
-        height: 42px;
-        border-radius: 13px;
+    .pf-info-icon {
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        background: var(--primary-soft);
-        color: var(--primary);
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        background: var(--pf-primary-light);
+        color: var(--pf-primary);
     }
 
-    .profile-info-label {
-        font-size: 11px;
-        color: var(--muted);
-        font-weight: 700;
+    .pf-info-icon .material-symbols-outlined {
+        font-size: 22px;
+    }
+
+    .pf-info-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .pf-info-label {
         margin-bottom: 5px;
+        color: var(--pf-muted);
+        font-size: 11px;
+        font-weight: 600;
     }
 
-    .profile-info-value {
+    .pf-info-value {
+        color: var(--pf-text);
         font-size: 13px;
-        font-weight: 800;
+        font-weight: 700;
+        line-height: 1.5;
         overflow-wrap: anywhere;
     }
 
-    .profile-action {
+    /* Pengaturan akun */
+    .pf-action {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 14px 0;
-        color: var(--text);
+        gap: 13px;
+        width: 100%;
+        padding: 15px 16px;
+        color: var(--pf-text);
+        text-align: left;
         text-decoration: none;
+        background: #fff;
+        border: 0;
+        cursor: pointer;
+        font: inherit;
     }
 
-    .profile-action .action-text {
-        flex: 1;
-        font-size: 13px;
-        font-weight: 700;
+    .pf-action + .pf-action,
+    .pf-list form {
+        border-top: 1px solid var(--pf-border);
     }
+
+    .pf-action .pf-info-content {
+        flex: 1;
+    }
+
+    .pf-action-title {
+        font-size: 13px;
+        font-weight: 750;
+    }
+
+    .pf-action-description {
+        margin-top: 4px;
+        color: var(--pf-muted);
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .pf-action-arrow {
+        flex-shrink: 0;
+        color: #94a3b8;
+        font-size: 21px;
+    }
+
+    .pf-logout {
+        color: #dc2626;
+    }
+
+    .pf-logout .pf-info-icon {
+        color: #dc2626;
+        background: #fef2f2;
+    }
+
+    .pf-logout .pf-action-arrow {
+        color: #dc2626;
+    }
+
+    .pf-action:focus-visible {
+        outline: 3px solid #93c5fd;
+        outline-offset: -3px;
+    }
+
+    .pf-action:active {
+        background: #f8fafc;
+    }
+
+    .pf-footer {
+        text-align: center;
+        padding: 2px 0 12px;
+    }
+
+    .pf-footer strong {
+        display: block;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .pf-footer span {
+        display: block;
+        margin-top: 5px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    @media (max-width: 420px) {
+        .profile-page {
+            padding: 18px 14px 24px;
+        }
+
+        .pf-hero {
+            gap: 13px;
+            padding: 17px 15px;
+        }
+
+        .pf-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 19px;
+            font-size: 22px;
+        }
+
+        .pf-hero-info h2 {
+            font-size: 17px;
+        }
+
+        .pf-info,
+        .pf-action {
+            padding: 13px 12px;
+            gap: 11px;
+        }
+
+        .pf-info-icon {
+            width: 39px;
+            height: 39px;
+        }
+    }
+
+    
+/* Memberi jarak yang seimbang di sisi kiri dan kanan */
+.profile-page {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Supaya tidak terlalu mepet di layar kecil */
+@media (max-width: 576px) {
+    .profile-page {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+}
+
 </style>
 @endpush
 
 @section('content')
-<div class="topbar">
-    <div class="profile-info-icon">
-        <span class="material-symbols-outlined">person</span>
-    </div>
-    <div style="flex:1;">
-        <h1>Profil Saya</h1>
-        <div class="muted">Informasi akun siswa</div>
-    </div>
-</div>
+@php
+    $studentName = $user->name ?? 'Siswa';
+    $studentInitials = $initials ?? 'S';
+    $studentSchool = $user->institution ?? null;
+    $studentNisn = $user->nisn ?? null;
+    $studentEmail = $user->email ?? null;
+    $joinedDate = $user->created_at ?? null;
+@endphp
 
-<div class="px" style="padding-top:18px;">
+<div class="profile-page">
 
-    <!-- Kartu Identitas Siswa -->
-    <div class="card profile-hero">
-        <div class="profile-avatar">
+    <!-- Header halaman -->
+    <header class="pf-heading">
+        <div class="pf-heading-icon">
+            <span class="material-symbols-outlined">person</span>
+        </div>
+        <div>
+            <h2>Profil Saya</h2>
+            <p>Informasi dan pengaturan akunmu</p>
+        </div>
+    </header>
+
+    <!-- Identitas siswa -->
+    <section class="pf-hero" aria-label="Identitas siswa">
+        <div class="pf-avatar">
             @if(!empty($user->avatar))
-                <img src="{{ asset('storage/' . $user->avatar) }}"
-                     alt="Foto profil {{ $user->name }}">
+                <img
+                    src="{{ asset('storage/' . $user->avatar) }}"
+                    alt="Foto profil {{ $studentName }}"
+                >
             @else
-                {{ strtoupper($initials ?: 'S') }}
+                {{ strtoupper($studentInitials ?: 'S') }}
             @endif
         </div>
 
-        <div style="font-size:20px;font-weight:800;line-height:1.4;">
-            {{ $user->name }}
-        </div>
+        <div class="pf-hero-info">
+            <h2>{{ $studentName }}</h2>
+            <p>{{ $studentSchool ?: 'Sekolah belum diisi' }}</p>
 
-        <div class="muted" style="margin-top:5px;">
-            {{ $user->institution ?: 'Sekolah belum diisi' }}
-        </div>
-
-        <div class="profile-role">
-            <span class="material-symbols-outlined" style="font-size:14px;">
-                school
-            </span>
-            Siswa EquiTask AI
-        </div>
-    </div>
-
-    <!-- Informasi Pribadi -->
-    <div class="profile-section-title">Informasi Pribadi</div>
-
-    <div class="card">
-        <div class="profile-info">
-            <div class="profile-info-icon">
-                <span class="material-symbols-outlined">badge</span>
-            </div>
-            <div style="flex:1;">
-                <div class="profile-info-label">Nama Lengkap</div>
-                <div class="profile-info-value">{{ $user->name }}</div>
-            </div>
-        </div>
-
-        <div class="profile-info">
-            <div class="profile-info-icon">
-                <span class="material-symbols-outlined">fingerprint</span>
-            </div>
-            <div style="flex:1;">
-                <div class="profile-info-label">NISN</div>
-                <div class="profile-info-value">
-                    {{ $user->nisn ?: 'Belum diisi' }}
-                </div>
-            </div>
-        </div>
-
-        <div class="profile-info">
-            <div class="profile-info-icon">
-                <span class="material-symbols-outlined">mail</span>
-            </div>
-            <div style="flex:1;">
-                <div class="profile-info-label">Email</div>
-                <div class="profile-info-value">
-                    {{ $user->email ?: 'Belum ditambahkan' }}
-                </div>
-            </div>
-        </div>
-
-        <div class="profile-info">
-            <div class="profile-info-icon">
+            <span class="pf-role">
                 <span class="material-symbols-outlined">school</span>
-            </div>
-            <div style="flex:1;">
-                <div class="profile-info-label">Asal Sekolah</div>
-                <div class="profile-info-value">
-                    {{ $user->institution ?: 'Belum diisi' }}
-                </div>
-            </div>
-        </div>
-
-        <div class="profile-info">
-            <div class="profile-info-icon">
-                <span class="material-symbols-outlined">calendar_month</span>
-            </div>
-            <div style="flex:1;">
-                <div class="profile-info-label">Tanggal Bergabung</div>
-                <div class="profile-info-value">
-                    {{ $user->created_at
-                        ? \Carbon\Carbon::parse($user->created_at)->format('d F Y')
-                        : 'Tidak tersedia' }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pengaturan Akun -->
-    <div class="profile-section-title">Pengaturan Akun</div>
-
-    <div class="card">
-        <div class="profile-action">
-            <div class="profile-info-icon">
-                <span class="material-symbols-outlined">verified_user</span>
-            </div>
-            <div class="action-text">
-                <div>Keamanan Akun</div>
-                <div class="muted" style="margin-top:4px;font-weight:400;">
-                    Jaga kerahasiaan kata sandimu.
-                </div>
-            </div>
-            <span class="material-symbols-outlined" style="color:var(--muted);">
-                lock
+                Siswa EquiTask AI
             </span>
         </div>
+    </section>
 
-        <div style="border-top:1px solid var(--border);"></div>
-
-        <form action="{{ route('logout') }}" method="POST"
-              onsubmit="return confirm('Apakah kamu yakin ingin keluar dari akun?')">
-            @csrf
-            <button type="submit"
-                    class="profile-action"
-                    style="width:100%;border:0;background:none;text-align:left;cursor:pointer;">
-                <div class="profile-info-icon"
-                     style="background:#fee2e2;color:#b91c1c;">
-                    <span class="material-symbols-outlined">logout</span>
-                </div>
-
-                <div class="action-text" style="color:#b91c1c;">
-                    Keluar dari Akun
-                </div>
-
-                <span class="material-symbols-outlined" style="color:#b91c1c;">
-                    arrow_forward
-                </span>
-            </button>
-        </form>
-    </div>
-
-    <div style="text-align:center;padding:10px 0 24px;">
-        <div class="muted">EquiTask AI</div>
-        <div style="font-size:11px;color:#94a3b8;margin-top:4px;">
-            Platform Assessment Adaptif
+    <!-- Informasi pribadi -->
+    <section class="pf-section">
+        <div class="pf-section-heading">
+            <h3>Informasi Pribadi</h3>
+            <span>Data akunmu</span>
         </div>
-    </div>
+
+        <div class="pf-list">
+            <div class="pf-info">
+                <div class="pf-info-icon">
+                    <span class="material-symbols-outlined">badge</span>
+                </div>
+                <div class="pf-info-content">
+                    <div class="pf-info-label">Nama Lengkap</div>
+                    <div class="pf-info-value">{{ $studentName }}</div>
+                </div>
+            </div>
+
+            <div class="pf-info">
+                <div class="pf-info-icon">
+                    <span class="material-symbols-outlined">fingerprint</span>
+                </div>
+                <div class="pf-info-content">
+                    <div class="pf-info-label">NISN</div>
+                    <div class="pf-info-value">
+                        {{ $studentNisn ?: 'Belum diisi' }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="pf-info">
+                <div class="pf-info-icon">
+                    <span class="material-symbols-outlined">mail</span>
+                </div>
+                <div class="pf-info-content">
+                    <div class="pf-info-label">Email</div>
+                    <div class="pf-info-value">
+                        {{ $studentEmail ?: 'Belum ditambahkan' }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="pf-info">
+                <div class="pf-info-icon">
+                    <span class="material-symbols-outlined">school</span>
+                </div>
+                <div class="pf-info-content">
+                    <div class="pf-info-label">Asal Sekolah</div>
+                    <div class="pf-info-value">
+                        {{ $studentSchool ?: 'Belum diisi' }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="pf-info">
+                <div class="pf-info-icon">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                </div>
+                <div class="pf-info-content">
+                    <div class="pf-info-label">Tanggal Bergabung</div>
+                    <div class="pf-info-value">
+                        @if($joinedDate)
+                            {{ \Carbon\Carbon::parse($joinedDate)->locale('id')->translatedFormat('d F Y') }}
+                        @else
+                            Tidak tersedia
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pengaturan akun -->
+    <section class="pf-section">
+        <div class="pf-section-heading">
+            <h3>Pengaturan Akun</h3>
+        </div>
+
+        <div class="pf-list">
+            <div class="pf-action">
+                <div class="pf-info-icon">
+                    <span class="material-symbols-outlined">shield_lock</span>
+                </div>
+                <div class="pf-info-content">
+                    <div class="pf-action-title">Keamanan Akun</div>
+                    <div class="pf-action-description">
+                        Jaga kerahasiaan kata sandimu.
+                    </div>
+                </div>
+                <span class="material-symbols-outlined pf-action-arrow">
+                    lock
+                </span>
+            </div>
+
+            <form
+                action="{{ route('logout') }}"
+                method="POST"
+                onsubmit="return confirm('Apakah kamu yakin ingin keluar dari akun?')"
+            >
+                @csrf
+
+                <button type="submit" class="pf-action pf-logout">
+                    <div class="pf-info-icon">
+                        <span class="material-symbols-outlined">logout</span>
+                    </div>
+
+                    <div class="pf-info-content">
+                        <div class="pf-action-title">Keluar dari Akun</div>
+                        <div class="pf-action-description">
+                            Akhiri sesi akunmu dengan aman.
+                        </div>
+                    </div>
+
+                    <span class="material-symbols-outlined pf-action-arrow">
+                        arrow_forward
+                    </span>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="pf-footer">
+        <strong>EquiTask AI</strong>
+        <span>Platform Asesmen Adaptif</span>
+    </footer>
+
 </div>
 @endsection
 
@@ -294,4 +568,6 @@
         Profil
     </a>
 </div>
+
+
 @endsection
