@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('content')
@@ -245,6 +244,10 @@
         border: 1px solid #e7edf8;
         border-radius: 16px;
         transition: border-color .2s, box-shadow .2s;
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        background: #fff;
     }
 
     .as-item:hover {
@@ -669,7 +672,8 @@
                         $isPublic = $a->visibility === 'public';
                     @endphp
 
-                    <article
+                    <!-- Kartu dibungkus tag <a> agar bisa diklik menuju halaman detail -->
+                    <a href="{{ route('guru.assessments.show', $a->id) }}"
                         class="as-item"
                         data-assessment-item
                         data-name="{{ strtolower($a->nama) }}"
@@ -703,7 +707,7 @@
                             </span>
                         </div>
 
-                        <div class="as-item-footer">
+                        <div class="as-item-footer" onclick="event.preventDefault();">
                             <div class="as-visibility">
                                 <span class="material-symbols-outlined">
                                     {{ $isPublic ? 'public' : 'lock' }}
@@ -735,7 +739,7 @@
                                 @endif
                             </div>
                         </div>
-                    </article>
+                    </a>
                 @empty
                     <div class="as-empty">
                         <div class="as-empty-icon">

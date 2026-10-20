@@ -98,6 +98,16 @@ class AssessmentController extends Controller
         );
     }
 
+    // Menampilkan detail asesmen milik guru yang sedang login.
+    public function show(int $id)
+    {
+        $assessment = Assessment::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        return view('guru.assessments.show', compact('assessment'));
+    }
+
     // 2. Menampilkan Bank Soal Publik
     public function bankSoal(Request $request)
     {

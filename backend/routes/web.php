@@ -25,13 +25,14 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 Route::get('/register', fn() => view('auth.register'))->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 
 
 /*
 |--------------------------------------------------------------------------
-| RUTE UNTUK GURU (FINAL & BERSIH)
+| RUTE UNTUK GURU
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->prefix('guru')->name('guru.')->group(function () {
@@ -53,16 +54,16 @@ Route::middleware(['auth'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/assessments/create', [AssessmentController::class, 'create'])->name('assessments.create');
     Route::post('/assessments', [AssessmentController::class, 'store'])->name('assessments.store');
     Route::post('/assessments/{id}/share', [AssessmentController::class, 'shareToPublic'])->name('assessments.share');
+    Route::get('/assessments/{id}', [AssessmentController::class, 'show'])->name('assessments.show');
 
     // Notifikasi Guru
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi');
 
-    // --- MANAJEMEN KELAS (FINAL & TERPUSAT) ---
+    // Manajemen Kelas
     Route::get('/kelas', [ClassroomController::class, 'index'])->name('kelas');
     Route::post('/kelas', [ClassroomController::class, 'store'])->name('kelas.store');
     Route::get('/kelas/{id}', [ClassroomController::class, 'show'])->name('kelas.show');
     Route::post('/kelas/{id}/tambah-siswa', [ClassroomController::class, 'addStudent'])->name('kelas.addStudent');
-    // Import siswa via Excel/CSV
     Route::post('/kelas/{id}/import-excel', [ClassroomController::class, 'importExcel'])->name('kelas.importExcel');
 });
 
@@ -76,13 +77,11 @@ Route::middleware(['auth'])->prefix('siswa')->name('siswa.')->group(function () 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/daftar-assessment', [DashboardController::class, 'assessments'])->name('assessment');
     Route::get('/riwayat', [StudentPageController::class, 'riwayat'])->name('riwayat');
+    Route::get('/profil', [StudentPageController::class, 'profil'])->name('profil');
 
-Route::get('/profil', [StudentPageController::class, 'profil'])
-    ->name('profil');
-
-    // Rute Notifikasi Siswa
+    // Notifikasi Siswa
     Route::get('/notifikasi', [SiswaNotificationController::class, 'index'])->name('notifikasi');
 
-    // Siswa bergabung ke kelas via link
+    // Join Kelas
     Route::get('/kelas/{id}/join', [ClassroomController::class, 'joinViaLink'])->name('kelas.join');
 });

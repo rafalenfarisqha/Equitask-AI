@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'Masuk — EquiTask AI')
@@ -27,13 +26,13 @@
 
     .role-switch {
         display: flex;
-        background: var(--card);
+        background: var(--card, #fff);
         border-radius: 14px;
         padding: 4px;
         margin: 22px auto 16px auto;
         max-width: 400px;
-        box-shadow: var(--shadow);
-        border: 1px solid var(--border);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid var(--border, #e2e8f0);
     }
 
     .role-switch button {
@@ -44,36 +43,92 @@
         border-radius: 11px;
         font-weight: 700;
         font-size: 13px;
-        color: var(--muted);
+        color: var(--muted, #64748b);
         font-family: inherit;
         cursor: pointer;
         transition: background 0.2s, color 0.2s;
-        tetx-align: center;
+        text-align: center;
     }
 
     .role-switch button.active {
-        background: var(--primary);
+        background: var(--primary, #2563eb);
         color: #fff;
+    }
+
+    /* Perbaikan styling form agar tertata rapi vertikal */
+    .login-form form {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .field-label {
+        display: block;
+        font-weight: 700;
+        font-size: 13px;
+        color: #1e293b;
+        margin-top: 16px;
+        margin-bottom: 6px;
+    }
+
+    .input {
+        display: block;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border, #cbd5e1);
+        background: var(--card, #fff);
+        font-size: 14px;
+        font-family: inherit;
+        box-sizing: border-box;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input:focus {
+        border-color: var(--primary, #2563eb);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
     }
 
     .forgot {
         text-align: right;
         font-size: 12.5px;
-        color: var(--primary);
+        color: var(--primary, #2563eb);
         font-weight: 700;
-        margin: -6px 0 20px;
+        margin: 8px 0 20px;
         cursor: pointer;
+    }
+
+    .btn-block {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 12px 20px;
+        border-radius: 12px;
+        background: var(--primary, #2563eb);
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-block:active {
+        transform: scale(0.98);
     }
 
     .auth-footer {
         text-align: center;
         font-size: 13px;
         margin-top: 20px;
-        color: var(--muted);
+        color: var(--muted, #64748b);
     }
 
     .auth-footer a {
-        color: var(--primary);
+        color: var(--primary, #2563eb);
         font-weight: 700;
         text-decoration: none;
     }
@@ -85,7 +140,7 @@
         padding: 12px;
         border-radius: 10px;
         margin-bottom: 16px;
-        font-size: 14px;
+        font-size: 13.5px;
     }
 </style>
 @endpush
@@ -95,7 +150,7 @@
 
     {{-- Header EquiTask AI --}}
     <div class="login-hero">
-        <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 16px; max-width: 980px; margin: 0 auto;">
             <img src="{{ asset('images/logoequitask.png') }}"
                  alt="Logo EquiTask AI"
                  style="width: 60px; height: 60px; border-radius: 16px; object-fit: cover; background: white; padding: 4px; box-shadow: 0 6px 18px rgba(0,0,0,0.15);">
@@ -104,7 +159,7 @@
                 <h2 style="margin:0; font-size: 30px; font-weight: 800;">
                     EquiTask AI
                 </h2>
-                <p style="margin:4px 0 0; font-size: 18px; opacity: 0.9;">
+                <p style="margin:4px 0 0; font-size: 16px; opacity: 0.9;">
                     Platform Asesmen Adaptif
                 </p>
             </div>
@@ -128,7 +183,7 @@
     </div>
 
     {{-- Form login --}}
-    <div class="login-form" style="padding: 22px 0;">
+    <div class="login-form" style="padding: 12px 0 24px 0;">
         <form action="{{ route('login') }}" method="POST">
             @csrf
 
@@ -144,7 +199,7 @@
                 </div>
             @endif
 
-            {{-- Email guru atau NIS siswa --}}
+            {{-- Email guru atau NISN siswa --}}
             <label class="field-label"
                    id="label-identitas"
                    for="input-identitas">
@@ -181,7 +236,7 @@
                 Lupa Password?
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block">
+            <button type="submit" class="btn-block">
                 <span class="material-symbols-outlined" style="font-size:20px;">
                     login
                 </span>
