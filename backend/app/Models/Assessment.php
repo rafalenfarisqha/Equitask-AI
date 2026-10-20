@@ -31,9 +31,22 @@ class Assessment extends Model
         'visibility',
         'icon',
         'color',
-        'description', // Tempat menyimpan hasil output dari Dify AI
     ];
 
+    protected $casts = [
+        'jumlah_pilihan_ganda' => 'integer',
+        'jumlah_esai' => 'integer',
+        'c1' => 'boolean',
+        'c2' => 'boolean',
+        'c3' => 'boolean',
+        'c4' => 'boolean',
+        'c5' => 'boolean',
+        'c6' => 'boolean',
+    ];
+
+    /**
+     * Guru pemilik asesmen.
+     */
     public function teacher()
     {
         return $this->belongsTo(User::class, 'user_id');
