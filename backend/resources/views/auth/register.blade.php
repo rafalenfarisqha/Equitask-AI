@@ -25,14 +25,15 @@
 
     .role-switch {
         display: flex;
-        background: var(--card);
+        background: var(--card, #ffffff);
         border-radius: 14px;
         padding: 4px;
         margin: 22px auto 16px auto;
         max-width: 400px;
-        box-shadow: var(--shadow);
-        border: 1px solid var(--border);
+        box-shadow: var(--shadow, 0 4px 12px rgba(0,0,0,0.05));
+        border: 1px solid var(--border, #e2e8f0);
     }
+
     .role-switch button {
         flex: 1;
         border: none;
@@ -41,34 +42,79 @@
         border-radius: 11px;
         font-weight: 700;
         font-size: 13px;
-        color: var(--muted);
+        color: var(--muted, #64748b);
         font-family: inherit;
         cursor: pointer;
         transition: background 0.2s, color 0.2s;
         text-align: center;
     }
+
     .role-switch button.active {
-        background: var(--primary);
+        background: var(--primary, #2563eb);
         color: #fff;
     }
 
     .register-form-container {
         max-width: 400px;
         margin: 0 auto;
-        padding: 22px 0;
+        padding: 10px 0 22px;
+    }
+
+    .field-label {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        margin-top: 14px;
+        color: var(--text, #1e293b);
+    }
+
+    .input {
+        width: 100%;
+        padding: 11px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border, #cbd5e1);
+        background: #f8fafc;
+        font-size: 13.5px;
+        font-family: inherit;
+        box-sizing: border-box;
+        outline: none;
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+    .input:focus {
+        border-color: var(--primary, #2563eb);
+        background: #ffffff;
+    }
+
+    .btn-block {
+        width: 100%;
+        padding: 12px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        border: none;
+        background: var(--primary, #2563eb);
+        color: white;
     }
 
     .auth-footer {
         text-align: center;
         font-size: 13px;
         margin-top: 20px;
-        color: var(--muted);
+        color: var(--muted, #64748b);
         max-width: 400px;
         margin-left: auto;
         margin-right: auto;
     }
+
     .auth-footer a {
-        color: var(--primary);
+        color: var(--primary, #2563eb);
         font-weight: 700;
         text-decoration: none;
     }
@@ -111,14 +157,15 @@
             @csrf
 
             <!-- Menyimpan role yang dipilih -->
-            <input type="hidden" name="role" id="input-role" value="guru">
+            <input type="hidden" name="role" id="input-role" value="{{ old('role', 'guru') }}">
 
             <!-- Pesan Error Validasi Aman -->
-            @if (isset($errors) && $errors->any())
+            @if(isset($errors) &&$errors->any())
                 <div class="register-error">
-                    @foreach ($errors->all() as $err)
-                        <div>{{ $err }}</div>
-                    @endforeach
+                    @php $allErrors =$errors->all(); @endphp
+                    @for($i = 0; $i < count($allErrors);$i++)
+                        <div>{{ $allErrors[$i] }}</div>
+                    @endfor
                 </div>
             @endif
 
@@ -144,8 +191,8 @@
             <span class="field-label">Konfirmasi Password</span>
             <input class="input" type="password" name="password_confirmation" placeholder="••••••••" required>
 
-            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 12px;">
-                <span class="material-symbols-outlined" style="font-size:18px;">person_add</span>Daftar Sekarang
+            <button type="submit" class="btn-block" style="margin-top: 20px;">
+                <span class="material-symbols-outlined" style="font-size:18px;">person_add</span> Daftar Sekarang
             </button>
         </form>
     </div>
@@ -179,5 +226,10 @@
             `;
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const initialRole = document.getElementById('input-role').value || 'guru';
+        setRegisterRole(initialRole);
+    });
 </script>
 @endpush
