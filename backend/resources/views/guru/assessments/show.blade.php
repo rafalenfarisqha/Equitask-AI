@@ -5,7 +5,13 @@
 
 @section('content')
 
+<link rel="stylesheet" href="{{ asset('css/easy-read.css') }}">
+
 <style>
+    /* ========================================
+       HALAMAN DETAIL ASESMEN GURU
+       ======================================== */
+
     .assessment-page {
         max-width: 1000px;
     }
@@ -62,6 +68,10 @@
         overflow-wrap: anywhere;
     }
 
+    /* ========================================
+       PILIHAN JAWABAN UMUM / REGULER
+       ======================================== */
+
     .question-choice {
         display: flex;
         align-items: flex-start;
@@ -112,28 +122,196 @@
         border-radius: 12px;
     }
 
-    /* Gambar sekarang berada pada masing-masing soal Adaptif */
+    /* ========================================
+       GAMBAR DIFY
+       ======================================== */
+
     .assessment-image-frame {
-        padding: 14px;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        background: #f8fafc;
+        padding: 16px;
+        border: 1px solid #dbe5f3;
+        border-radius: 16px;
+        background: #f8fbff;
+        height: 100%;
     }
 
     .assessment-image-frame img {
         display: block;
         width: 100%;
-        max-height: 350px;
+        height: auto;
+        max-height: 340px;
         object-fit: contain;
-        border-radius: 10px;
+        border-radius: 12px;
+        margin: 0 auto;
         background: #ffffff;
     }
 
     .assessment-image-caption {
+        margin-top: 12px;
         font-size: 13px;
+        line-height: 1.5;
         color: #64748b;
-        margin-top: 10px;
+        text-align: center;
     }
+
+    /* ========================================
+       EASY READ KHUSUS SOAL ADAPTIF
+       ======================================== */
+
+    #panelAdaptif.easy-read-assessment {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #172238;
+    }
+
+    #panelAdaptif .easy-read-question {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 0 24px !important;
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 21px;
+        font-weight: 600;
+        line-height: 1.75;
+        letter-spacing: .2px;
+        word-spacing: 1px;
+        text-align: left;
+        white-space: pre-line;
+        overflow-wrap: break-word;
+    }
+
+    #panelAdaptif .adaptive-illustrations {
+        margin-bottom: 28px;
+    }
+
+    /*
+     * Satu pilihan = satu baris flex.
+     * Tidak menggunakan grid untuk label dan teks.
+     */
+
+    #panelAdaptif .easy-read-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    #panelAdaptif .easy-read-options .question-choice {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 16px !important;
+
+        width: 100%;
+        min-height: 74px;
+        margin: 0 !important;
+        padding: 16px 18px !important;
+
+        border: 1.5px solid #dce5f0;
+        border-radius: 15px;
+        background: #ffffff;
+    }
+
+    /*
+     * Label A/B/C/D tepat di tengah.
+     */
+
+    #panelAdaptif .easy-read-options .question-label {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+
+        flex: 0 0 40px !important;
+        width: 40px !important;
+        min-width: 40px !important;
+        height: 40px !important;
+
+        margin: 0 !important;
+        padding: 0 !important;
+
+        border-radius: 11px;
+        background: #e5edff;
+        color: #2458cb;
+
+        font-size: 17px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    /*
+     * Teks jawaban di samping label.
+     *
+     * Class question-text sengaja tidak digunakan
+     * agar white-space: pre-line tidak mengganggu.
+     */
+
+    #panelAdaptif .easy-read-options .easy-read-option {
+        display: block !important;
+        flex: 1 1 auto !important;
+        align-self: center !important;
+
+        min-width: 0;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1.5;
+        letter-spacing: .2px;
+        word-spacing: .5px;
+
+        color: #172238;
+        white-space: normal !important;
+        text-align: left;
+        overflow-wrap: break-word;
+    }
+
+    /* ========================================
+       SCAFFOLDING ADAPTIF
+       ======================================== */
+
+    #panelAdaptif .scaffolding-box {
+        margin-top: 22px;
+        padding: 22px 24px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-left: 4px solid #2563eb;
+        border-radius: 16px;
+    }
+
+    #panelAdaptif .scaffolding-box h6 {
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.5;
+        color: #1e40af;
+        margin-bottom: 16px;
+    }
+
+    #panelAdaptif .scaffolding-box ol {
+        padding-left: 26px;
+        margin-bottom: 0;
+    }
+
+    #panelAdaptif .scaffolding-box li {
+        font-size: 17px;
+        font-weight: 500;
+        line-height: 1.75;
+        letter-spacing: .2px;
+        word-spacing: .7px;
+        color: #172238;
+        margin-bottom: 12px;
+    }
+
+    #panelAdaptif .scaffolding-box li:last-child {
+        margin-bottom: 0;
+    }
+
+    /* ========================================
+       RESPONSIF HP
+       ======================================== */
 
     @media (max-width: 575px) {
         .assessment-actions {
@@ -147,12 +325,98 @@
         .assessment-card {
             border-radius: 14px;
         }
+
+        #panelAdaptif .easy-read-question {
+            font-size: 19px;
+            line-height: 1.75;
+        }
+
+        #panelAdaptif .easy-read-options .question-choice {
+            min-height: 64px;
+            padding: 13px 14px !important;
+            gap: 12px !important;
+        }
+
+        #panelAdaptif .easy-read-options .easy-read-option {
+            font-size: 17px;
+        }
+
+        .assessment-image-frame {
+            padding: 12px;
+        }
+
+        #panelAdaptif .scaffolding-box {
+            padding: 18px;
+        }
+
+        #panelAdaptif .scaffolding-box h6 {
+            font-size: 17px;
+        }
+
+        #panelAdaptif .scaffolding-box li {
+            font-size: 16px;
+        }
     }
+
+    /* ========================================
+    PERAPIAN PILIHAN JAWABAN REGULER
+    ======================================== */
+
+    #panelReguler .regular-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #panelReguler .regular-options .question-choice {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+
+        min-height: 68px;
+        margin: 0;
+        padding: 14px 16px;
+
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #f8fafc;
+    }
+
+    #panelReguler .regular-options .question-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 34px;
+
+        width: 34px;
+        height: 34px;
+        margin: 0;
+        padding: 0;
+
+        line-height: 1;
+    }
+
+    #panelReguler .regular-options .regular-option-text {
+        display: block;
+        flex: 1;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 1.6;
+        white-space: normal;
+        text-align: left;
+    }
+
 </style>
 
 <div class="container py-4 py-md-5 assessment-page">
 
     {{-- NOTIFIKASI --}}
+
     @if(session('success'))
         <div class="alert alert-success rounded-3 mb-4">
             {{ session('success') }}
@@ -165,7 +429,8 @@
         </div>
     @endif
 
-    {{-- HEADER --}}
+    {{-- HEADER ASESMEN --}}
+
     <div class="assessment-card p-4 mb-4">
 
         <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
@@ -175,6 +440,7 @@
                 <a href="{{ route('guru.assessments.index') }}"
                    class="btn btn-light border rounded-3"
                    title="Kembali ke daftar asesmen">
+
                     <span class="material-symbols-outlined">
                         arrow_back
                     </span>
@@ -205,6 +471,7 @@
                     ? 'Dipublikasikan'
                     : 'Draft' }}
             </span>
+
         </div>
 
         <div class="border-top mt-4 pt-4">
@@ -241,9 +508,11 @@
                         <button type="button"
                                 class="btn btn-success assessment-action-btn"
                                 disabled>
+
                             <span class="material-symbols-outlined">
                                 check_circle
                             </span>
+
                             Sudah Dipublikasikan
                         </button>
 
@@ -260,12 +529,17 @@
                         </a>
 
                     @endif
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
 
     {{-- TUJUAN PEMBELAJARAN --}}
+
     <div class="assessment-card p-4 mb-4">
 
         <h5 class="assessment-heading mb-3">
@@ -275,9 +549,11 @@
         <p class="text-secondary question-text mb-0">
             {{ $assessment->tujuan_pembelajaran ?: 'Belum diisi.' }}
         </p>
+
     </div>
 
-    {{-- PERINGATAN VALIDASI --}}
+    {{-- PERINGATAN HASIL VALIDASI --}}
+
     @if(
         ($statusKesetaraan ?? null) === 'perlu_revisi'
         || (
@@ -293,7 +569,9 @@
 
         <div class="alert alert-warning rounded-3 mb-4">
 
-            <strong>Asesmen memerlukan tinjauan guru.</strong>
+            <strong>
+                Asesmen memerlukan tinjauan guru.
+            </strong>
 
             <p class="small mt-2 mb-0">
                 Periksa soal, hasil validasi, kunci jawaban,
@@ -319,7 +597,8 @@
 
     @endif
 
-    {{-- HASIL ASESMEN --}}
+    {{-- HASIL ASESMEN AI --}}
+
     <div class="assessment-card p-4 mb-4">
 
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
@@ -351,18 +630,21 @@
                 </button>
 
             </div>
+
         </div>
 
-        {{-- ===================== --}}
-        {{-- PANEL SOAL REGULER --}}
-        {{-- ===================== --}}
+        {{-- ======================================
+             PANEL SOAL REGULER
+             ====================================== --}}
 
         <div id="panelReguler" class="assessment-panel">
 
             @if(!empty($catatanReguler))
+
                 <p class="text-muted small question-text mb-4">
                     {{ $catatanReguler }}
                 </p>
+
             @endif
 
             @forelse($soalReguler as $index => $soal)
@@ -385,6 +667,7 @@
 
                             • {{ $soal['level_bloom'] ?? '-' }}
                         </span>
+
                     </div>
 
                     <h5 class="fw-semibold question-text mb-4">
@@ -403,28 +686,24 @@
                     {{-- PILIHAN JAWABAN REGULER --}}
                     @if(!empty($soal['opsi']) && is_array($soal['opsi']))
 
-                        <div class="mb-4">
+                        <div class="regular-options mb-4">
 
                             @foreach($soal['opsi'] as $opsi)
 
                                 <div class="question-choice">
-
-                                    <span class="question-label">
-                                        {{ $opsi['label'] ?? '-' }}
-                                    </span>
-
-                                    <span class="question-text">
-                                        {{ $opsi['teks'] ?? '' }}
-                                    </span>
-
+                                    <span class="question-label">{{ $opsi['label'] ?? '-' }}</span>
+                                    <span class="regular-option-text">{{ trim((string) ($opsi['teks'] ?? '')) }}</span>
                                 </div>
 
                             @endforeach
+
                         </div>
 
                     @endif
 
+
                     {{-- KUNCI JAWABAN REGULER --}}
+
                     <details class="answer-box mt-4">
 
                         <summary class="fw-semibold">
@@ -458,6 +737,7 @@
                             @endif
 
                         </div>
+
                     </details>
 
                 </article>
@@ -472,18 +752,22 @@
 
         </div>
 
-        {{-- ===================== --}}
-        {{-- PANEL SOAL ADAPTIF --}}
-        {{-- ===================== --}}
+        {{-- ======================================
+             PANEL SOAL ADAPTIF
+             ====================================== --}}
 
         <div id="panelAdaptif"
-             class="assessment-panel"
+             class="assessment-panel easy-read-assessment"
              style="display:none;">
 
             @if(!empty($catatanAdaptif))
 
                 <p class="text-muted small question-text mb-4">
-                    {{ str_ireplace('inklusif', 'adaptif', $catatanAdaptif) }}
+                    {{ str_ireplace(
+                        'inklusif',
+                        'adaptif',
+                        $catatanAdaptif
+                    ) }}
                 </p>
 
             @endif
@@ -492,8 +776,8 @@
 
                 @php
                     /*
-                     * Ambil ID soal Adaptif.
-                     * Contoh: PG1, ES1, PG2.
+                     * Hubungkan gambar berdasarkan ID soal.
+                     * Contoh: PG1, PG2, ES1.
                      */
                     $idSoalAdaptif = trim(
                         (string) (
@@ -503,18 +787,10 @@
                         )
                     );
 
-                    /*
-                     * Ambil HANYA gambar yang memiliki
-                     * id_soal_asal sama dengan soal ini.
-                     */
                     $ilustrasiSoal = $idSoalAdaptif !== ''
                         ? ($gambarPerSoal[$idSoalAdaptif] ?? [])
                         : [];
 
-                    /*
-                     * Ambil teks alternatif dari rencana_visual.
-                     * Cocokkan berdasarkan id_visual.
-                     */
                     $rencanaVisual = is_array(
                         $soal['rencana_visual'] ?? null
                     )
@@ -546,6 +822,8 @@
                     data-version="adaptif"
                     data-index="{{ $index }}">
 
+                    {{-- NOMOR SOAL --}}
+
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
 
                         <span class="badge bg-primary px-3 py-2">
@@ -562,24 +840,22 @@
 
                     </div>
 
-                    {{-- ================================== --}}
-                    {{-- GAMBAR OTOMATIS PER SOAL ADAPTIF --}}
-                    {{-- ================================== --}}
+                    {{-- GAMBAR DIFY PER SOAL --}}
 
                     @if(!empty($ilustrasiSoal))
 
-                        <div class="mb-4">
+                        <div class="adaptive-illustrations">
 
                             <h6 class="fw-bold mb-3">
-                                <span class="material-symbols-outlined
-                                             align-middle text-primary me-1">
+
+                                <span class="material-symbols-outlined align-middle text-primary me-1">
                                     image
                                 </span>
 
                                 Ilustrasi Soal
                             </h6>
 
-                            <div class="row g-3">
+                            <div class="row g-3 justify-content-center">
 
                                 @foreach($ilustrasiSoal as $gambar)
 
@@ -600,9 +876,11 @@
                                         }
                                     @endphp
 
-                                    <div class="col-md-6">
+                                    <div class="{{ count($ilustrasiSoal) === 1
+                                        ? 'col-12 col-lg-8'
+                                        : 'col-12 col-md-6' }}">
 
-                                        <div class="assessment-image-frame h-100">
+                                        <div class="assessment-image-frame">
 
                                             <img
                                                 src="{{ $gambar['url'] }}"
@@ -647,36 +925,36 @@
 
                             <p class="small text-muted mt-2 mb-0">
                                 Dify memiliki rencana visual untuk soal ini,
-                                tetapi belum ada gambar dengan ID soal yang
-                                sesuai dalam output yang tersimpan.
+                                tetapi belum ada gambar dengan ID soal
+                                yang sesuai dalam output tersimpan.
                             </p>
 
                         </div>
 
                     @endif
 
-                    {{-- PERTANYAAN ADAPTIF --}}
-                    <h5 class="fw-semibold question-text mb-4">
+                    {{-- PERTANYAAN EASY READ --}}
+
+                    <h5 class="question-text easy-read-question">
                         {{ $soal['pertanyaan'] ?? 'Pertanyaan belum tersedia.' }}
                     </h5>
 
-                    {{-- PILIHAN JAWABAN ADAPTIF --}}
+                    {{-- =====================================
+                         PILIHAN JAWABAN EASY READ - DIPERBAIKI
+
+                         HANYA SATU LOOP.
+                         TIDAK ADA LOOP DI DALAM SPAN.
+                         ===================================== --}}
+
                     @if(!empty($soal['opsi']) && is_array($soal['opsi']))
 
-                        <div class="mb-4">
+                        <div class="easy-read-options">
 
                             @foreach($soal['opsi'] as $opsi)
 
                                 <div class="question-choice">
-
-                                    <span class="question-label">
-                                        {{ $opsi['label'] ?? '-' }}
-                                    </span>
-
-                                    <span class="question-text">
-                                        {{ $opsi['teks'] ?? '' }}
-                                    </span>
-
+                                    <span class="question-label">{{ $opsi['label'] ?? '-' }}</span>
+                                    <span class="easy-read-option">{{ trim((string) ($opsi['teks'] ?? '')) }}</span>
                                 </div>
 
                             @endforeach
@@ -686,6 +964,7 @@
                     @endif
 
                     {{-- SCAFFOLDING ADAPTIF --}}
+
                     @if(
                         !empty($soal['dukungan_scaffolding'])
                         && is_array($soal['dukungan_scaffolding'])
@@ -699,7 +978,10 @@
 
                             <ol class="mb-0">
 
-                                @foreach($soal['dukungan_scaffolding'] as $petunjuk)
+                                @foreach(
+                                    $soal['dukungan_scaffolding']
+                                    as $petunjuk
+                                )
 
                                     <li class="mb-2 question-text">
                                         {{ $petunjuk }}
@@ -713,7 +995,8 @@
 
                     @endif
 
-                    {{-- INFORMASI RENCANA VISUAL --}}
+                    {{-- DETAIL RENCANA VISUAL --}}
+
                     @if(!empty($rencanaVisual))
 
                         <details class="bg-light border rounded-3 p-3 mb-4">
@@ -726,11 +1009,15 @@
 
                                 @foreach($rencanaVisual as $visual)
 
-                                    <p class="small question-text mb-2">
-                                        {{ $visual['teks_alternatif']
-                                            ?? $visual['tujuan_visual']
-                                            ?? 'Ilustrasi pendukung.' }}
-                                    </p>
+                                    @if(is_array($visual))
+
+                                        <p class="small question-text mb-2">
+                                            {{ $visual['teks_alternatif']
+                                                ?? $visual['tujuan_visual']
+                                                ?? 'Ilustrasi pendukung.' }}
+                                        </p>
+
+                                    @endif
 
                                 @endforeach
 
@@ -741,6 +1028,7 @@
                     @endif
 
                     {{-- KUNCI JAWABAN ADAPTIF --}}
+
                     <details class="answer-box mt-4">
 
                         <summary class="fw-semibold">
@@ -790,6 +1078,7 @@
         </div>
 
         {{-- NAVIGASI SOAL --}}
+
         <div id="questionNavigation"
              class="d-flex flex-wrap justify-content-between align-items-center gap-3 border-top mt-4 pt-4">
 
@@ -816,9 +1105,9 @@
 
     </div>
 
-    {{-- =========================== --}}
-    {{-- EVALUASI DAN VALIDASI AI --}}
-    {{-- =========================== --}}
+    {{-- ======================================
+         EVALUASI DAN VALIDASI AI
+         ====================================== --}}
 
     <div class="assessment-card p-4 mb-4">
 
@@ -914,6 +1203,8 @@
 
         @endif
 
+        {{-- HASIL EVALUASI PER SOAL --}}
+
         @if(
             !empty($evaluasi['hasil_per_soal'])
             && is_array($evaluasi['hasil_per_soal'])
@@ -968,7 +1259,9 @@
 
                         <div class="small mb-3">
 
-                            <strong>Masalah yang ditemukan:</strong>
+                            <strong>
+                                Masalah yang ditemukan:
+                            </strong>
 
                             <ul class="mb-0 mt-2">
 
@@ -997,11 +1290,16 @@
 
                         <div class="small">
 
-                            <strong>Rekomendasi revisi:</strong>
+                            <strong>
+                                Rekomendasi revisi:
+                            </strong>
 
                             <ul class="mb-0 mt-2">
 
-                                @foreach($hasil['rekomendasi_revisi'] as $rekomendasi)
+                                @foreach(
+                                    $hasil['rekomendasi_revisi']
+                                    as $rekomendasi
+                                )
 
                                     <li class="question-text mb-1">
                                         {{ str_ireplace(
@@ -1025,6 +1323,8 @@
 
         @endif
 
+        {{-- REKOMENDASI UMUM --}}
+
         @if(
             !empty($evaluasi['rekomendasi_umum'])
             && is_array($evaluasi['rekomendasi_umum'])
@@ -1036,7 +1336,10 @@
 
             <ul class="mb-0">
 
-                @foreach($evaluasi['rekomendasi_umum'] as $rekomendasi)
+                @foreach(
+                    $evaluasi['rekomendasi_umum']
+                    as $rekomendasi
+                )
 
                     <li class="question-text mb-2">
                         {{ str_ireplace(
@@ -1054,13 +1357,14 @@
 
         <p class="small text-muted mt-4 mb-0">
             Evaluasi AI merupakan bahan tinjauan.
-            Guru tetap bertanggung jawab memeriksa dan
-            menyetujui soal sebelum publikasi.
+            Guru tetap bertanggung jawab memeriksa
+            dan menyetujui soal sebelum publikasi.
         </p>
 
     </div>
 
-    {{-- INFORMASI GAMBAR TANPA ID SOAL --}}
+    {{-- GAMBAR LAMA TANPA ID SOAL --}}
+
     @php
         $gambarTanpaId = array_values(
             array_filter(
@@ -1082,8 +1386,7 @@
 
             <p class="small text-muted">
                 Gambar berikut tidak memiliki ID soal dari Dify.
-                Gambar tidak dipasangkan secara otomatis agar
-                tidak tertukar.
+                Gambar tidak dipasangkan otomatis agar tidak tertukar.
             </p>
 
             <div class="row g-3">
@@ -1117,6 +1420,7 @@
     @endif
 
     {{-- NAVIGASI BAWAH --}}
+
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-4">
 
         <a href="{{ route('guru.assessments.index') }}"
@@ -1145,7 +1449,10 @@
 
 </div>
 
-{{-- SCRIPT TAB DAN NAVIGASI --}}
+{{-- ======================================
+     JAVASCRIPT NAVIGASI REGULER / ADAPTIF
+     ====================================== --}}
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -1192,19 +1499,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const questions = getQuestions();
 
         questions.forEach(function (question, index) {
-
             question.classList.toggle(
                 'active',
                 index === currentIndex
             );
-
         });
 
         if (questions.length === 0) {
-
             navigation.style.display = 'none';
             counter.textContent = 'Belum ada soal';
-
             return;
         }
 
@@ -1274,21 +1577,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     previousButton.addEventListener('click', function () {
-
         if (currentIndex > 0) {
             currentIndex--;
             renderQuestions();
         }
-
     });
 
     nextButton.addEventListener('click', function () {
-
         if (currentIndex < getQuestions().length - 1) {
             currentIndex++;
             renderQuestions();
         }
-
     });
 
     changeVersion('reguler');
