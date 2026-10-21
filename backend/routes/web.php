@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -68,7 +69,7 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------
-        | Profil Guru
+        | PROFIL GURU
         |--------------------------------------------------------------
         */
 
@@ -89,7 +90,7 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------
-        | Dashboard Guru
+        | DASHBOARD GURU
         |--------------------------------------------------------------
         */
 
@@ -100,10 +101,8 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------
-        | Analytics Guru
+        | ANALYTICS GURU
         |--------------------------------------------------------------
-        | Mengambil nilai asli dari student_assessments.
-        | Menampilkan rata-rata kelas dan hasil setiap siswa.
         */
 
         Route::get(
@@ -113,7 +112,7 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------
-        | Bank Soal Publik
+        | BANK SOAL PUBLIK
         |--------------------------------------------------------------
         */
 
@@ -125,11 +124,12 @@ Route::middleware(['auth'])
         Route::post(
             '/bank-soal/{id}/gunakan',
             [BankSoalController::class, 'gunakanSoal']
-        )->name('bank-soal.gunakan');
+        )->whereNumber('id')
+         ->name('bank-soal.gunakan');
 
         /*
         |--------------------------------------------------------------
-        | Daftar dan Pembuatan Asesmen
+        | DAFTAR DAN PEMBUATAN ASESMEN
         |--------------------------------------------------------------
         */
 
@@ -144,8 +144,8 @@ Route::middleware(['auth'])
         )->name('assessments.create');
 
         /*
-        | Generate Dify
-        | Tetap menggunakan AssessmentController::store.
+        | Generate asesmen menggunakan Dify.
+        | Tetap menggunakan method store() yang sudah ada.
         */
 
         Route::post(
@@ -155,18 +155,60 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------
-        | Edit Soal Reguler dan Adaptif
+        | DUPLIKASI PAKET ASESMEN
+        |--------------------------------------------------------------
+        |
+        | Menyalin paket asesmen yang sudah tersedia
+        | tanpa menjalankan Dify kembali.
+        |
+        | Paket salinan mempunyai assessment_id baru,
+        | tetapi mempertahankan soal Reguler dan Adaptif
+        | dari paket asli.
+        |
+        | Nama salinan dapat dikirim melalui form dengan
+        | input bernama "nama".
+        |
+        | Status awal salinan: Draft.
+        |
+        */
+
+        Route::post(
+            '/assessments/{id}/duplicate',
+            [AssessmentController::class, 'duplicate']
+        )->whereNumber('id')
+         ->name('assessments.duplicate');
+
+        /*
+        |--------------------------------------------------------------
+        | EDIT JUDUL / NAMA PAKET ASESMEN
+        |--------------------------------------------------------------
+        |
+        | Guru bisa mengganti judul paket salinan
+        | tanpa mengubah isi soal yang sudah tersimpan.
+        |
+        | Form menggunakan method PATCH
+        | dan field input bernama "nama".
+        |
+        */
+
+        Route::patch(
+            '/assessments/{id}/title',
+            [AssessmentController::class, 'updateTitle']
+        )->whereNumber('id')
+         ->name('assessments.update-title');
+
+        /*
+        |--------------------------------------------------------------
+        | EDIT SOAL REGULER DAN ADAPTIF
         |--------------------------------------------------------------
         */
 
-        // Menampilkan formulir edit soal.
         Route::get(
             '/assessments/{id}/edit',
             [AssessmentReviewController::class, 'edit']
         )->whereNumber('id')
          ->name('assessments.edit');
 
-        // Menyimpan revisi guru ke PostgreSQL.
         Route::put(
             '/assessments/{id}',
             [AssessmentReviewController::class, 'update']
@@ -175,8 +217,17 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------
-        | Publikasikan Satu Paket Asesmen ke Kelas
+        | PUBLIKASIKAN PAKET ASESMEN KE KELAS
         |--------------------------------------------------------------
+        |
+        | Route ini berlaku untuk paket asli maupun salinan.
+        |
+        | Guru dapat memilih kelas tujuan, dan siswa kelas
+        | tersebut dapat melihat asesmen setelah publikasi
+        | berhasil dilakukan.
+        |
+        | Tidak perlu membuat route publikasi baru.
+        |
         */
 
         Route::post(
@@ -187,7 +238,7 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------
-        | Berbagi ke Bank Soal Publik
+        | BERBAGI KE BANK SOAL PUBLIK
         |--------------------------------------------------------------
         */
 
@@ -199,8 +250,11 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------
-        | Detail Asesmen
+        | DETAIL ASESMEN
         |--------------------------------------------------------------
+        |
+        | Ditempatkan setelah route khusus di atas.
+        |
         */
 
         Route::get(
@@ -211,7 +265,7 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------
-        | Notifikasi Guru
+        | NOTIFIKASI GURU
         |--------------------------------------------------------------
         */
 
@@ -222,7 +276,7 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------
-        | Manajemen Kelas
+        | MANAJEMEN KELAS
         |--------------------------------------------------------------
         */
 
@@ -253,32 +307,133 @@ Route::middleware(['auth'])
             [ClassroomController::class, 'importExcel']
         )->whereNumber('id')
          ->name('kelas.importExcel');
+
     });
 
 /*
 |--------------------------------------------------------------------------
 | RUTE SISWA
 |--------------------------------------------------------------------------
-| Seluruh bagian siswa dipertahankan.
+|
+| Seluruh alur siswa tetap dipertahankan.
+|
+| Paket asli dan paket hasil duplikasi nantinya
+| akan mempunyai assessment_id masing-masing.
+|
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->prefix('siswa')->name('siswa.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/daftar-assessment', [DashboardController::class, 'assessments'])->name('assessment');
 
-    Route::get('/assessment/{id}/petunjuk', [\App\Http\Controllers\Siswa\AssessmentController::class, 'instructions'])
-        ->name('assessment.instructions');
+Route::middleware(['auth'])
+    ->prefix('siswa')
+    ->name('siswa.')
+    ->group(function () {
 
-    Route::get('/assessment/{id}/mulai', [\App\Http\Controllers\Siswa\AssessmentController::class,'start'])->name('assessment.start');
-    Route::get('/assessment/{id}/kerjakan', [\App\Http\Controllers\Siswa\AssessmentController::class,'work'])->name('assessment.work');
-    Route::post('/assessment/{id}/kumpulkan', [\App\Http\Controllers\Siswa\AssessmentController::class,'submit'])->name('assessment.submit');
+        /*
+        |--------------------------------------------------------------
+        | DASHBOARD DAN DAFTAR ASESMEN SISWA
+        |--------------------------------------------------------------
+        */
 
-    Route::get('/riwayat', [StudentPageController::class, 'riwayat'])->name('riwayat');
-    Route::get('/profil', [StudentPageController::class, 'profil'])->name('profil');
+        Route::get(
+            '/dashboard',
+            [DashboardController::class, 'index']
+        )->name('dashboard');
 
-    // Notifikasi Siswa
-    Route::get('/notifikasi', [SiswaNotificationController::class, 'index'])->name('notifikasi');
+        Route::get(
+            '/daftar-assessment',
+            [DashboardController::class, 'assessments']
+        )->name('assessment');
 
-    // Join Kelas
-    Route::get('/kelas/{id}/join', [ClassroomController::class, 'joinViaLink'])->name('kelas.join');
-});
+        /*
+        |--------------------------------------------------------------
+        | PETUNJUK DAN PEMILIHAN VERSI ASESMEN
+        |--------------------------------------------------------------
+        */
+
+        Route::get(
+            '/assessment/{id}/petunjuk',
+            [\App\Http\Controllers\Siswa\AssessmentController::class, 'instructions']
+        )->whereNumber('id')
+         ->name('assessment.instructions');
+
+        /*
+        |--------------------------------------------------------------
+        | MULAI PENGERJAAN
+        |--------------------------------------------------------------
+        */
+
+        Route::get(
+            '/assessment/{id}/mulai',
+            [\App\Http\Controllers\Siswa\AssessmentController::class, 'start']
+        )->whereNumber('id')
+         ->name('assessment.start');
+
+        /*
+        |--------------------------------------------------------------
+        | LANJUTKAN PENGERJAAN
+        |--------------------------------------------------------------
+        |
+        | Mempertahankan URL dan nama route yang sudah
+        | digunakan sebelumnya agar tidak mengubah
+        | integrasi milik anggota tim.
+        |
+        */
+
+        Route::get(
+            '/assessment/{id}/kerjakan',
+            [\App\Http\Controllers\Siswa\AssessmentController::class, 'work']
+        )->whereNumber('id')
+         ->name('assessment.work');
+
+        /*
+        |--------------------------------------------------------------
+        | KUMPULKAN JAWABAN SISWA
+        |--------------------------------------------------------------
+        */
+
+        Route::post(
+            '/assessment/{id}/kumpulkan',
+            [\App\Http\Controllers\Siswa\AssessmentController::class, 'submit']
+        )->whereNumber('id')
+         ->name('assessment.submit');
+
+        /*
+        |--------------------------------------------------------------
+        | RIWAYAT DAN PROFIL SISWA
+        |--------------------------------------------------------------
+        */
+
+        Route::get(
+            '/riwayat',
+            [StudentPageController::class, 'riwayat']
+        )->name('riwayat');
+
+        Route::get(
+            '/profil',
+            [StudentPageController::class, 'profil']
+        )->name('profil');
+
+        /*
+        |--------------------------------------------------------------
+        | NOTIFIKASI SISWA
+        |--------------------------------------------------------------
+        */
+
+        Route::get(
+            '/notifikasi',
+            [SiswaNotificationController::class, 'index']
+        )->name('notifikasi');
+
+        /*
+        |--------------------------------------------------------------
+        | GABUNG KELAS
+        |--------------------------------------------------------------
+        */
+
+        Route::get(
+            '/kelas/{id}/join',
+            [ClassroomController::class, 'joinViaLink']
+        )->whereNumber('id')
+         ->name('kelas.join');
+
+    });
