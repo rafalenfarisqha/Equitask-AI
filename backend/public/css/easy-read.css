@@ -1,0 +1,283 @@
+
+/*
+|--------------------------------------------------------------------------
+| EQUITASK AI - EASY READ
+|--------------------------------------------------------------------------
+| Tipografi khusus soal Adaptif.
+| Dapat digunakan di halaman Guru dan Siswa.
+| Tidak memengaruhi soal Reguler.
+|--------------------------------------------------------------------------
+*/
+
+.easy-read-assessment {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #172238;
+}
+
+/* Pertanyaan Adaptif */
+.easy-read-assessment .easy-read-question {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.85;
+    letter-spacing: 0.3px;
+    word-spacing: 1.5px;
+
+    max-width: 65ch;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+
+    margin-bottom: 28px;
+    color: #172238;
+}
+
+/* Pilihan jawaban Adaptif */
+.easy-read-assessment .easy-read-options {
+    display: grid;
+    gap: 14px;
+}
+
+.easy-read-assessment .easy-read-option {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.75;
+    letter-spacing: 0.25px;
+    word-spacing: 1px;
+    color: #172238;
+}
+
+/* Kotak pilihan jawaban guru dan siswa */
+.easy-read-assessment .question-choice,
+.easy-read-assessment .aw-option {
+    background: #ffffff;
+    border: 1.5px solid #dce5f0;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 12px;
+}
+
+/* Label pilihan A, B, C, D */
+.easy-read-assessment .question-label,
+.easy-read-assessment .aw-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+
+    border-radius: 12px;
+    background: #e4edff;
+    color: #2458cb;
+
+    font-size: 17px;
+    font-weight: 700;
+}
+
+/* Scaffolding pada soal Adaptif */
+.easy-read-assessment .scaffolding-box {
+    background: #eff6ff;
+    border-left: 4px solid #2563eb;
+    border-radius: 14px;
+}
+
+.easy-read-assessment .scaffolding-box li {
+    font-size: 17px;
+    line-height: 1.8;
+    letter-spacing: 0.2px;
+    word-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+/* Tombol A+ pada halaman siswa */
+.aw-page.large-text.easy-read-assessment .easy-read-question {
+    font-size: 25px;
+}
+
+.aw-page.large-text.easy-read-assessment .easy-read-option {
+    font-size: 22px;
+}
+
+/* Tampilan layar HP */
+@media (max-width: 575px) {
+
+    .easy-read-assessment .easy-read-question {
+        font-size: 19px;
+        line-height: 1.8;
+        word-spacing: 1px;
+    }
+
+    .easy-read-assessment .easy-read-option {
+        font-size: 17px;
+        line-height: 1.7;
+    }
+
+    .easy-read-assessment .question-choice,
+    .easy-read-assessment .aw-option {
+        padding: 15px;
+    }
+
+    .aw-page.large-text.easy-read-assessment .easy-read-question {
+        font-size: 23px;
+    }
+}
+
+
+/* ==========================================
+   SCAFFOLDING EASY READ - HALAMAN GURU
+   ========================================== */
+
+#panelAdaptif .scaffolding-box {
+    margin-top: 24px;
+    padding: 22px 24px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-left: 4px solid #2563eb;
+    border-radius: 16px;
+}
+
+#panelAdaptif .scaffolding-box h6 {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.5;
+    color: #1e40af;
+    margin-bottom: 16px;
+}
+
+#panelAdaptif .scaffolding-box ol {
+    padding-left: 26px;
+    margin-bottom: 0;
+}
+
+#panelAdaptif .scaffolding-box li {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.75;
+    letter-spacing: 0.2px;
+    word-spacing: 0.7px;
+    color: #172238;
+    padding-left: 5px;
+    margin-bottom: 12px;
+}
+
+#panelAdaptif .scaffolding-box li:last-child {
+    margin-bottom: 0;
+}
+
+@media (max-width: 575px) {
+    #panelAdaptif .scaffolding-box {
+        padding: 18px;
+    }
+
+    #panelAdaptif .scaffolding-box h6 {
+        font-size: 17px;
+    }
+
+    #panelAdaptif .scaffolding-box li {
+        font-size: 16px;
+    }
+}
+
+
+/* ==========================================
+   PERBAIKAN POSISI LABEL DAN JAWABAN ADAPTIF
+   KHUSUS HALAMAN GURU
+   ========================================== */
+
+/* Kotak pilihan jawaban */
+#panelAdaptif .question-choice {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 74px;
+    padding: 16px 18px;
+}
+
+/* Label A, B, C, D */
+#panelAdaptif .question-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 40px;
+
+    width: 40px;
+    height: 40px;
+
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+/* Tulisan jawaban di samping label */
+#panelAdaptif .question-choice .easy-read-option {
+    display: flex;
+    align-items: center;
+    flex: 1;
+
+    min-height: 40px;
+    margin: 0;
+    padding: 0;
+
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.5;
+
+    white-space: normal;
+    text-align: left;
+}
+
+/* Menghilangkan pengaruh baris kosong */
+#panelAdaptif .question-choice .question-text {
+    white-space: normal;
+}
+
+@media (max-width: 575px) {
+    #panelAdaptif .question-choice {
+        gap: 12px;
+        padding: 13px 14px;
+    }
+
+    #panelAdaptif .question-choice .easy-read-option {
+        font-size: 17px;
+    }
+}
+
+
+/* Perataan akhir pilihan jawaban Adaptif guru */
+#panelAdaptif .question-choice {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 16px;
+    min-height: 74px;
+    padding: 16px 18px;
+}
+
+#panelAdaptif .question-choice .question-label {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+
+#panelAdaptif .question-choice .easy-read-option {
+    display: block;
+    align-self: center;
+    width: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: normal;
+    text-align: left;
+}
+
