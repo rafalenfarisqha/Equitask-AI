@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'Pengerjaan Assessment')
@@ -8,9 +7,9 @@
 <link rel="stylesheet" href="{{ asset('css/easy-read.css') }}">
 
 <style>
-    /* ========================================
-       HALAMAN PENGERJAAN ASESMEN SISWA
-       ======================================== */
+    /* =========================================
+       DASAR HALAMAN SISWA
+       ========================================= */
 
     .aw-page {
         --aw-blue: #2563eb;
@@ -18,7 +17,7 @@
         --aw-ink: #182337;
         --aw-muted: #718096;
 
-        max-width: 900px;
+        max-width: 1200px;
         margin: 0 auto;
         padding: 24px 18px 45px;
         color: var(--aw-ink);
@@ -33,8 +32,8 @@
     }
 
     .aw-back {
-        text-decoration: none;
         color: var(--aw-muted);
+        text-decoration: none;
         font-size: 14px;
     }
 
@@ -70,8 +69,8 @@
     }
 
     .aw-progress-bar {
-        height: 100%;
         width: 0;
+        height: 100%;
         background: linear-gradient(
             90deg,
             var(--aw-blue),
@@ -82,39 +81,40 @@
 
     .aw-layout {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 210px;
+        grid-template-columns: minmax(0, 1fr) 250px;
         gap: 20px;
         align-items: start;
     }
 
     .aw-card,
     .aw-sidebar {
+        min-width: 0;
+        padding: 24px;
         background: white;
         border: 1px solid #e6edf5;
         border-radius: 22px;
-        padding: 24px;
         box-shadow: 0 8px 30px rgba(25, 50, 90, .04);
     }
 
     .aw-number {
-        font-size: 13px;
-        color: var(--aw-blue);
-        font-weight: 800;
         margin-bottom: 18px;
+        color: var(--aw-blue);
+        font-size: 13px;
+        font-weight: 800;
     }
 
     .aw-question {
+        margin-bottom: 24px;
         font-size: 19px;
         font-weight: 650;
         line-height: 1.8;
-        margin-bottom: 24px;
         white-space: pre-wrap;
         overflow-wrap: anywhere;
     }
 
-    /* ========================================
-       PILIHAN JAWABAN REGULER
-       ======================================== */
+    /* =========================================
+       PILIHAN GANDA
+       ========================================= */
 
     .aw-options {
         display: grid;
@@ -124,26 +124,29 @@
     .aw-option {
         display: flex;
         flex-direction: row;
+        flex-wrap: nowrap;
         align-items: center;
         gap: 12px;
+
         min-height: 68px;
         padding: 14px 16px;
 
+        background: #fff;
         border: 1.5px solid #e0e7f0;
         border-radius: 15px;
-        background: white;
+
         cursor: pointer;
         transition: .15s ease;
     }
 
     .aw-option:hover {
-        border-color: #93b4fa;
         background: #f8fbff;
+        border-color: #93b4fa;
     }
 
     .aw-option.selected {
-        border-color: var(--aw-blue);
         background: #eff6ff;
+        border-color: var(--aw-blue);
     }
 
     .aw-option input[type="radio"] {
@@ -163,9 +166,9 @@
         width: 34px;
         height: 34px;
 
-        border-radius: 9px;
         background: #edf2f8;
         color: #2458cb;
+        border-radius: 9px;
 
         font-size: 14px;
         font-weight: 800;
@@ -177,7 +180,6 @@
         flex: 1;
         min-width: 0;
         margin: 0;
-        padding: 0;
 
         font-size: 16px;
         font-weight: 500;
@@ -186,9 +188,9 @@
         overflow-wrap: break-word;
     }
 
-    /* ========================================
-       EASY READ KHUSUS VERSI ADAPTIF
-       ======================================== */
+    /* =========================================
+       EASY READ ADAPTIF
+       ========================================= */
 
     .aw-page.easy-read-assessment .aw-question {
         font-family: Arial, Helvetica, sans-serif;
@@ -197,9 +199,6 @@
         line-height: 1.75;
         letter-spacing: .2px;
         word-spacing: 1px;
-        white-space: pre-wrap;
-        overflow-wrap: break-word;
-        max-width: 65ch;
     }
 
     .aw-page.easy-read-assessment .aw-options {
@@ -207,60 +206,213 @@
     }
 
     .aw-page.easy-read-assessment .aw-option {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        align-items: center;
-        gap: 14px;
         min-height: 74px;
+        gap: 14px;
         padding: 16px 18px;
         border-radius: 16px;
-        background: #ffffff;
-    }
-
-    .aw-page.easy-read-assessment .aw-option.selected {
-        background: #eff6ff;
     }
 
     .aw-page.easy-read-assessment .aw-letter {
-        display: grid;
-        place-items: center;
-
         flex: 0 0 40px;
         width: 40px;
         height: 40px;
-
-        border-radius: 11px;
         background: #e5edff;
         color: #2458cb;
-
+        border-radius: 11px;
         font-size: 17px;
-        font-weight: 700;
-        line-height: 1;
     }
 
     .aw-page.easy-read-assessment .aw-option-text {
-        display: block;
-        flex: 1;
-        min-width: 0;
-        margin: 0;
-        padding: 0;
-
         font-family: Arial, Helvetica, sans-serif;
         font-size: 18px;
         font-weight: 600;
         line-height: 1.65;
         letter-spacing: .2px;
         word-spacing: .5px;
-
         color: #172238;
-        white-space: normal;
+    }
+
+    /* =========================================
+       GAMBAR SOAL ADAPTIF
+       ========================================= */
+
+    .student-question-images {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 25px;
+    }
+
+    .student-question-figure {
+        margin: 0;
+        padding: 16px;
+        background: #f8fbff;
+        border: 1px solid #dbe5f2;
+        border-radius: 16px;
+        text-align: center;
+    }
+
+    .student-question-image {
+        display: block;
+        max-width: 100%;
+        max-height: 420px;
+        width: auto;
+        height: auto;
+        margin: 0 auto;
+        object-fit: contain;
+        border-radius: 10px;
+    }
+
+    .student-question-figure figcaption {
+        margin-top: 12px;
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .student-image-error {
+        display: none;
+        padding: 12px;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    /* =========================================
+       INPUT JAWABAN ESAI
+       ========================================= */
+
+    .student-essay-wrapper {
+        display: block;
+        margin-top: 8px;
+    }
+
+    .student-essay-label {
+        display: block;
+        margin-bottom: 12px;
+        color: #172238;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .student-essay-input {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 230px;
+        padding: 18px 20px;
+
+        background: #fff;
+        color: #172238;
+        border: 1.5px solid #d5e1f2;
+        border-radius: 15px;
+
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 17px;
+        line-height: 1.8;
+
+        resize: vertical;
+        white-space: pre-wrap;
         overflow-wrap: break-word;
     }
 
-    /* ========================================
-       NAVIGASI SOAL
-       ======================================== */
+    .student-essay-input:focus {
+        border-color: #2563eb;
+        outline: 3px solid #bfdbfe;
+    }
+
+    .student-essay-hint {
+        margin: 10px 0 0;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .aw-page.easy-read-assessment .student-essay-label {
+        font-size: 18px;
+    }
+
+    .aw-page.easy-read-assessment .student-essay-input {
+        min-height: 270px;
+        font-size: 19px;
+        line-height: 1.85;
+        letter-spacing: .2px;
+        word-spacing: 1px;
+    }
+
+    /* =========================================
+       DUKUNGAN BELAJAR ADAPTIF
+       ========================================= */
+
+    .student-scaffolding-box {
+        margin-top: 26px;
+        padding: 22px 24px;
+
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-left: 4px solid #2563eb;
+        border-radius: 16px;
+    }
+
+    .student-scaffolding-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        margin: 0 0 12px;
+        color: #1e40af;
+
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.5;
+    }
+
+    .student-scaffolding-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        flex: 0 0 36px;
+        width: 36px;
+        height: 36px;
+
+        background: #dbeafe;
+        border-radius: 11px;
+        font-size: 19px;
+    }
+
+    .student-scaffolding-description {
+        margin: 0 0 14px;
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .student-scaffolding-list {
+        margin: 0;
+        padding-left: 26px;
+    }
+
+    .student-scaffolding-list li {
+        margin-bottom: 12px;
+        padding-left: 4px;
+        color: #172238;
+
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 17px;
+        font-weight: 500;
+        line-height: 1.8;
+        letter-spacing: .2px;
+        word-spacing: .7px;
+        overflow-wrap: break-word;
+    }
+
+    .student-scaffolding-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    /* =========================================
+       NAVIGASI
+       ========================================= */
 
     .aw-nav {
         display: flex;
@@ -269,11 +421,15 @@
     }
 
     .aw-btn {
+        flex: 1;
+        min-height: 48px;
         padding: 12px 17px;
-        border-radius: 12px;
-        border: 1px solid #dce5f0;
+
         background: white;
         color: var(--aw-ink);
+        border: 1px solid #dce5f0;
+        border-radius: 12px;
+
         font-weight: 700;
         cursor: pointer;
     }
@@ -289,13 +445,9 @@
         cursor: not-allowed;
     }
 
-    .aw-nav .aw-btn {
-        flex: 1;
-    }
-
     .aw-sidebar h3 {
-        font-size: 15px;
         margin: 0 0 8px;
+        font-size: 16px;
     }
 
     .aw-numbers {
@@ -307,17 +459,17 @@
 
     .aw-numbtn {
         aspect-ratio: 1;
+        background: white;
         border: 1px solid #dfe7f0;
         border-radius: 10px;
-        background: white;
         font-weight: 700;
         cursor: pointer;
     }
 
     .aw-numbtn.current {
         background: var(--aw-blue);
-        border-color: var(--aw-blue);
         color: white;
+        border-color: var(--aw-blue);
     }
 
     .aw-numbtn.answered {
@@ -331,9 +483,9 @@
         color: white;
     }
 
-    /* ========================================
-       TOMBOL AKSESIBILITAS
-       ======================================== */
+    /* =========================================
+       AKSESIBILITAS
+       ========================================= */
 
     .aw-tools {
         display: flex;
@@ -343,13 +495,13 @@
     }
 
     .aw-tool {
-        border: 1px solid #dfe7f0;
-        background: white;
         padding: 9px 12px;
+        background: white;
+        border: 1px solid #dfe7f0;
         border-radius: 10px;
-        cursor: pointer;
         font-size: 12px;
         font-weight: 700;
+        cursor: pointer;
     }
 
     .aw-tool.active {
@@ -361,10 +513,12 @@
         width: 100%;
         margin-top: 16px;
         padding: 13px;
-        border: 0;
-        border-radius: 12px;
+
         background: var(--aw-teal);
         color: white;
+        border: none;
+        border-radius: 12px;
+
         font-weight: 800;
         cursor: pointer;
     }
@@ -374,7 +528,7 @@
         cursor: not-allowed;
     }
 
-    /* Tombol A+ untuk semua versi */
+    /* Tombol perbesar teks */
 
     .aw-page.large-text .aw-question {
         font-size: 23px;
@@ -384,7 +538,9 @@
         font-size: 20px;
     }
 
-    /* Tombol A+ pada Adaptif */
+    .aw-page.large-text .student-essay-input {
+        font-size: 21px;
+    }
 
     .aw-page.easy-read-assessment.large-text .aw-question {
         font-size: 25px;
@@ -394,27 +550,52 @@
         font-size: 22px;
     }
 
+    .aw-page.easy-read-assessment.large-text .student-essay-input {
+        font-size: 23px;
+    }
+
+    .aw-page.easy-read-assessment.large-text
+    .student-scaffolding-list li {
+        font-size: 21px;
+    }
+
     /* Mode kontras */
 
     .aw-page.high-contrast {
-        --aw-ink: #000000;
+        --aw-ink: #000;
         --aw-muted: #303030;
     }
 
     .aw-page.high-contrast .aw-card,
     .aw-page.high-contrast .aw-sidebar,
-    .aw-page.high-contrast .aw-option {
-        border-color: #333333;
+    .aw-page.high-contrast .aw-option,
+    .aw-page.high-contrast .student-essay-input,
+    .aw-page.high-contrast .student-scaffolding-box {
+        border-color: #333;
     }
 
     .aw-page.high-contrast .aw-question,
-    .aw-page.high-contrast .aw-option-text {
-        color: #000000;
+    .aw-page.high-contrast .aw-option-text,
+    .aw-page.high-contrast .student-essay-input,
+    .aw-page.high-contrast .student-scaffolding-list li {
+        color: #000;
     }
 
-    /* ========================================
+    /* Mode fokus */
+
+    .aw-page.focus-mode .aw-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .aw-page.focus-mode .aw-card {
+        width: 100%;
+        max-width: 850px;
+        margin: 0 auto;
+    }
+
+    /* =========================================
        RESPONSIF HP
-       ======================================== */
+       ========================================= */
 
     @media (max-width: 700px) {
         .aw-page {
@@ -430,15 +611,12 @@
             padding: 17px;
         }
 
-        .aw-numbers {
-            grid-template-columns: repeat(
-                5,
-                minmax(0, 1fr)
-            );
-        }
-
         .aw-card {
             padding: 19px;
+        }
+
+        .aw-numbers {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
         }
 
         .aw-question {
@@ -459,26 +637,42 @@
             font-size: 17px;
         }
 
-        .aw-page.easy-read-assessment.large-text .aw-question {
-            font-size: 23px;
+        .student-question-figure {
+            padding: 10px;
         }
 
-        .aw-page.easy-read-assessment.large-text .aw-option-text {
-            font-size: 21px;
+        .student-question-image {
+            max-height: 320px;
+        }
+
+        .student-scaffolding-box {
+            padding: 18px;
+        }
+
+        .student-scaffolding-title {
+            font-size: 17px;
+        }
+
+        .student-scaffolding-list li {
+            font-size: 16px;
+        }
+
+        .aw-page.easy-read-assessment .student-essay-input {
+            font-size: 18px;
         }
     }
 </style>
 
 <div
-    class="aw-page {{ $version === 'adaptif' ? 'easy-read-assessment' : '' }}"
-    id="assessmentApp">
+    id="assessmentApp"
+    class="aw-page {{ $version === 'adaptif' ? 'easy-read-assessment' : '' }}">
 
-    {{-- HEADER HALAMAN --}}
+    {{-- HEADER --}}
 
     <div class="aw-top">
-
-        <a href="{{ route('siswa.assessment.instructions', $assessment->id) }}"
-           class="aw-back">
+        <a
+            href="{{ route('siswa.assessment.instructions', $assessment->id) }}"
+            class="aw-back">
             ← Petunjuk asesmen
         </a>
 
@@ -487,11 +681,9 @@
                 ? '✦ Versi Adaptif'
                 : '● Versi Reguler' }}
         </span>
-
     </div>
 
     <div class="aw-heading">
-
         <p class="aw-muted" style="font-size:13px;margin:0">
             {{ $assessment->mapel }} · {{ $assessment->nama }}
         </p>
@@ -503,35 +695,45 @@
         </p>
 
         <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px">
-
             <span id="progressText">
                 Soal 1 dari {{ $questions->count() }}
             </span>
 
-            <span
-                id="elapsedTime"
-                style="font-weight:800;color:#2563eb">
+            <span id="elapsedTime"
+                  style="font-weight:800;color:#2563eb">
                 00:00
             </span>
-
         </div>
 
         <div class="aw-progress">
-            <div class="aw-progress-bar" id="progressBar"></div>
+            <div
+                id="progressBar"
+                class="aw-progress-bar">
+            </div>
         </div>
-
     </div>
 
-    {{-- FORM JAWABAN SISWA --}}
+    @if($errors->any())
+        <div
+            role="alert"
+            style="padding:14px;margin-bottom:20px;border-radius:12px;background:#fff0f0;color:#9f1239;">
+            {{ $errors->first() }}
+        </div>
+    @endif
+
+    {{-- FORM PENGERJAAN --}}
 
     <form
         id="assessmentForm"
         method="POST"
-        action="{{ route('siswa.assessment.submit', [
-            'id' => $assessment->id,
-        ]) }}">
+        action="{{ route('siswa.assessment.submit', ['id' => $assessment->id]) }}">
 
         @csrf
+
+        <input
+            type="hidden"
+            name="attempt_id"
+            value="{{ $attemptId }}">
 
         <input
             type="hidden"
@@ -542,20 +744,13 @@
 
             <main class="aw-card">
 
-                {{-- =====================================
-                     LOOP SOAL SISWA
-                     HANYA SATU LOOP UTAMA
-                     ===================================== --}}
+                {{-- LOOP SOAL --}}
 
                 @foreach($questions as $index => $question)
-
                     @php
                         /*
-                         * Options dapat berupa:
-                         * - array PHP
-                         * - string JSON
+                         * 1. Normalisasi opsi jawaban.
                          */
-
                         $options = is_array($question->options)
                             ? $question->options
                             : json_decode(
@@ -565,6 +760,63 @@
 
                         $options = is_array($options)
                             ? $options
+                            : [];
+
+                        /*
+                         * 2. Periksa jenis soal.
+                         *
+                         * PERBAIKAN UTAMA:
+                         * Soal tanpa opsi mendapat textarea,
+                         * walaupun question_type dari database
+                         * belum terbaca sebagai "esai".
+                         */
+                        $tipeSoal = strtolower(
+                            trim((string) (
+                                $question->question_type ?? ''
+                            ))
+                        );
+
+                        $typeSaysEssay =
+                            str_contains($tipeSoal, 'esai')
+                            || str_contains($tipeSoal, 'essay')
+                            || str_contains($tipeSoal, 'uraian');
+
+                        $isEssay = $typeSaysEssay || empty($options);
+
+                        /*
+                         * 3. Ambil jawaban tersimpan.
+                         */
+                        $jawabanTersimpan = old(
+                            'answers.' . $question->id,
+                            $savedAnswers[$question->id] ?? ''
+                        );
+
+                        /*
+                         * 4. Ambil scaffolding Adaptif.
+                         */
+                        $petunjukAdaptif = $version === 'adaptif'
+                            ? (
+                                ($scaffoldingPerQuestion ?? [])[$question->id]
+                                ?? []
+                            )
+                            : [];
+
+                        $petunjukAdaptif = is_array($petunjukAdaptif)
+                            ? $petunjukAdaptif
+                            : [];
+
+                        /*
+                         * 5. Ambil gambar Adaptif.
+                         */
+                        $gambarSoal = $version === 'adaptif'
+                            ? (
+                                ($gambarPerQuestion ?? [])[$question->id]
+                                ?? []
+                            )
+                            : [];
+
+                        $gambarSoal = is_array($gambarSoal)
+                            ? $gambarSoal
                             : [];
                     @endphp
 
@@ -583,98 +835,198 @@
                             ) }}
                         </div>
 
-                        {{-- PERTANYAAN REGULER / ADAPTIF --}}
+                        {{-- TEKS PERTANYAAN --}}
 
                         <div class="aw-question {{ $version === 'adaptif' ? 'easy-read-question' : '' }}">{{ $question->question_text }}</div>
 
-                        {{-- PILIHAN JAWABAN --}}
+                        {{-- GAMBAR KHUSUS ADAPTIF --}}
 
-                        <div class="aw-options {{ $version === 'adaptif' ? 'easy-read-options' : '' }}">
+                        @if(
+                            $version === 'adaptif'
+                            && !empty($gambarSoal)
+                        )
+                            <div class="student-question-images">
 
-                            {{-- =====================================
-                                 LOOP PILIHAN JAWABAN
-                                 HANYA SATU LOOP
-                                 ===================================== --}}
+                                @foreach($gambarSoal as $gambar)
+                                    @php
+                                        $imageUrl = is_array($gambar)
+                                            ? ($gambar['url'] ?? null)
+                                            : null;
 
-                            @foreach($options as $key => $option)
+                                        $imageAlt = is_array($gambar)
+                                            ? (
+                                                $gambar['alt']
+                                                ?? 'Ilustrasi pendukung soal'
+                                            )
+                                            : 'Ilustrasi pendukung soal';
+                                    @endphp
 
-                                @php
-                                    /*
-                                     * Data dari Dify biasanya:
-                                     *
-                                     * {
-                                     *   "label": "A",
-                                     *   "teks": "Kerongkongan"
-                                     * }
-                                     *
-                                     * Tetapi tetap dukung
-                                     * pilihan jawaban string biasa.
-                                     */
+                                    @if(
+                                        is_string($imageUrl)
+                                        && filter_var($imageUrl, FILTER_VALIDATE_URL)
+                                    )
+                                        <figure class="student-question-figure">
+                                            <img
+                                                src="{{ $imageUrl }}"
+                                                alt="{{ $imageAlt }}"
+                                                class="student-question-image"
+                                                loading="lazy"
+                                                referrerpolicy="no-referrer"
+                                                onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
 
-                                    $optionData = is_array($option)
-                                        ? $option
-                                        : [];
+                                            <div class="student-image-error">
+                                                Ilustrasi belum dapat dimuat.
+                                            </div>
 
-                                    // Label yang tampil: A, B, C, D.
-                                    $optionLabel =
-                                        $optionData['label']
-                                        ?? (
-                                            is_numeric($key)
-                                                ? chr(65 + (int) $key)
-                                                : (string) $key
-                                        );
+                                            <figcaption>
+                                                {{ $imageAlt }}
+                                            </figcaption>
+                                        </figure>
+                                    @endif
+                                @endforeach
 
-                                    // Ambil teks jawaban saja.
-                                    $optionText =
-                                        $optionData['teks']
-                                        ?? $optionData['text']
-                                        ?? (
-                                            is_scalar($option)
-                                                ? (string) $option
-                                                : ''
-                                        );
+                            </div>
+                        @endif
 
-                                    /*
-                                     * Nilai input tetap menggunakan
-                                     * key asli seperti kode sebelumnya.
-                                     */
-                                    $optionValue = $key;
+                        {{-- ======================================
+                             JAWABAN SISWA
+                             ====================================== --}}
 
-                                    $isChecked =
-                                        (string) (
-                                            $savedAnswers[$question->id]
-                                            ?? ''
-                                        ) === (string) $optionValue;
-                                @endphp
+                        @if($isEssay)
 
-                                <label class="aw-option">
+                            {{-- ESAI: SELALU TAMPILKAN TEXTAREA --}}
 
-                                    <input
-                                        type="radio"
-                                        name="answers[{{ $question->id }}]"
-                                        value="{{ $optionValue }}"
-                                        {{ $isChecked ? 'checked' : '' }}>
+                            <div class="student-essay-wrapper">
 
-                                    <span class="aw-letter">{{ $optionLabel }}</span>
-
-                                    <span class="aw-option-text">{{ $optionText }}</span>
-
+                                <label
+                                    for="essay-answer-{{ $question->id }}"
+                                    class="student-essay-label">
+                                    Tulis jawabanmu di sini
                                 </label>
 
-                            @endforeach
+                                <textarea
+                                    id="essay-answer-{{ $question->id }}"
+                                    name="answers[{{ $question->id }}]"
+                                    class="student-essay-input"
+                                    rows="8"
+                                    maxlength="5000"
+                                    placeholder="Tuliskan jawaban dengan bahasamu sendiri..."
+                                    aria-label="Jawaban esai pertanyaan {{ $index + 1 }}">{{ $jawabanTersimpan }}</textarea>
 
-                        </div>
+                                <p class="student-essay-hint">
+                                    Kamu dapat menulis beberapa kalimat.
+                                    Periksa kembali jawaban sebelum dikumpulkan.
+                                </p>
+
+                            </div>
+
+                        @else
+
+                            {{-- PILIHAN GANDA --}}
+
+                            <div class="aw-options {{ $version === 'adaptif' ? 'easy-read-options' : '' }}">
+
+                                @foreach($options as $key => $option)
+                                    @php
+                                        $optionData = is_array($option)
+                                            ? $option
+                                            : [];
+
+                                        $optionLabel =
+                                            $optionData['label']
+                                            ?? (
+                                                is_numeric($key)
+                                                    ? chr(65 + (int) $key)
+                                                    : (string) $key
+                                            );
+
+                                        $optionText =
+                                            $optionData['teks']
+                                            ?? $optionData['text']
+                                            ?? (
+                                                is_scalar($option)
+                                                    ? (string) $option
+                                                    : ''
+                                            );
+
+                                        /*
+                                         * Format key asli dipertahankan.
+                                         */
+                                        $optionValue = (string) $key;
+
+                                        $isChecked =
+                                            (string) $jawabanTersimpan
+                                            === $optionValue;
+                                    @endphp
+
+                                    <label class="aw-option">
+
+                                        <input
+                                            type="radio"
+                                            name="answers[{{ $question->id }}]"
+                                            value="{{ $optionValue }}"
+                                            {{ $isChecked ? 'checked' : '' }}>
+
+                                        <span class="aw-letter">
+                                            {{ $optionLabel }}
+                                        </span>
+
+                                        <span class="aw-option-text">
+                                            {{ $optionText }}
+                                        </span>
+
+                                    </label>
+                                @endforeach
+
+                            </div>
+
+                        @endif
+
+                        {{-- DUKUNGAN BELAJAR ADAPTIF --}}
+
+                        @if(
+                            $version === 'adaptif'
+                            && !empty($petunjukAdaptif)
+                        )
+                            <div class="student-scaffolding-box">
+
+                                <h3 class="student-scaffolding-title">
+                                    <span
+                                        class="student-scaffolding-icon"
+                                        aria-hidden="true">
+                                        💡
+                                    </span>
+
+                                    Dukungan Belajar Adaptif
+                                </h3>
+
+                                <p class="student-scaffolding-description">
+                                    Gunakan petunjuk berikut untuk
+                                    membantu memahami pertanyaan.
+                                </p>
+
+                                <ol class="student-scaffolding-list">
+
+                                    @foreach($petunjukAdaptif as $petunjuk)
+                                        @if(
+                                            is_string($petunjuk)
+                                            && trim($petunjuk) !== ''
+                                        )
+                                            <li>{{ $petunjuk }}</li>
+                                        @endif
+                                    @endforeach
+
+                                </ol>
+
+                            </div>
+                        @endif
 
                     </section>
-
                 @endforeach
 
-                {{-- =====================================
-                     AKHIR LOOP SOAL
-                     ===================================== --}}
+                {{-- NAVIGASI SEBELUMNYA/SELANJUTNYA --}}
 
                 <div class="aw-nav">
-
                     <button
                         type="button"
                         class="aw-btn"
@@ -688,48 +1040,33 @@
                         id="nextBtn">
                         Selanjutnya →
                     </button>
-
                 </div>
 
             </main>
 
-            {{-- =====================================
-                 SIDEBAR NAVIGASI SISWA
-                 ===================================== --}}
+            {{-- SIDEBAR --}}
 
             <aside class="aw-sidebar">
 
                 <h3>Navigasi soal</h3>
 
-                <p
-                    class="aw-muted"
-                    style="font-size:12px;line-height:1.6">
+                <p class="aw-muted"
+                   style="font-size:12px;line-height:1.6">
                     Pilih nomor untuk berpindah soal.
                 </p>
 
-                <div
-                    class="aw-numbers"
-                    id="questionNumbers">
-
+                <div class="aw-numbers" id="questionNumbers">
                     @foreach($questions as $index => $question)
-
                         <button
                             type="button"
                             class="aw-numbtn {{ $index === 0 ? 'current' : '' }}"
                             data-go="{{ $index }}">
-
                             {{ $index + 1 }}
-
                         </button>
-
                     @endforeach
-
                 </div>
 
-                <div
-                    class="aw-muted"
-                    style="font-size:12px">
-
+                <div class="aw-muted" style="font-size:12px">
                     <span style="color:#0d9488">●</span>
                     Sudah dijawab
 
@@ -737,13 +1074,9 @@
 
                     <span style="color:#2563eb">●</span>
                     Soal aktif
-
                 </div>
 
-                {{-- FITUR AKSESIBILITAS --}}
-
                 <div class="aw-tools">
-
                     <button
                         type="button"
                         class="aw-tool"
@@ -771,10 +1104,7 @@
                         id="readBtn">
                         🔊 Bacakan
                     </button>
-
                 </div>
-
-                {{-- SUBMIT JAWABAN --}}
 
                 <button
                     type="button"
@@ -786,14 +1116,13 @@
             </aside>
 
         </div>
-
     </form>
 
 </div>
 
-{{-- ========================================
-     JAVASCRIPT PENGERJAAN SISWA
-     ======================================== --}}
+{{-- ==========================================
+     JAVASCRIPT HALAMAN SISWA
+     ========================================== --}}
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -801,25 +1130,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const app = document.getElementById('assessmentApp');
     const form = document.getElementById('assessmentForm');
 
-    const panels = [
-        ...document.querySelectorAll('.aw-question-panel')
-    ];
+    const panels = Array.from(
+        document.querySelectorAll('.aw-question-panel')
+    );
 
-    const numberButtons = [
-        ...document.querySelectorAll('.aw-numbtn')
-    ];
+    const numberButtons = Array.from(
+        document.querySelectorAll('.aw-numbtn')
+    );
 
-    const previousBtn =
-        document.getElementById('previousBtn');
-
-    const nextBtn =
-        document.getElementById('nextBtn');
-
-    const progressText =
-        document.getElementById('progressText');
-
-    const progressBar =
-        document.getElementById('progressBar');
+    const previousBtn = document.getElementById('previousBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progressText = document.getElementById('progressText');
+    const progressBar = document.getElementById('progressBar');
+    const sidebar = app.querySelector('.aw-sidebar');
+    const submitBtn = document.getElementById('submitBtn');
 
     const total = panels.length;
 
@@ -827,60 +1151,74 @@ document.addEventListener('DOMContentLoaded', function () {
     let focusMode = false;
 
     /*
-     * Perbarui warna nomor soal terjawab.
+     * Status terjawab untuk PG dan esai.
+     */
+    function isPanelAnswered(panel) {
+        const checkedRadio = panel.querySelector(
+            'input[type="radio"]:checked'
+        );
+
+        const essayInput = panel.querySelector(
+            '.student-essay-input'
+        );
+
+        return Boolean(
+            checkedRadio ||
+            (
+                essayInput &&
+                essayInput.value.trim() !== ''
+            )
+        );
+    }
+
+    /*
+     * Warna nomor soal.
      */
     function updateAnswered() {
-
         panels.forEach((panel, index) => {
-
-            const answered = panel.querySelector(
-                'input[type="radio"]:checked'
-            );
-
             if (numberButtons[index]) {
-
                 numberButtons[index].classList.toggle(
                     'answered',
-                    !!answered
+                    isPanelAnswered(panel)
                 );
-
             }
         });
     }
 
     /*
-     * Tampilkan soal sesuai nomor.
+     * Berpindah soal.
      */
     function showQuestion(index) {
-
         if (index < 0 || index >= total) {
             return;
         }
 
         current = index;
 
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+
         panels.forEach((panel, i) => {
-
-            panel.style.display =
-                i === current ? '' : 'none';
-
+            panel.style.display = i === current
+                ? ''
+                : 'none';
         });
 
         numberButtons.forEach((button, i) => {
-
             button.classList.toggle(
                 'current',
                 i === current
             );
-
         });
 
         previousBtn.disabled = current === 0;
 
-        nextBtn.textContent =
-            current === total - 1
-                ? 'Soal terakhir ✓'
-                : 'Selanjutnya →';
+        nextBtn.disabled = current === total - 1;
+
+        nextBtn.textContent = current === total - 1
+            ? 'Soal terakhir ✓'
+            : 'Selanjutnya →';
 
         progressText.textContent =
             `Soal ${current + 1} dari ${total}`;
@@ -891,82 +1229,64 @@ document.addEventListener('DOMContentLoaded', function () {
         updateAnswered();
     }
 
-    /*
-     * Klik nomor soal di sidebar.
-     */
     numberButtons.forEach(button => {
-
-        button.addEventListener('click', () => {
-
-            showQuestion(
-                Number(button.dataset.go)
-            );
-
+        button.addEventListener('click', function () {
+            showQuestion(Number(this.dataset.go));
         });
-
     });
 
-    /*
-     * Navigasi sebelumnya.
-     */
-    previousBtn.addEventListener('click', () => {
-
+    previousBtn.addEventListener('click', function () {
         showQuestion(current - 1);
+    });
 
+    nextBtn.addEventListener('click', function () {
+        showQuestion(current + 1);
     });
 
     /*
-     * Navigasi selanjutnya.
+     * Pilihan ganda.
      */
-    nextBtn.addEventListener('click', () => {
+    form.querySelectorAll('input[type="radio"]')
+        .forEach(input => {
 
-        if (current < total - 1) {
+            input.addEventListener('change', function () {
+                const panel = this.closest('.aw-question-panel');
 
-            showQuestion(current + 1);
+                panel.querySelectorAll('.aw-option')
+                    .forEach(option => {
+                        const radio = option.querySelector(
+                            'input[type="radio"]'
+                        );
 
-        }
+                        option.classList.toggle(
+                            'selected',
+                            Boolean(radio && radio.checked)
+                        );
+                    });
 
-    });
-
-    /*
-     * Saat siswa memilih jawaban.
-     */
-    form.querySelectorAll(
-        'input[type="radio"]'
-    ).forEach(input => {
-
-        input.addEventListener('change', () => {
-
-            const panel = input.closest(
-                '.aw-question-panel'
-            );
-
-            panel.querySelectorAll(
-                '.aw-option'
-            ).forEach(option => {
-
-                option.classList.toggle(
-                    'selected',
-                    option.querySelector('input').checked
-                );
-
+                updateAnswered();
             });
-
-            updateAnswered();
-
         });
 
-    });
+    /*
+     * ESAI:
+     * Status terjawab berubah saat mengetik.
+     */
+    form.querySelectorAll('.student-essay-input')
+        .forEach(textarea => {
+            textarea.addEventListener(
+                'input',
+                updateAnswered
+            );
+        });
 
     /*
-     * Tombol A+.
+     * Tombol perbesar teks.
      */
     document.getElementById('largeTextBtn')
         .addEventListener('click', function () {
-
             app.classList.toggle('large-text');
             this.classList.toggle('active');
-
         });
 
     /*
@@ -974,10 +1294,8 @@ document.addEventListener('DOMContentLoaded', function () {
      */
     document.getElementById('contrastBtn')
         .addEventListener('click', function () {
-
             app.classList.toggle('high-contrast');
             this.classList.toggle('active');
-
         });
 
     /*
@@ -985,93 +1303,98 @@ document.addEventListener('DOMContentLoaded', function () {
      */
     document.getElementById('focusBtn')
         .addEventListener('click', function () {
-
             focusMode = !focusMode;
 
-            app.querySelector('.aw-sidebar').style.display =
-                focusMode ? 'none' : '';
+            app.classList.toggle('focus-mode', focusMode);
 
-            this.classList.toggle('active');
+            sidebar.style.display = focusMode
+                ? 'none'
+                : '';
 
+            this.classList.toggle('active', focusMode);
         });
 
     /*
-     * Pembaca soal.
+     * Pembaca soal dan petunjuk.
      */
     document.getElementById('readBtn')
         .addEventListener('click', function () {
 
             if (!('speechSynthesis' in window)) {
-
                 alert(
                     'Fitur pembaca teks tidak didukung browser ini.'
                 );
-
                 return;
             }
 
             window.speechSynthesis.cancel();
 
-            if (panels.length === 0) {
+            const panel = panels[current];
+
+            if (!panel) {
                 return;
             }
 
-            const activePanel = panels[current];
-
             const questionText =
-                activePanel.querySelector('.aw-question')
+                panel.querySelector('.aw-question')
                     ?.innerText ?? '';
 
-            const optionTexts = [
-                ...activePanel.querySelectorAll('.aw-option')
-            ].map(option => option.innerText)
-             .join('. ');
+            const optionText = Array.from(
+                panel.querySelectorAll('.aw-option')
+            ).map(option => option.innerText).join('. ');
+
+            const imageText = Array.from(
+                panel.querySelectorAll('.student-question-image')
+            ).map(img => img.alt).filter(Boolean).join('. ');
+
+            const scaffoldingText =
+                panel.querySelector('.student-scaffolding-box')
+                    ?.innerText ?? '';
+
+            const textToRead = [
+                questionText,
+                optionText,
+                imageText,
+                scaffoldingText
+            ].filter(Boolean).join('. ');
 
             const utterance =
-                new SpeechSynthesisUtterance(
-                    questionText + '. ' + optionTexts
-                );
+                new SpeechSynthesisUtterance(textToRead);
 
             utterance.lang = 'id-ID';
 
             window.speechSynthesis.speak(utterance);
-
         });
 
     /*
-     * Konfirmasi pengumpulan jawaban.
+     * Kirim jawaban.
      */
-    document.getElementById('submitBtn')
-        .addEventListener('click', function () {
+    submitBtn.addEventListener('click', function () {
 
-            const unanswered = panels.filter(
-                panel => !panel.querySelector(
-                    'input[type="radio"]:checked'
-                )
-            ).length;
+        const unanswered = panels.filter(
+            panel => !isPanelAnswered(panel)
+        ).length;
 
-            const message = unanswered > 0
-                ? `Masih ada ${unanswered} soal yang belum dijawab. Tetap kumpulkan?`
-                : 'Yakin ingin mengumpulkan jawaban? Setelah dikumpulkan, asesmen tidak dapat dilanjutkan.';
+        const message = unanswered > 0
+            ? `Masih ada ${unanswered} soal yang belum dijawab. Tetap kumpulkan?`
+            : 'Yakin ingin mengumpulkan jawaban? Setelah dikumpulkan, asesmen tidak dapat dilanjutkan.';
 
-            if (confirm(message)) {
+        if (!confirm(message)) {
+            return;
+        }
 
-                this.disabled = true;
-                this.textContent = 'Mengumpulkan...';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Mengumpulkan...';
 
-                form.submit();
-
-            }
-        });
+        form.submit();
+    });
 
     /*
-     * Timer tampilan pengerjaan.
-     * Bukan batas waktu server.
+     * Timer tampilan, bukan batas waktu server.
      */
     let elapsed = 0;
 
-    setInterval(() => {
-
+    setInterval(function () {
         elapsed++;
 
         const minutes = String(
@@ -1082,35 +1405,30 @@ document.addEventListener('DOMContentLoaded', function () {
             elapsed % 60
         ).padStart(2, '0');
 
-        const elapsedElement =
-            document.getElementById('elapsedTime');
-
-        if (elapsedElement) {
-
-            elapsedElement.textContent =
-                `${minutes}:${seconds}`;
-
-        }
+        document.getElementById('elapsedTime')
+            .textContent = `${minutes}:${seconds}`;
 
     }, 1000);
 
     /*
-     * Inisialisasi halaman.
+     * Inisialisasi awal.
      */
-    showQuestion(0);
+    if (total > 0) {
+        showQuestion(0);
+    }
 
     panels.forEach(panel => {
-
         panel.querySelectorAll('.aw-option')
             .forEach(option => {
+                const radio = option.querySelector(
+                    'input[type="radio"]'
+                );
 
                 option.classList.toggle(
                     'selected',
-                    option.querySelector('input').checked
+                    Boolean(radio && radio.checked)
                 );
-
             });
-
     });
 
     updateAnswered();
