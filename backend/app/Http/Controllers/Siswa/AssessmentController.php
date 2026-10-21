@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\DB;
 
 class AssessmentController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | AKSES SISWA
+    |--------------------------------------------------------------------------
+    */
+
     private function ensureStudent(): void
     {
         $user = Auth::user();
@@ -28,9 +34,11 @@ class AssessmentController extends Controller
             ->where('a.id', $assessmentId)
             ->where('a.status', 'Published')
             ->where(function ($query) use ($studentId) {
-                $query->where('a.visibility', 'public')
+                $query
+                    ->where('a.visibility', 'public')
                     ->orWhereExists(function ($subquery) use ($studentId) {
-                        $subquery->selectRaw('1')
+                        $subquery
+                            ->selectRaw('1')
                             ->from('assessment_class_assignments as aca')
                             ->join(
                                 'class_members as cm',
@@ -38,8 +46,14 @@ class AssessmentController extends Controller
                                 '=',
                                 'aca.class_id'
                             )
-                            ->whereColumn('aca.assessment_id', 'a.id')
-                            ->where('cm.student_id', $studentId);
+                            ->whereColumn(
+                                'aca.assessment_id',
+                                'a.id'
+                            )
+                            ->where(
+                                'cm.student_id',
+                                $studentId
+                            );
                     });
             })
             ->exists();
@@ -58,6 +72,12 @@ class AssessmentController extends Controller
         );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | HELPER DATA
+    |--------------------------------------------------------------------------
+    */
+
     private function decodeArray($value): array
     {
         if (is_string($value)) {
@@ -68,8 +88,10 @@ class AssessmentController extends Controller
     }
 
     /**
-     * Menyamakan aturan identifikasi esai
-     * di controller dengan Blade siswa.
+     * Soal esai dikenali dari jenis soal
+     * atau dari opsi jawaban yang kosong.
+     *
+     * Aturan ini sama dengan Blade pengerjaan siswa.
      */
     private function isEssayQuestion($question): bool
     {
@@ -87,10 +109,12 @@ class AssessmentController extends Controller
             || empty($options);
     }
 
-    /**
-     * Mengambil output Dify yang telah tersimpan.
-     * Tidak memanggil API Dify.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | DATA DIFY YANG SUDAH TERSIMPAN
+    |--------------------------------------------------------------------------
+    */
+
     private function getStoredDifyOutputs(
         int $assessmentId
     ): array {
@@ -123,10 +147,6 @@ class AssessmentController extends Controller
         );
     }
 
-    /**
-     * Mengambil soal Adaptif yang sudah direview guru,
-     * atau output awal/revisi Dify.
-     */
     private function getAdaptiveSourceQuestions(
         int $assessmentId,
         array $outputs
@@ -161,9 +181,6 @@ class AssessmentController extends Controller
             : [];
     }
 
-    /**
-     * Mengubah petunjuk Dify menjadi array teks.
-     */
     private function normalizeScaffolding($value): array
     {
         if (is_string($value)) {
@@ -180,16 +197,25 @@ class AssessmentController extends Controller
 
         foreach ($value as $item) {
             if (is_string($item)) {
-                if (trim($item) !== '') {
-                    $result[] = trim($item);
+                $text = trim($item);
+
+                if ($text !== '') {
+                    $result[] = $text;
                 }
-            } elseif (is_array($item)) {
+
+                continue;
+            }
+
+            if (is_array($item)) {
                 $text = $item['teks']
                     ?? $item['petunjuk']
                     ?? $item['langkah']
                     ?? null;
 
-                if (is_string($text) && trim($text) !== '') {
+                if (
+                    is_string($text)
+                    && trim($text) !== ''
+                ) {
                     $result[] = trim($text);
                 }
             }
@@ -199,8 +225,10 @@ class AssessmentController extends Controller
     }
 
     /**
-     * Menyiapkan gambar dan scaffolding Adaptif
-     * menggunakan ID soal database.
+     * Menyiapkan gambar dan dukungan scaffolding
+     * untuk soal Adaptif.
+     *
+     * Tidak memanggil API Dify kembali.
      */
     private function getAdaptiveSupport(
         int $assessmentId,
@@ -212,7 +240,10 @@ class AssessmentController extends Controller
             'images' => [],
         ];
 
-        if ($version !== 'adaptif' || $questions->isEmpty()) {
+        if (
+            $version !== 'adaptif'
+            || $questions->isEmpty()
+        ) {
             return $empty;
         }
 
@@ -227,8 +258,14 @@ class AssessmentController extends Controller
 
         $questions = $questions->values();
 
-        // Jangan memasangkan petunjuk ke soal yang salah.
-        if (count($sourceQuestions) !== $questions->count()) {
+        /*
+         * Hindari memasangkan gambar atau petunjuk
+         * ke soal yang tidak sesuai.
+         */
+        if (
+            count($sourceQuestions)
+            !== $questions->count()
+        ) {
             return $empty;
         }
 
@@ -265,6 +302,9 @@ class AssessmentController extends Controller
             }
         }
 
+        /*
+         * Ambil gambar dari output Dify.
+         */
         $gambarRaw = $this->decodeArray(
             $outputs['gambar_asesmen_revisi']
             ?? $outputs['gambar_asesmen']
@@ -280,6 +320,9 @@ class AssessmentController extends Controller
                 continue;
             }
 
+            /*
+             * Format output Dify dapat bertingkat.
+             */
             if (
                 isset($item['output'])
                 && is_array($item['output'])
@@ -329,14 +372,24 @@ class AssessmentController extends Controller
             }
 
             $scheme = strtolower(
-                (string) parse_url($url, PHP_URL_SCHEME)
+                (string) parse_url(
+                    $url,
+                    PHP_URL_SCHEME
+                )
             );
 
-            if (!in_array($scheme, ['http', 'https'], true)) {
+            if (
+                !in_array(
+                    $scheme,
+                    ['http', 'https'],
+                    true
+                )
+            ) {
                 continue;
             }
 
-            $questionId = $databaseIdPerSourceId[$sourceId];
+            $questionId =
+                $databaseIdPerSourceId[$sourceId];
 
             $gambarPerQuestion[$questionId][] = [
                 'url' => $url,
@@ -354,17 +407,27 @@ class AssessmentController extends Controller
         ];
     }
 
-    /**
-     * Soal yang dikirim ke siswa.
-     * Kunci jawaban tidak disertakan.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | SOAL YANG BOLEH DILIHAT SISWA
+    |--------------------------------------------------------------------------
+    */
+
     private function getQuestionsForStudent(
         int $assessmentId,
         string $version
     ) {
         return DB::table('assessment_questions as aq')
-            ->join('questions as q', 'q.id', '=', 'aq.question_id')
-            ->where('aq.assessment_id', $assessmentId)
+            ->join(
+                'questions as q',
+                'q.id',
+                '=',
+                'aq.question_id'
+            )
+            ->where(
+                'aq.assessment_id',
+                $assessmentId
+            )
             ->whereRaw(
                 'LOWER(TRIM(q.version_type)) = ?',
                 [$version]
@@ -389,16 +452,24 @@ class AssessmentController extends Controller
             });
     }
 
-    /**
-     * Halaman petunjuk asesmen.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | HALAMAN PETUNJUK
+    |--------------------------------------------------------------------------
+    */
+
     public function instructions($id)
     {
         $this->ensureStudent();
         $this->ensureAssessmentAccessible((int) $id);
 
         $assessment = DB::table('assessments as a')
-            ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
+            ->leftJoin(
+                'users as u',
+                'u.id',
+                '=',
+                'a.user_id'
+            )
             ->where('a.id', $id)
             ->select(
                 'a.id',
@@ -417,8 +488,16 @@ class AssessmentController extends Controller
         );
 
         $versions = DB::table('assessment_questions as aq')
-            ->join('questions as q', 'q.id', '=', 'aq.question_id')
-            ->where('aq.assessment_id', $assessment->id)
+            ->join(
+                'questions as q',
+                'q.id',
+                '=',
+                'aq.question_id'
+            )
+            ->where(
+                'aq.assessment_id',
+                $assessment->id
+            )
             ->distinct()
             ->pluck('q.version_type')
             ->map(
@@ -436,8 +515,16 @@ class AssessmentController extends Controller
         );
 
         $questionCount = DB::table('assessment_questions as aq')
-            ->join('questions as q', 'q.id', '=', 'aq.question_id')
-            ->where('aq.assessment_id', $assessment->id)
+            ->join(
+                'questions as q',
+                'q.id',
+                '=',
+                'aq.question_id'
+            )
+            ->where(
+                'aq.assessment_id',
+                $assessment->id
+            )
             ->whereRaw(
                 'LOWER(TRIM(q.version_type)) IN (?, ?)',
                 ['reguler', 'adaptif']
@@ -455,9 +542,12 @@ class AssessmentController extends Controller
         );
     }
 
-    /**
-     * Mulai pengerjaan siswa.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | MULAI PENGERJAAN - PERBAIKAN DUPLICATE KEY
+    |--------------------------------------------------------------------------
+    */
+
     public function start(Request $request, $id)
     {
         $this->ensureStudent();
@@ -483,6 +573,52 @@ class AssessmentController extends Controller
             'Asesmen tidak ditemukan.'
         );
 
+        /*
+         * PENTING:
+         *
+         * Periksa database terlebih dahulu.
+         * Jangan langsung membuat pengerjaan baru
+         * hanya karena session tidak ditemukan.
+         */
+        $studentId = (int) Auth::id();
+
+        $attempt = DB::table('student_assessments')
+            ->where(
+                'assessment_id',
+                $assessment->id
+            )
+            ->where(
+                'student_id',
+                $studentId
+            )
+            ->first();
+
+        /*
+         * SUDAH SELESAI:
+         * Arahkan siswa ke hasil pengerjaan lama.
+         */
+        if (
+            $attempt
+            && in_array(
+                strtolower((string) $attempt->status),
+                ['submitted', 'completed'],
+                true
+            )
+        ) {
+            session()->forget([
+                'assessment_attempt_id',
+                'assessment_version_' . $attempt->id,
+            ]);
+
+            return redirect()->route(
+                'siswa.assessment.result',
+                ['attemptId' => $attempt->id]
+            );
+        }
+
+        /*
+         * Pastikan versi soal tersedia.
+         */
         $questions = $this->getQuestionsForStudent(
             (int) $assessment->id,
             $version
@@ -494,44 +630,34 @@ class AssessmentController extends Controller
             'Versi soal ini belum tersedia.'
         );
 
+        /*
+         * Ambil gambar dan scaffolding Adaptif.
+         */
         $support = $this->getAdaptiveSupport(
             (int) $assessment->id,
             $questions,
             $version
         );
 
-        $scaffoldingPerQuestion = $support['scaffolding'];
-        $gambarPerQuestion = $support['images'];
+        $scaffoldingPerQuestion =
+            $support['scaffolding'];
 
-        $studentId = (int) Auth::id();
-        $attemptId = session('assessment_attempt_id');
-        $attempt = null;
+        $gambarPerQuestion =
+            $support['images'];
 
-        if ($attemptId) {
-            $attempt = DB::table('student_assessments')
-                ->where('id', $attemptId)
-                ->where('assessment_id', $assessment->id)
-                ->where('student_id', $studentId)
-                ->where('status', 'in_progress')
-                ->first();
-        }
+        /*
+         * MASIH DIKERJAKAN:
+         * Gunakan attempt lama.
+         */
+        if ($attempt) {
+            abort_unless(
+                $attempt->status === 'in_progress',
+                409,
+                'Status pengerjaan belum dapat dilanjutkan.'
+            );
 
-        if (!$attempt) {
-            $attemptId = DB::table('student_assessments')
-                ->insertGetId([
-                    'assessment_id' => $assessment->id,
-                    'student_id' => $studentId,
-                    'status' => 'in_progress',
-                    'started_at' => now(),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            $attemptId = $attempt->id;
 
-            session([
-                'assessment_attempt_id' => $attemptId,
-                'assessment_version_' . $attemptId => $version,
-            ]);
-        } else {
             $savedVersion = session(
                 'assessment_version_' . $attemptId
             );
@@ -541,21 +667,54 @@ class AssessmentController extends Controller
                 && $savedVersion !== $version
             ) {
                 return redirect()
-                    ->route('siswa.assessment.instructions', $id)
+                    ->route(
+                        'siswa.assessment.instructions',
+                        $id
+                    )
                     ->with(
                         'error',
                         'Selesaikan versi yang sedang dikerjakan terlebih dahulu.'
                     );
             }
 
-            session([
-                'assessment_version_' . $attemptId => $version,
-            ]);
+        } else {
+
+            /*
+             * BELUM PERNAH DIKERJAKAN:
+             * Baru buat pengerjaan baru.
+             */
+            $attemptId = DB::table('student_assessments')
+                ->insertGetId([
+                    'assessment_id' => $assessment->id,
+                    'student_id' => $studentId,
+                    'status' => 'in_progress',
+                    'started_at' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
         }
 
+        /*
+         * Simpan sesi dan versi yang dipilih.
+         */
+        session([
+            'assessment_attempt_id' => $attemptId,
+            'assessment_version_' . $attemptId => $version,
+        ]);
+
+        /*
+         * Ambil jawaban yang sudah tersimpan,
+         * jika pengerjaan dilanjutkan.
+         */
         $savedAnswers = DB::table('student_answers')
-            ->where('student_assessment_id', $attemptId)
-            ->pluck('answer', 'question_id');
+            ->where(
+                'student_assessment_id',
+                $attemptId
+            )
+            ->pluck(
+                'answer',
+                'question_id'
+            );
 
         return view(
             'student.assessment-working',
@@ -571,19 +730,145 @@ class AssessmentController extends Controller
         );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | HELPER PENILAIAN PILIHAN GANDA
+    |--------------------------------------------------------------------------
+    */
+
+    private function normalizeAnswer($value): string
+    {
+        return mb_strtoupper(
+            trim((string) $value),
+            'UTF-8'
+        );
+    }
+
     /**
-     * Mengumpulkan jawaban siswa.
-     *
-     * Esai disimpan sebagai teks untuk koreksi guru.
-     * Skor yang mengandung esai masih sementara.
+     * Mendukung format jawaban:
+     * - key opsi 0, 1, 2, 3
+     * - label A, B, C, D
+     * - teks opsi
      */
+    private function checkMultipleChoiceAnswer(
+        string $answer,
+        array $options,
+        $correctAnswer
+    ): bool {
+        if (!array_key_exists($answer, $options)) {
+            return false;
+        }
+
+        $selectedOption = $options[$answer];
+
+        $selectedData = is_array($selectedOption)
+            ? $selectedOption
+            : [];
+
+        $selectedLabel = $selectedData['label']
+            ?? (
+                ctype_digit($answer)
+                    ? chr(65 + (int) $answer)
+                    : $answer
+            );
+
+        $selectedText = $selectedData['teks']
+            ?? $selectedData['text']
+            ?? (
+                is_scalar($selectedOption)
+                    ? (string) $selectedOption
+                    : ''
+            );
+
+        $correct = $this->normalizeAnswer(
+            $correctAnswer
+        );
+
+        if ($correct === '') {
+            return false;
+        }
+
+        $accepted = [
+            $this->normalizeAnswer($answer),
+            $this->normalizeAnswer($selectedLabel),
+            $this->normalizeAnswer($selectedText),
+        ];
+
+        return in_array(
+            $correct,
+            $accepted,
+            true
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ANALYTICS DAN KALIMAT MOTIVASI SISWA
+    |--------------------------------------------------------------------------
+    */
+
+    private function makeStudentFeedback(
+        ?float $nilaiPG
+    ): array {
+        if ($nilaiPG === null) {
+            return [
+                'kategori' => 'Menunggu Penilaian',
+                'pesan' =>
+                    'Terima kasih sudah menyelesaikan asesmen! ' .
+                    'Jawaban esaimu akan diperiksa oleh guru. ' .
+                    'Tetap semangat belajar dan terus berkembang, ya!',
+            ];
+        }
+
+        if ($nilaiPG >= 85) {
+            return [
+                'kategori' => 'Sangat Baik',
+                'pesan' =>
+                    'Hebat! Pemahamanmu sudah sangat baik. ' .
+                    'Pertahankan semangat belajarmu dan terus ' .
+                    'tantang dirimu dengan hal-hal baru!',
+            ];
+        }
+
+        if ($nilaiPG >= 70) {
+            return [
+                'kategori' => 'Baik',
+                'pesan' =>
+                    'Bagus! Kamu sudah memahami banyak materi. ' .
+                    'Yuk, pelajari kembali beberapa bagian yang ' .
+                    'masih sulit agar hasilmu semakin meningkat!',
+            ];
+        }
+
+        return [
+            'kategori' => 'Terus Berkembang',
+            'pesan' =>
+                'Terima kasih sudah berusaha! Setiap latihan ' .
+                'adalah kesempatan untuk berkembang. ' .
+                'Coba pelajari kembali materi dan terus berlatih, ' .
+                'ya. Kemajuan bisa dimulai dari langkah kecil!',
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | KUMPULKAN JAWABAN SISWA
+    |--------------------------------------------------------------------------
+    */
+
     public function submit(Request $request, $id)
     {
         $this->ensureStudent();
 
         $validated = $request->validate([
-            'attempt_id' => ['required', 'integer'],
-            'answers' => ['sometimes', 'array'],
+            'attempt_id' => [
+                'required',
+                'integer',
+            ],
+            'answers' => [
+                'sometimes',
+                'array',
+            ],
             'answers.*' => [
                 'nullable',
                 'string',
@@ -598,13 +883,35 @@ class AssessmentController extends Controller
             ->where('id', $attemptId)
             ->where('assessment_id', $id)
             ->where('student_id', $studentId)
-            ->where('status', 'in_progress')
             ->first();
 
         abort_unless(
             $attempt,
             403,
             'Sesi pengerjaan tidak valid.'
+        );
+
+        /*
+         * Jika pengerjaan sudah dikumpulkan,
+         * jangan mengirim atau menilai ulang.
+         */
+        if (
+            in_array(
+                (string) $attempt->status,
+                ['submitted', 'completed'],
+                true
+            )
+        ) {
+            return redirect()->route(
+                'siswa.assessment.result',
+                ['attemptId' => $attemptId]
+            );
+        }
+
+        abort_unless(
+            $attempt->status === 'in_progress',
+            403,
+            'Sesi pengerjaan tidak aktif.'
         );
 
         $this->ensureAssessmentAccessible((int) $id);
@@ -614,20 +921,33 @@ class AssessmentController extends Controller
         );
 
         abort_unless(
-            in_array($version, ['reguler', 'adaptif'], true),
+            in_array(
+                $version,
+                ['reguler', 'adaptif'],
+                true
+            ),
             403,
-            'Versi soal tidak valid. Silakan buka ulang asesmen.'
+            'Versi soal tidak valid.'
         );
 
         $answers = $validated['answers'] ?? [];
 
         $questions = DB::table('assessment_questions as aq')
-            ->join('questions as q', 'q.id', '=', 'aq.question_id')
-            ->where('aq.assessment_id', $id)
+            ->join(
+                'questions as q',
+                'q.id',
+                '=',
+                'aq.question_id'
+            )
+            ->where(
+                'aq.assessment_id',
+                $id
+            )
             ->whereRaw(
                 'LOWER(TRIM(q.version_type)) = ?',
                 [$version]
             )
+            ->orderBy('aq.question_order')
             ->select(
                 'q.id',
                 'q.question_type',
@@ -643,37 +963,66 @@ class AssessmentController extends Controller
             'Soal tidak ditemukan.'
         );
 
-        // Pastikan jawaban hanya untuk soal paket ini.
+        /*
+         * Validasi ID soal.
+         */
         $validIds = $questions
             ->pluck('id')
-            ->map(fn ($questionId) => (string) $questionId)
+            ->map(
+                fn ($questionId) =>
+                    (string) $questionId
+            )
             ->all();
 
         foreach ($answers as $questionId => $answer) {
-            if (!in_array((string) $questionId, $validIds, true)) {
-                return back()->withErrors([
-                    'answers' =>
-                        'Terdapat jawaban yang tidak sesuai dengan versi soal ini.',
-                ]);
+            if (
+                !in_array(
+                    (string) $questionId,
+                    $validIds,
+                    true
+                )
+            ) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'answers' =>
+                            'Ada jawaban yang tidak sesuai dengan asesmen ini.',
+                    ]);
             }
 
-            if ($answer !== null && !is_string($answer)) {
-                return back()->withErrors([
-                    'answers' =>
-                        'Ada jawaban dengan format yang tidak valid.',
-                ]);
+            if (
+                $answer !== null
+                && !is_string($answer)
+            ) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'answers' =>
+                            'Format jawaban tidak valid.',
+                    ]);
             }
         }
 
+        /*
+         * Statistik pilihan ganda.
+         */
+        $benar = 0;
+        $salah = 0;
+        $belumDijawab = 0;
+        $jumlahPG = 0;
+
+        $poinPG = 0.0;
+        $poinPGMaksimal = 0.0;
+
+        /*
+         * Statistik esai.
+         */
+        $jumlahEsai = 0;
+        $esaiTerisi = 0;
+
         $totalPoints = (float) $questions->sum(
-            fn ($question) => (float) $question->points
-        );
-
-        $earnedPoints = 0.0;
-
-        // Perbaikan: aturan esai sama dengan Blade.
-        $hasEssay = $questions->contains(
-            fn ($question) => $this->isEssayQuestion($question)
+            fn ($question) =>
+                (float) $question->points
         );
 
         DB::transaction(function () use (
@@ -681,16 +1030,33 @@ class AssessmentController extends Controller
             $answers,
             $attemptId,
             $totalPoints,
-            &$earnedPoints
+            &$benar,
+            &$salah,
+            &$belumDijawab,
+            &$jumlahPG,
+            &$jumlahEsai,
+            &$esaiTerisi,
+            &$poinPG,
+            &$poinPGMaksimal
         ) {
             foreach ($questions as $question) {
                 $answer = $answers[$question->id] ?? null;
 
-                // Perbaikan: soal tanpa opsi diperlakukan
-                // sebagai input teks, bukan pilihan ganda.
-                $isEssay = $this->isEssayQuestion($question);
+                $isEssay = $this->isEssayQuestion(
+                    $question
+                );
+
+                $bobot = (float) $question->points;
+
+                $isCorrect = false;
+                $points = 0.0;
 
                 if ($isEssay) {
+                    /*
+                     * Esai belum dinilai guru.
+                     */
+                    $jumlahEsai++;
+
                     $answer = is_string($answer)
                         ? trim($answer)
                         : null;
@@ -699,40 +1065,74 @@ class AssessmentController extends Controller
                         $answer = null;
                     }
 
-                    // Menunggu koreksi guru.
+                    if ($answer !== null) {
+                        $esaiTerisi++;
+                    }
+
+                    /*
+                     * Nilai teknis sementara.
+                     * Bukan berarti esainya salah.
+                     */
                     $isCorrect = false;
                     $points = 0.0;
+
                 } else {
+                    /*
+                     * Pilihan ganda.
+                     */
+                    $jumlahPG++;
+
+                    $poinPGMaksimal += $bobot;
+
                     $options = $this->decodeArray(
                         $question->options
                     );
 
+                    $answer = is_string($answer)
+                        ? trim($answer)
+                        : null;
+
                     if (
                         $answer !== null
-                        && !array_key_exists($answer, $options)
+                        && !array_key_exists(
+                            $answer,
+                            $options
+                        )
                     ) {
                         $answer = null;
                     }
 
-                    // Logika penilaian pilihan ganda lama.
-                    $isCorrect = $answer !== null
-                        && trim((string) $answer)
-                            === trim(
-                                (string) $question->correct_answer
+                    if (
+                        $answer === null
+                        || $answer === ''
+                    ) {
+                        $belumDijawab++;
+
+                    } else {
+                        $isCorrect =
+                            $this->checkMultipleChoiceAnswer(
+                                $answer,
+                                $options,
+                                $question->correct_answer
                             );
 
-                    $points = $isCorrect
-                        ? (float) $question->points
-                        : 0.0;
+                        if ($isCorrect) {
+                            $benar++;
+                            $points = $bobot;
+                            $poinPG += $points;
+                        } else {
+                            $salah++;
+                        }
+                    }
                 }
-
-                $earnedPoints += $points;
 
                 DB::table('student_answers')
                     ->updateOrInsert(
                         [
-                            'student_assessment_id' => $attemptId,
-                            'question_id' => $question->id,
+                            'student_assessment_id' =>
+                                $attemptId,
+                            'question_id' =>
+                                $question->id,
                         ],
                         [
                             'answer' => $answer,
@@ -743,22 +1143,60 @@ class AssessmentController extends Controller
                     );
             }
 
-            $score = $totalPoints > 0
+            /*
+             * Skor database masih sementara
+             * apabila terdapat soal esai.
+             */
+            $scoreSementara = $totalPoints > 0
                 ? round(
-                    ($earnedPoints / $totalPoints) * 100,
+                    ($poinPG / $totalPoints) * 100,
                     2
                 )
                 : 0;
 
             DB::table('student_assessments')
                 ->where('id', $attemptId)
+                ->where('status', 'in_progress')
                 ->update([
                     'status' => 'submitted',
                     'submitted_at' => now(),
-                    'score' => $score,
+                    'score' => $scoreSementara,
                     'updated_at' => now(),
                 ]);
         });
+
+        /*
+         * Nilai dari soal pilihan ganda saja.
+         */
+        $nilaiPG = $poinPGMaksimal > 0
+            ? round(
+                ($poinPG / $poinPGMaksimal) * 100,
+                2
+            )
+            : null;
+
+        $hasEssay = $jumlahEsai > 0;
+
+        $esaiBelumTerisi =
+            $jumlahEsai - $esaiTerisi;
+
+        $feedback = $this->makeStudentFeedback(
+            $nilaiPG
+        );
+
+        $kategoriHasil = $feedback['kategori'];
+        $kalimatHasil = $feedback['pesan'];
+
+        $catatanEsai = $hasEssay
+            ? 'Hasil pilihan ganda telah diperiksa otomatis. ' .
+              'Jawaban esai masih menunggu koreksi guru, ' .
+              'sehingga nilai keseluruhan belum final.'
+            : 'Seluruh soal pilihan ganda telah diperiksa otomatis.';
+
+        /*
+         * Variabel kompatibilitas halaman hasil.
+         */
+        $earnedPoints = $poinPG;
 
         $score = $totalPoints > 0
             ? round(
@@ -778,20 +1216,80 @@ class AssessmentController extends Controller
                 'score',
                 'earnedPoints',
                 'totalPoints',
-                'hasEssay'
+                'hasEssay',
+                'nilaiPG',
+                'benar',
+                'salah',
+                'belumDijawab',
+                'jumlahPG',
+                'jumlahEsai',
+                'esaiTerisi',
+                'esaiBelumTerisi',
+                'kategoriHasil',
+                'kalimatHasil',
+                'catatanEsai'
             )
         );
     }
 
-    /**
-     * Melanjutkan pengerjaan siswa.
-     *
-     * Gambar dan scaffolding Adaptif tetap tersedia.
-     */
-    public function work($id, $attemptId)
+    /*
+    |--------------------------------------------------------------------------
+    | LANJUTKAN PENGERJAAN
+    |--------------------------------------------------------------------------
+    */
+
+    public function work($id, $attemptId = null)
     {
         $this->ensureStudent();
-        $this->ensureAssessmentAccessible((int) $id);
+
+        $this->ensureAssessmentAccessible(
+            (int) $id
+        );
+
+        /*
+         * Route lama tidak selalu membawa
+         * attemptId sebagai parameter.
+         */
+        $attemptId = $attemptId
+            ?? session('assessment_attempt_id');
+
+        /*
+         * Jika sesi hilang, cari pengerjaan
+         * yang masih aktif di database.
+         */
+        if (!$attemptId) {
+            $existingAttempt = DB::table(
+                'student_assessments'
+            )
+                ->where('assessment_id', $id)
+                ->where(
+                    'student_id',
+                    (int) Auth::id()
+                )
+                ->first();
+
+            if (
+                $existingAttempt
+                && in_array(
+                    $existingAttempt->status,
+                    ['submitted', 'completed'],
+                    true
+                )
+            ) {
+                return redirect()->route(
+                    'siswa.assessment.result',
+                    ['attemptId' => $existingAttempt->id]
+                );
+            }
+
+            $attemptId = $existingAttempt->id ?? null;
+        }
+
+        abort_unless(
+            $attemptId,
+            404,
+            'Sesi pengerjaan tidak ditemukan.'
+        );
 
         $attempt = DB::table('student_assessments as sa')
             ->join(
@@ -802,12 +1300,15 @@ class AssessmentController extends Controller
             )
             ->where('sa.id', $attemptId)
             ->where('sa.assessment_id', $id)
-            ->where('sa.student_id', Auth::id())
-            ->where('sa.status', 'in_progress')
+            ->where(
+                'sa.student_id',
+                Auth::id()
+            )
             ->where('a.status', 'Published')
             ->select(
                 'sa.id as attempt_id',
                 'sa.assessment_id',
+                'sa.status',
                 'a.nama',
                 'a.mapel',
                 'a.icon',
@@ -821,14 +1322,42 @@ class AssessmentController extends Controller
             'Sesi asesmen tidak ditemukan.'
         );
 
+        /*
+         * Jika sudah dikumpulkan,
+         * buka halaman hasil.
+         */
+        if (
+            in_array(
+                $attempt->status,
+                ['submitted', 'completed'],
+                true
+            )
+        ) {
+            return redirect()->route(
+                'siswa.assessment.result',
+                ['attemptId' => $attempt->attempt_id]
+            );
+        }
+
+        abort_unless(
+            $attempt->status === 'in_progress',
+            403,
+            'Sesi pengerjaan tidak aktif.'
+        );
+
         $version = session(
-            'assessment_version_' . $attempt->attempt_id
+            'assessment_version_' .
+            $attempt->attempt_id
         );
 
         abort_unless(
-            in_array($version, ['reguler', 'adaptif'], true),
+            in_array(
+                $version,
+                ['reguler', 'adaptif'],
+                true
+            ),
             403,
-            'Versi asesmen tidak ditemukan di sesi ini.'
+            'Versi asesmen tidak ditemukan di sesi ini. Silakan pilih versi melalui halaman petunjuk.'
         );
 
         $questions = $this->getQuestionsForStudent(
@@ -848,15 +1377,21 @@ class AssessmentController extends Controller
             $version
         );
 
-        $scaffoldingPerQuestion = $support['scaffolding'];
-        $gambarPerQuestion = $support['images'];
+        $scaffoldingPerQuestion =
+            $support['scaffolding'];
+
+        $gambarPerQuestion =
+            $support['images'];
 
         $savedAnswers = DB::table('student_answers')
             ->where(
                 'student_assessment_id',
                 $attempt->attempt_id
             )
-            ->pluck('answer', 'question_id');
+            ->pluck(
+                'answer',
+                'question_id'
+            );
 
         $assessment = (object) [
             'id' => $attempt->assessment_id,
@@ -878,6 +1413,243 @@ class AssessmentController extends Controller
                 'savedAnswers',
                 'scaffoldingPerQuestion',
                 'gambarPerQuestion'
+            )
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | LIHAT KEMBALI HASIL DARI RIWAYAT SISWA
+    |--------------------------------------------------------------------------
+    */
+
+    public function result(int $attemptId)
+    {
+        $this->ensureStudent();
+
+        /*
+         * Hanya pemilik pengerjaan
+         * yang boleh melihat hasilnya.
+         */
+        $attempt = DB::table('student_assessments as sa')
+            ->join(
+                'assessments as a',
+                'a.id',
+                '=',
+                'sa.assessment_id'
+            )
+            ->where(
+                'sa.id',
+                $attemptId
+            )
+            ->where(
+                'sa.student_id',
+                Auth::id()
+            )
+            ->whereIn(
+                'sa.status',
+                ['submitted', 'completed']
+            )
+            ->select(
+                'sa.id',
+                'sa.assessment_id',
+                'sa.status',
+                'sa.score',
+                'a.nama',
+                'a.mapel'
+            )
+            ->first();
+
+        abort_unless(
+            $attempt,
+            404,
+            'Hasil pengerjaan tidak ditemukan.'
+        );
+
+        /*
+         * Ambil seluruh jawaban siswa
+         * yang sudah tersimpan di database.
+         */
+        $rows = DB::table('student_answers as ans')
+            ->join(
+                'questions as q',
+                'q.id',
+                '=',
+                'ans.question_id'
+            )
+            ->join(
+                'assessment_questions as aq',
+                'aq.question_id',
+                '=',
+                'q.id'
+            )
+            ->where(
+                'ans.student_assessment_id',
+                $attempt->id
+            )
+            ->where(
+                'aq.assessment_id',
+                $attempt->assessment_id
+            )
+            ->orderBy('aq.question_order')
+            ->select(
+                'q.id',
+                'q.question_type',
+                'q.options',
+                'q.correct_answer',
+                'aq.points',
+                'ans.answer'
+            )
+            ->get();
+
+        abort_if(
+            $rows->isEmpty(),
+            404,
+            'Data jawaban pengerjaan ini belum ditemukan.'
+        );
+
+        /*
+         * Statistik pilihan ganda.
+         */
+        $benar = 0;
+        $salah = 0;
+        $belumDijawab = 0;
+        $jumlahPG = 0;
+
+        $poinPG = 0.0;
+        $poinPGMaksimal = 0.0;
+
+        /*
+         * Statistik esai.
+         */
+        $jumlahEsai = 0;
+        $esaiTerisi = 0;
+
+        $totalPoints = 0.0;
+
+        foreach ($rows as $row) {
+            $bobot = (float) $row->points;
+
+            $totalPoints += $bobot;
+
+            $jawaban = is_string($row->answer)
+                ? trim($row->answer)
+                : null;
+
+            if ($this->isEssayQuestion($row)) {
+                /*
+                 * Esai belum dikoreksi guru.
+                 * Tidak dihitung sebagai salah.
+                 */
+                $jumlahEsai++;
+
+                if (
+                    $jawaban !== null
+                    && $jawaban !== ''
+                ) {
+                    $esaiTerisi++;
+                }
+
+                continue;
+            }
+
+            /*
+             * Hitung hasil pilihan ganda.
+             */
+            $jumlahPG++;
+            $poinPGMaksimal += $bobot;
+
+            $options = $this->decodeArray(
+                $row->options
+            );
+
+            if (
+                $jawaban === null
+                || $jawaban === ''
+                || !array_key_exists(
+                    $jawaban,
+                    $options
+                )
+            ) {
+                $belumDijawab++;
+                continue;
+            }
+
+            $isCorrect = $this->checkMultipleChoiceAnswer(
+                $jawaban,
+                $options,
+                $row->correct_answer
+            );
+
+            if ($isCorrect) {
+                $benar++;
+                $poinPG += $bobot;
+            } else {
+                $salah++;
+            }
+        }
+
+        /*
+         * Nilai pilihan ganda dari data tersimpan.
+         */
+        $nilaiPG = $poinPGMaksimal > 0
+            ? round(
+                ($poinPG / $poinPGMaksimal) * 100,
+                2
+            )
+            : null;
+
+        $hasEssay = $jumlahEsai > 0;
+
+        $esaiBelumTerisi =
+            $jumlahEsai - $esaiTerisi;
+
+        /*
+         * Umpan balik dari backend.
+         */
+        $feedback = $this->makeStudentFeedback(
+            $nilaiPG
+        );
+
+        $kategoriHasil = $feedback['kategori'];
+        $kalimatHasil = $feedback['pesan'];
+
+        $catatanEsai = $hasEssay
+            ? 'Jawaban pilihan ganda telah diperiksa otomatis. ' .
+              'Jawaban esai masih menunggu koreksi guru, ' .
+              'sehingga nilai keseluruhan belum final.'
+            : 'Seluruh soal pilihan ganda telah diperiksa otomatis.';
+
+        $earnedPoints = $poinPG;
+
+        /*
+         * Kompatibilitas dengan halaman hasil lama.
+         */
+        $score = $totalPoints > 0
+            ? round(
+                ($earnedPoints / $totalPoints) * 100,
+                2
+            )
+            : 0;
+
+        return view(
+            'student.assessment-result',
+            compact(
+                'score',
+                'earnedPoints',
+                'totalPoints',
+                'hasEssay',
+                'nilaiPG',
+                'benar',
+                'salah',
+                'belumDijawab',
+                'jumlahPG',
+                'jumlahEsai',
+                'esaiTerisi',
+                'esaiBelumTerisi',
+                'kategoriHasil',
+                'kalimatHasil',
+                'catatanEsai'
             )
         );
     }
