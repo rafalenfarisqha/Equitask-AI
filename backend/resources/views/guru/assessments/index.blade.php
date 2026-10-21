@@ -1,6 +1,8 @@
+
 @extends('layouts.app')
 
 @section('content')
+
 @php
     $total = $assessments->count();
     $draft = $assessments->where('status', 'Draft')->count();
@@ -46,7 +48,7 @@
         font-size: clamp(25px, 3vw, 32px);
         line-height: 1.2;
         font-weight: 800;
-        letter-spacing: -0.8px;
+        letter-spacing: -.8px;
         margin: 0 0 8px;
         color: var(--as-ink);
     }
@@ -62,30 +64,53 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        min-height: 44px;
-        padding: 0 18px;
+        gap: 7px;
+        min-height: 40px;
+        padding: 0 14px;
         border: 1px solid transparent;
-        border-radius: 13px;
-        font-size: 13px;
+        border-radius: 11px;
+        font-size: 12px;
         font-weight: 700;
         text-decoration: none;
         cursor: pointer;
-        transition: .2s ease;
-        white-space: nowrap;
         font-family: inherit;
+        transition: .2s ease;
     }
 
     .as-btn-primary {
         background: var(--as-primary);
-        color: #fff;
-        box-shadow: 0 6px 16px #2864f026;
+        color: white;
     }
 
     .as-btn-primary:hover {
         background: #174ed1;
-        color: #fff;
-        transform: translateY(-1px);
+        color: white;
+    }
+
+    .as-btn-outline {
+        border-color: #dce5f4;
+        background: white;
+        color: #53627d;
+    }
+
+    .as-btn-outline:hover {
+        border-color: #a9c3ff;
+        color: var(--as-primary);
+    }
+
+    .as-btn-copy {
+        border-color: #c7d7ff;
+        background: #eff4ff;
+        color: #2455ce;
+    }
+
+    .as-btn-copy:hover {
+        background: #e1ebff;
+        color: #1745b8;
+    }
+
+    .as-btn .material-symbols-outlined {
+        font-size: 17px;
     }
 
     .as-summary {
@@ -100,10 +125,9 @@
         align-items: center;
         gap: 15px;
         padding: 21px;
-        background: #fff;
+        background: white;
         border: 1px solid var(--as-border);
         border-radius: 18px;
-        box-shadow: 0 5px 18px #1e3a6b05;
     }
 
     .as-stat-icon {
@@ -122,9 +146,7 @@
 
     .as-stat-number {
         font-size: 25px;
-        line-height: 1.1;
         font-weight: 800;
-        letter-spacing: -.5px;
     }
 
     .as-stat-label {
@@ -134,19 +156,14 @@
     }
 
     .as-panel {
-        background: #fff;
+        background: white;
         border: 1px solid var(--as-border);
         border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 5px 20px #1e3a6b05;
     }
 
     .as-panel-heading {
         padding: 22px 24px 17px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
     }
 
     .as-panel-title {
@@ -182,24 +199,14 @@
         border-radius: 12px;
     }
 
-    .as-search > .material-symbols-outlined {
-        color: #8a98b0;
-        font-size: 21px;
-    }
-
     .as-search input {
         width: 100%;
-        min-width: 0;
         border: 0;
         outline: 0;
         background: transparent;
         color: var(--as-ink);
         font: inherit;
         font-size: 13px;
-    }
-
-    .as-search input::placeholder {
-        color: #98a4b8;
     }
 
     .as-filters {
@@ -213,18 +220,11 @@
         padding: 0 13px;
         border-radius: 10px;
         border: 1px solid var(--as-border);
-        background: #fff;
+        background: white;
         color: #65738e;
-        font-family: inherit;
         font-size: 12px;
         font-weight: 700;
         cursor: pointer;
-        transition: .2s;
-    }
-
-    .as-chip:hover {
-        border-color: #a9c3ff;
-        color: var(--as-primary);
     }
 
     .as-chip.active {
@@ -243,16 +243,17 @@
         padding: 19px;
         border: 1px solid #e7edf8;
         border-radius: 16px;
-        transition: border-color .2s, box-shadow .2s;
-        display: block;
-        text-decoration: none;
-        color: inherit;
-        background: #fff;
+        background: white;
+        transition: .2s ease;
     }
 
     .as-item:hover {
         border-color: #c9d8ff;
         box-shadow: 0 6px 20px #244a8a09;
+    }
+
+    .as-item[hidden] {
+        display: none !important;
     }
 
     .as-item-main {
@@ -271,10 +272,6 @@
         border-radius: 15px;
     }
 
-    .as-subject-icon .material-symbols-outlined {
-        font-size: 26px;
-    }
-
     .as-item-info {
         min-width: 0;
         flex: 1;
@@ -291,18 +288,10 @@
     .as-item-meta {
         display: flex;
         flex-wrap: wrap;
-        align-items: center;
-        gap: 7px;
+        gap: 8px;
         margin-top: 8px;
         color: var(--as-muted);
         font-size: 12px;
-    }
-
-    .as-meta-dot {
-        width: 3px;
-        height: 3px;
-        border-radius: 50%;
-        background: #aab5c8;
     }
 
     .as-badge {
@@ -314,10 +303,6 @@
         font-size: 11px;
         font-weight: 800;
         white-space: nowrap;
-    }
-
-    .as-badge .material-symbols-outlined {
-        font-size: 14px;
     }
 
     .as-badge-draft {
@@ -347,71 +332,18 @@
     }
 
     .as-visibility {
-        display: inline-flex;
+        display: flex;
         align-items: center;
         gap: 6px;
         font-size: 11px;
         color: var(--as-muted);
     }
 
-    .as-visibility .material-symbols-outlined {
-        font-size: 16px;
-    }
-
     .as-actions {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-    }
-
-    .as-btn-outline {
-        min-height: 35px;
-        padding: 0 12px;
-        border: 1px solid #dce5f4;
-        background: #fff;
-        color: #53627d;
-        border-radius: 9px;
-        font-size: 11px;
-    }
-
-    .as-btn-outline:hover {
-        border-color: #a9c3ff;
-        color: var(--as-primary);
-    }
-
-    .as-empty {
-        padding: 58px 20px;
-        text-align: center;
-    }
-
-    .as-empty-icon {
-        display: flex;
         align-items: center;
-        justify-content: center;
-        width: 70px;
-        height: 70px;
-        margin: 0 auto 18px;
-        border-radius: 22px;
-        background: #edf2ff;
-        color: var(--as-primary);
-    }
-
-    .as-empty-icon .material-symbols-outlined {
-        font-size: 34px;
-    }
-
-    .as-empty h3 {
-        margin: 0 0 8px;
-        font-size: 18px;
-        font-weight: 800;
-    }
-
-    .as-empty p {
-        margin: 0 auto 20px;
-        max-width: 380px;
-        color: var(--as-muted);
-        font-size: 13px;
-        line-height: 1.7;
     }
 
     .as-alert {
@@ -433,8 +365,74 @@
         border: 1px solid #fbd0d0;
     }
 
-    .as-item[hidden] {
+    .as-empty {
+        padding: 40px 20px;
+        text-align: center;
+        color: var(--as-muted);
+    }
+
+    /* =====================================
+       MODAL DUPLIKAT DAN EDIT JUDUL
+       ===================================== */
+
+    .as-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(15, 23, 42, .55);
+    }
+
+    .as-modal[hidden] {
         display: none !important;
+    }
+
+    .as-modal-card {
+        width: 100%;
+        max-width: 480px;
+        padding: 25px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .18);
+    }
+
+    .as-modal-title {
+        margin: 0 0 8px;
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .as-modal-description {
+        margin: 0 0 20px;
+        font-size: 13px;
+        line-height: 1.7;
+        color: var(--as-muted);
+    }
+
+    .as-field-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .as-field-input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #dce5f4;
+        border-radius: 11px;
+        font-family: inherit;
+        font-size: 14px;
+    }
+
+    .as-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 9px;
+        margin-top: 22px;
     }
 
     @media (max-width: 700px) {
@@ -442,50 +440,16 @@
             padding: 22px 15px 100px;
         }
 
+        .as-summary {
+            grid-template-columns: 1fr;
+        }
+
         .as-header {
             align-items: flex-start;
         }
 
-        .as-header .as-btn {
-            padding: 0 12px;
-            font-size: 12px;
-        }
-
-        .as-summary {
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-
-        .as-stat {
-            padding: 15px 17px;
-        }
-
-        .as-stat-icon {
-            width: 42px;
-            height: 42px;
-        }
-
-        .as-stat-number {
-            font-size: 22px;
-        }
-
-        .as-panel-heading {
-            padding: 19px 16px 15px;
-        }
-
         .as-toolbar {
             padding: 0 16px 17px;
-        }
-
-        .as-filters {
-            width: 100%;
-            overflow-x: auto;
-            flex-wrap: nowrap;
-            padding-bottom: 3px;
-        }
-
-        .as-chip {
-            flex-shrink: 0;
         }
 
         .as-list {
@@ -496,37 +460,9 @@
             padding: 15px;
         }
 
-        .as-item-main {
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .as-subject-icon {
-            width: 43px;
-            height: 43px;
-            border-radius: 12px;
-        }
-
-        .as-subject-icon .material-symbols-outlined {
-            font-size: 22px;
-        }
-
-        .as-item-name {
-            font-size: 13px;
-        }
-
-        .as-item-main > .as-badge {
-            padding: 6px 7px;
-            font-size: 10px;
-        }
-
         .as-item-footer {
-            align-items: flex-start;
             flex-direction: column;
-        }
-
-        .as-actions {
-            width: 100%;
+            align-items: flex-start;
         }
     }
 
@@ -535,16 +471,8 @@
             flex-direction: column;
         }
 
-        .as-header .as-btn {
+        .as-actions {
             width: 100%;
-        }
-
-        .as-item-main {
-            flex-wrap: wrap;
-        }
-
-        .as-item-main > .as-badge {
-            margin-left: 53px;
         }
     }
 </style>
@@ -552,39 +480,57 @@
 <div class="assessment-page">
     <div class="as-container">
 
+        {{-- HEADER --}}
+
         <header class="as-header">
             <div>
                 <h1 class="as-title">Asesmen Saya</h1>
                 <p class="as-subtitle">
-                    Kelola asesmen dan soal yang telah dibuat dalam satu tempat.
+                    Kelola asesmen, duplikasi paket, dan publikasi ke siswa.
                 </p>
             </div>
 
-            <a href="{{ route('guru.assessments.create') }}"
-               class="as-btn as-btn-primary">
+            <a
+                href="{{ route('guru.assessments.create') }}"
+                class="as-btn as-btn-primary">
+
                 <span class="material-symbols-outlined">add</span>
                 Buat Asesmen
             </a>
         </header>
 
-        @if (session('success'))
+        {{-- NOTIFIKASI --}}
+
+        @if(session('success'))
             <div class="as-alert as-alert-success">
                 {{ session('success') }}
             </div>
         @endif
 
-        @if ($errors->any())
+        @if(session('error'))
+            <div class="as-alert as-alert-error">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if($errors->any())
             <div class="as-alert as-alert-error">
                 {{ $errors->first() }}
             </div>
         @endif
 
+        {{-- STATISTIK --}}
+
         <section class="as-summary">
+
             <div class="as-stat">
                 <div class="as-stat-icon"
-                     style="background:#eaf0ff;color:#2864f0;">
-                    <span class="material-symbols-outlined">library_books</span>
+                     style="background:#eaf0ff;color:#2864f0">
+                    <span class="material-symbols-outlined">
+                        library_books
+                    </span>
                 </div>
+
                 <div>
                     <div class="as-stat-number">{{ $total }}</div>
                     <div class="as-stat-label">Total Asesmen</div>
@@ -593,9 +539,12 @@
 
             <div class="as-stat">
                 <div class="as-stat-icon"
-                     style="background:#fff4df;color:#d99016;">
-                    <span class="material-symbols-outlined">edit_note</span>
+                     style="background:#fff4df;color:#d99016">
+                    <span class="material-symbols-outlined">
+                        edit_note
+                    </span>
                 </div>
+
                 <div>
                     <div class="as-stat-number">{{ $draft }}</div>
                     <div class="as-stat-label">Masih Draft</div>
@@ -604,65 +553,88 @@
 
             <div class="as-stat">
                 <div class="as-stat-icon"
-                     style="background:#e4f8ef;color:#15966a;">
-                    <span class="material-symbols-outlined">check_circle</span>
+                     style="background:#e4f8ef;color:#15966a">
+                    <span class="material-symbols-outlined">
+                        check_circle
+                    </span>
                 </div>
+
                 <div>
                     <div class="as-stat-number">{{ $published }}</div>
                     <div class="as-stat-label">Telah Dipublikasikan</div>
                 </div>
             </div>
+
         </section>
 
+        {{-- DAFTAR ASESMEN --}}
+
         <section class="as-panel">
+
             <div class="as-panel-heading">
-                <div>
-                    <h2 class="as-panel-title">Daftar Asesmen</h2>
-                    <div class="as-panel-description">
-                        Semua asesmen yang dibuat.
-                    </div>
+                <h2 class="as-panel-title">Daftar Asesmen</h2>
+                <div class="as-panel-description">
+                    Pilih Detail, Duplikat, atau Edit Judul pada asesmen.
                 </div>
             </div>
 
-            <form method="GET"
-                  action="{{ route('guru.assessments.index') }}"
-                  id="assessmentFilterForm">
+            {{-- PENCARIAN DAN FILTER --}}
+
+            <form
+                method="GET"
+                action="{{ route('guru.assessments.index') }}"
+                id="assessmentFilterForm">
 
                 <div class="as-toolbar">
+
                     <label class="as-search">
-                        <span class="material-symbols-outlined">search</span>
+                        <span class="material-symbols-outlined">
+                            search
+                        </span>
+
                         <input
                             type="search"
                             name="search"
                             id="searchAssessment"
                             value="{{ request('search') }}"
-                            placeholder="Cari nama asesmen atau mapel..."
-                        >
+                            placeholder="Cari nama asesmen atau mapel...">
                     </label>
 
                     <div class="as-filters">
-                        @foreach (['Semua', 'Draft', 'Published'] as $status)
+
+                        @foreach(['Semua', 'Draft', 'Published'] as $filterStatus)
+
                             <button
                                 type="button"
-                                class="as-chip {{ request('status', 'Semua') === $status ? 'active' : '' }}"
-                                data-status="{{ $status }}"
-                            >
-                                {{ $status === 'Semua' ? 'Semua Status' : ($status === 'Published' ? 'Dipublikasikan' : $status) }}
+                                class="as-chip {{ request('status', 'Semua') === $filterStatus ? 'active' : '' }}"
+                                data-status="{{ $filterStatus }}">
+
+                                {{ $filterStatus === 'Semua'
+                                    ? 'Semua Status'
+                                    : ($filterStatus === 'Published'
+                                        ? 'Dipublikasikan'
+                                        : 'Draft') }}
                             </button>
+
                         @endforeach
+
                     </div>
 
-                    <input type="hidden" name="status"
-                           id="assessmentStatus"
-                           value="{{ request('status', 'Semua') }}">
-                    <input type="hidden" name="mapel"
-                           id="assessmentMapel"
-                           value="{{ request('mapel', 'Semua') }}">
+                    <input
+                        type="hidden"
+                        name="status"
+                        id="assessmentStatus"
+                        value="{{ request('status', 'Semua') }}">
+
                 </div>
             </form>
 
+            {{-- KARTU ASESMEN --}}
+
             <div class="as-list" id="assessmentList">
-                @forelse ($assessments as $a)
+
+                @forelse($assessments as $a)
+
                     @php
                         $status = $a->status ?? 'Draft';
                         $mapel = $a->mapel ?? 'Umum';
@@ -672,220 +644,579 @@
                         $isPublic = $a->visibility === 'public';
                     @endphp
 
-                    <!-- Kartu dibungkus tag <a> agar bisa diklik menuju halaman detail -->
-                    <a href="{{ route('guru.assessments.show', $a->id) }}"
+                    <div
                         class="as-item"
                         data-assessment-item
                         data-name="{{ strtolower($a->nama) }}"
                         data-mapel="{{ strtolower($mapel) }}"
-                        data-status="{{ $status }}"
-                    >
+                        data-status="{{ $status }}">
+
                         <div class="as-item-main">
-                            <div class="as-subject-icon"
-                                 style="background:{{ $color }}18;color:{{ $color }};">
+
+                            <div
+                                class="as-subject-icon"
+                                style="background:#eaf0ff;color:{{ $color }}">
+
                                 <span class="material-symbols-outlined">
                                     {{ $icon }}
                                 </span>
                             </div>
 
                             <div class="as-item-info">
-                                <h3 class="as-item-name">{{ $a->nama }}</h3>
+
+                                <h3 class="as-item-name">
+                                    {{ $a->nama }}
+                                </h3>
+
                                 <div class="as-item-meta">
                                     <span>{{ $mapel }}</span>
-                                    <span class="as-meta-dot"></span>
+                                    <span>•</span>
                                     <span>
-                                        Dibuat {{ $a->created_at?->format('d M Y') ?? '-' }}
+                                        Dibuat
+                                        {{ $a->created_at?->format('d M Y') ?? '-' }}
                                     </span>
                                 </div>
+
                             </div>
 
                             <span class="as-badge {{ $isPublished ? 'as-badge-published' : ($status === 'Draft' ? 'as-badge-draft' : 'as-badge-other') }}">
-                                <span class="material-symbols-outlined">
-                                    {{ $isPublished ? 'check_circle' : ($status === 'Draft' ? 'edit_note' : 'info') }}
-                                </span>
                                 {{ $status }}
                             </span>
+
                         </div>
 
-                        <div class="as-item-footer" onclick="event.preventDefault();">
+                        {{-- FOOTER KARTU --}}
+
+                        <div class="as-item-footer">
+
                             <div class="as-visibility">
                                 <span class="material-symbols-outlined">
                                     {{ $isPublic ? 'public' : 'lock' }}
                                 </span>
-                                {{ $isPublic ? 'Dibagikan ke Bank Soal Publik' : 'Hanya terlihat olehmu' }}
+
+                                {{ $isPublic
+                                    ? 'Dibagikan ke Bank Soal Publik'
+                                    : 'Belum dibagikan ke Bank Soal Publik' }}
                             </div>
 
                             <div class="as-actions">
-                                @if ($isPublic)
-                                    <span class="as-badge as-badge-published">
-                                        <span class="material-symbols-outlined">public</span>
-                                        Sudah dibagikan
+
+                                {{-- DETAIL ASESMEN --}}
+                                <a
+                                    href="{{ route('guru.assessments.show', $a->id) }}"
+                                    class="as-btn as-btn-outline">
+
+                                    <span class="material-symbols-outlined">
+                                        visibility
                                     </span>
-                                @else
+                                    Detail
+                                </a>
+
+                                {{-- DUPLIKAT --}}
+                                <button
+                                    type="button"
+                                    class="as-btn as-btn-copy"
+                                    data-duplicate
+                                    data-id="{{ $a->id }}"
+                                    data-title="{{ $a->nama }}">
+
+                                    <span class="material-symbols-outlined">
+                                        content_copy
+                                    </span>
+
+                                    Duplikat
+                                </button>
+
+                                {{-- EDIT JUDUL --}}
+                                <button
+                                    type="button"
+                                    class="as-btn as-btn-outline"
+                                    data-edit-title
+                                    data-id="{{ $a->id }}"
+                                    data-title="{{ $a->nama }}">
+
+                                    <span class="material-symbols-outlined">
+                                        edit
+                                    </span>
+
+                                    Edit Judul
+                                </button>
+
+                                {{-- BAGIKAN KE BANK SOAL --}}
+                                @if(!$isPublic && $isPublished)
+
                                     <form
                                         action="{{ route('guru.assessments.share', $a->id) }}"
                                         method="POST"
-                                        onsubmit="return confirm('Bagikan asesmen ini ke Bank Soal Publik?')"
-                                    >
+                                        onsubmit="return confirm('Bagikan asesmen ini ke Bank Soal Publik?')">
+
                                         @csrf
-                                        <button type="submit" class="as-btn as-btn-outline">
-                                            <span class="material-symbols-outlined"
-                                                  style="font-size:15px;vertical-align:middle;">
+
+                                        <button
+                                            type="submit"
+                                            class="as-btn as-btn-outline">
+
+                                            <span class="material-symbols-outlined">
                                                 share
                                             </span>
+
                                             Bagikan
                                         </button>
                                     </form>
+
+                                @elseif($isPublic)
+
+                                    <span class="as-badge as-badge-published">
+                                        Sudah dibagikan
+                                    </span>
+
                                 @endif
+
                             </div>
+
                         </div>
-                    </a>
+
+                    </div>
+
                 @empty
+
                     <div class="as-empty">
-                        <div class="as-empty-icon">
-                            <span class="material-symbols-outlined">assignment</span>
-                        </div>
                         <h3>Belum ada asesmen</h3>
                         <p>
-                            Asesmen yang kamu buat akan tersimpan di sini.
-                            Mulai buat asesmen untuk mengelola soal pembelajaranmu.
+                            Mulai buat asesmen untuk mengelola
+                            soal pembelajaranmu.
                         </p>
-                        <a href="{{ route('guru.assessments.create') }}"
-                           class="as-btn as-btn-primary">
-                            <span class="material-symbols-outlined">add</span>
+
+                        <a
+                            href="{{ route('guru.assessments.create') }}"
+                            class="as-btn as-btn-primary">
                             Buat Asesmen Pertama
                         </a>
                     </div>
+
                 @endforelse
 
-                <div class="as-empty" id="assessmentNoResults" hidden>
-                    <div class="as-empty-icon">
-                        <span class="material-symbols-outlined">search_off</span>
-                    </div>
+                <div
+                    class="as-empty"
+                    id="assessmentNoResults"
+                    hidden>
+
                     <h3>Asesmen tidak ditemukan</h3>
-                    <p>Coba gunakan kata kunci atau filter yang berbeda.</p>
-                    <button type="button" id="resetAssessmentFilters"
-                            class="as-btn as-btn-primary">
+
+                    <p>
+                        Coba kata kunci atau filter yang berbeda.
+                    </p>
+
+                    <button
+                        type="button"
+                        id="resetAssessmentFilters"
+                        class="as-btn as-btn-primary">
+
                         Reset Filter
                     </button>
                 </div>
+
             </div>
+
         </section>
+
+    </div>
+</div>
+
+{{-- ==========================================
+     MODAL DUPLIKAT
+     ========================================== --}}
+
+<div
+    class="as-modal"
+    id="duplicateModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="duplicateModalTitle"
+    hidden>
+
+    <div class="as-modal-card">
+
+        <h2
+            class="as-modal-title"
+            id="duplicateModalTitle">
+            Duplikat Paket Asesmen
+        </h2>
+
+        <p class="as-modal-description">
+            Paket salinan akan menggunakan soal Reguler
+            dan Adaptif dari paket asli, tanpa Generate
+            Dify ulang. Salinan disimpan sebagai Draft
+            sampai kamu memublikasikannya.
+        </p>
+
+        <form method="POST" id="duplicateForm">
+
+            @csrf
+
+            <label
+                for="duplicateName"
+                class="as-field-label">
+                Nama Paket Salinan
+            </label>
+
+            <input
+                type="text"
+                name="nama"
+                id="duplicateName"
+                class="as-field-input"
+                maxlength="255"
+                required>
+
+            <div class="as-modal-actions">
+
+                <button
+                    type="button"
+                    class="as-btn as-btn-outline"
+                    data-close-modal>
+                    Batal
+                </button>
+
+                <button
+                    type="submit"
+                    class="as-btn as-btn-primary">
+                    Buat Salinan
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{{-- ==========================================
+     MODAL EDIT JUDUL
+     ========================================== --}}
+
+<div
+    class="as-modal"
+    id="editTitleModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="editTitleModalTitle"
+    hidden>
+
+    <div class="as-modal-card">
+
+        <h2
+            class="as-modal-title"
+            id="editTitleModalTitle">
+            Edit Judul Asesmen
+        </h2>
+
+        <p class="as-modal-description">
+            Perubahan judul tidak akan mengubah
+            pertanyaan, pilihan jawaban, atau hasil Dify.
+        </p>
+
+        <form method="POST" id="editTitleForm">
+
+            @csrf
+            @method('PATCH')
+
+            <label
+                for="editTitleName"
+                class="as-field-label">
+                Nama Asesmen
+            </label>
+
+            <input
+                type="text"
+                name="nama"
+                id="editTitleName"
+                class="as-field-input"
+                maxlength="255"
+                required>
+
+            <div class="as-modal-actions">
+
+                <button
+                    type="button"
+                    class="as-btn as-btn-outline"
+                    data-close-modal>
+                    Batal
+                </button>
+
+                <button
+                    type="submit"
+                    class="as-btn as-btn-primary">
+                    Simpan Judul
+                </button>
+
+            </div>
+
+        </form>
+
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('assessmentFilterForm');
-    const search = document.getElementById('searchAssessment');
-    const statusInput = document.getElementById('assessmentStatus');
-    const mapelInput = document.getElementById('assessmentMapel');
-    const items = [...document.querySelectorAll('[data-assessment-item]')];
-    const noResults = document.getElementById('assessmentNoResults');
-    const resetButton = document.getElementById('resetAssessmentFilters');
-    const statusButtons = document.querySelectorAll('[data-status]');
 
-    if (!form || !search) return;
+    const search =
+        document.getElementById('searchAssessment');
+
+    const statusInput =
+        document.getElementById('assessmentStatus');
+
+    const items = [
+        ...document.querySelectorAll(
+            '[data-assessment-item]'
+        )
+    ];
+
+    const noResults =
+        document.getElementById('assessmentNoResults');
+
+    const statusButtons =
+        document.querySelectorAll('[data-status]');
 
     function applyFilters() {
+
         const keyword = search.value.trim().toLowerCase();
         const status = statusInput.value;
-        const mapel = mapelInput.value.toLowerCase();
+
         let visible = 0;
 
-        items.forEach(function (item) {
+        items.forEach(item => {
+
             const matchesKeyword =
                 item.dataset.name.includes(keyword) ||
                 item.dataset.mapel.includes(keyword);
 
             const matchesStatus =
-                status === 'Semua' || item.dataset.status === status;
+                status === 'Semua' ||
+                item.dataset.status === status;
 
-            const matchesMapel =
-                mapel === 'semua' || item.dataset.mapel === mapel;
-
-            const show = matchesKeyword && matchesStatus && matchesMapel;
+            const show =
+                matchesKeyword && matchesStatus;
 
             item.hidden = !show;
+
             if (show) visible++;
         });
 
         if (noResults) {
-            noResults.hidden = items.length === 0 || visible > 0;
+            noResults.hidden =
+                items.length === 0 || visible > 0;
         }
     }
 
-    function updateStatusButtons() {
-        statusButtons.forEach(function (button) {
-            button.classList.toggle(
-                'active',
-                button.dataset.status === statusInput.value
-            );
-        });
-    }
+    statusButtons.forEach(button => {
 
-    search.addEventListener('input', applyFilters);
-
-    statusButtons.forEach(function (button) {
         button.addEventListener('click', function () {
-            statusInput.value = button.dataset.status;
-            updateStatusButtons();
+
+            statusInput.value = this.dataset.status;
+
+            statusButtons.forEach(btn => {
+                btn.classList.toggle(
+                    'active',
+                    btn === this
+                );
+            });
+
             applyFilters();
         });
     });
 
+    if (search) {
+        search.addEventListener('input', applyFilters);
+    }
+
+    const resetButton =
+        document.getElementById('resetAssessmentFilters');
+
     if (resetButton) {
-        resetButton.addEventListener('click', function () {
+
+        resetButton.addEventListener('click', () => {
+
             search.value = '';
             statusInput.value = 'Semua';
-            mapelInput.value = 'Semua';
-            updateStatusButtons();
+
+            statusButtons.forEach(button => {
+                button.classList.toggle(
+                    'active',
+                    button.dataset.status === 'Semua'
+                );
+            });
+
             applyFilters();
         });
     }
 
-    updateStatusButtons();
-    applyFilters();
+    // =====================================
+    // MODAL
+    // =====================================
+
+    const duplicateModal =
+        document.getElementById('duplicateModal');
+
+    const duplicateForm =
+        document.getElementById('duplicateForm');
+
+    const duplicateName =
+        document.getElementById('duplicateName');
+
+    const editTitleModal =
+        document.getElementById('editTitleModal');
+
+    const editTitleForm =
+        document.getElementById('editTitleForm');
+
+    const editTitleName =
+        document.getElementById('editTitleName');
+
+    const duplicateBaseUrl = @json(
+        url('/guru/assessments')
+    );
+
+    function closeModals() {
+
+        duplicateModal.hidden = true;
+        editTitleModal.hidden = true;
+
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('[data-duplicate]')
+        .forEach(button => {
+
+            button.addEventListener('click', function () {
+
+                const id = this.dataset.id;
+                const title = this.dataset.title;
+
+                duplicateName.value =
+                    title + ' (Salinan)';
+
+                duplicateForm.action =
+                    `${duplicateBaseUrl}/${id}/duplicate`;
+
+                duplicateModal.hidden = false;
+                document.body.style.overflow = '';
+
+                duplicateName.focus();
+            });
+        });
+
+    document.querySelectorAll('[data-edit-title]')
+        .forEach(button => {
+
+            button.addEventListener('click', function () {
+
+                const id = this.dataset.id;
+                const title = this.dataset.title;
+
+                editTitleName.value = title;
+
+                editTitleForm.action =
+                    `${duplicateBaseUrl}/${id}/title`;
+
+                editTitleModal.hidden = false;
+                document.body.style.overflow = '';
+
+                editTitleName.focus();
+            });
+        });
+
+    document.querySelectorAll('[data-close-modal]')
+        .forEach(button => {
+
+            button.addEventListener(
+                'click',
+                closeModals
+            );
+        });
+
+    [duplicateModal, editTitleModal]
+        .forEach(modal => {
+
+            modal.addEventListener('click', function (event) {
+
+                if (event.target === modal) {
+                    closeModals();
+                }
+            });
+        });
+
+    document.addEventListener('keydown', event => {
+
+        if (event.key === 'Escape') {
+            closeModals();
+        }
+    });
+
+    if (search) {
+        applyFilters();
+    }
 });
 </script>
-@endsection
 
+@endsection
 
 @section('bottom_nav')
     <nav class="bottomnav">
-        <a href="{{ route('guru.dashboard') }}"
-           class="navitem"
-           style="text-decoration: none;">
-            <span class="material-symbols-outlined">dashboard</span>
+
+        <a
+            href="{{ route('guru.dashboard') }}"
+            class="navitem"
+            style="text-decoration:none">
+
+            <span class="material-symbols-outlined">
+                dashboard
+            </span>
             <span>Dashboard</span>
         </a>
 
-        <a href="{{ route('guru.kelas') }}"
-           class="navitem"
-           style="text-decoration: none;">
-            <span class="material-symbols-outlined">groups</span>
+        <a
+            href="{{ route('guru.kelas') }}"
+            class="navitem"
+            style="text-decoration:none">
+
+            <span class="material-symbols-outlined">
+                groups
+            </span>
             <span>Kelas</span>
         </a>
 
-        <a href="{{ route('guru.assessments.index') }}"
-           class="navitem active"
-           style="text-decoration: none;">
-            <span class="material-symbols-outlined">library_books</span>
+        <a
+            href="{{ route('guru.assessments.index') }}"
+            class="navitem active"
+            style="text-decoration:none">
+
+            <span class="material-symbols-outlined">
+                library_books
+            </span>
             <span>Asesmen</span>
         </a>
 
-        <a href="{{ route('guru.bank-soal') }}"
-           class="navitem"
-           style="text-decoration: none;">
-            <span class="material-symbols-outlined">folder_open</span>
+        <a
+            href="{{ route('guru.bank-soal') }}"
+            class="navitem"
+            style="text-decoration:none">
+
+            <span class="material-symbols-outlined">
+                folder_open
+            </span>
             <span>Bank Soal</span>
         </a>
 
-        <a href="{{ route('guru.profil') }}"
-           class="navitem"
-           style="text-decoration: none;">
-            <span class="material-symbols-outlined">person</span>
+        <a
+            href="{{ route('guru.profil') }}"
+            class="navitem"
+            style="text-decoration:none">
+
+            <span class="material-symbols-outlined">
+                person
+            </span>
             <span>Profil</span>
         </a>
+
     </nav>
 @endsection
