@@ -300,11 +300,10 @@
     </div>
 
     <form id="assessmentForm"
-          method="POST"
-          action="{{ route('siswa.assessment.submit', [
-              'assessment' => $assessment->id,
-              'attempt' => $attemptId
-          ]) }}">
+      method="POST"
+      action="{{ route('siswa.assessment.submit', [
+          'id' => $assessment->id,
+      ]) }}">
         @csrf
         <input type="hidden" name="version_type" value="{{ $version }}">
 

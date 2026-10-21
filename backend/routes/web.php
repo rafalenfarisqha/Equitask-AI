@@ -265,6 +265,14 @@ Route::middleware(['auth'])
 Route::middleware(['auth'])->prefix('siswa')->name('siswa.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/daftar-assessment', [DashboardController::class, 'assessments'])->name('assessment');
+
+    Route::get('/assessment/{id}/petunjuk', [\App\Http\Controllers\Siswa\AssessmentController::class, 'instructions'])
+        ->name('assessment.instructions');
+
+    Route::get('/assessment/{id}/mulai', [\App\Http\Controllers\Siswa\AssessmentController::class,'start'])->name('assessment.start');
+    Route::get('/assessment/{id}/kerjakan', [\App\Http\Controllers\Siswa\AssessmentController::class,'work'])->name('assessment.work');
+    Route::post('/assessment/{id}/kumpulkan', [\App\Http\Controllers\Siswa\AssessmentController::class,'submit'])->name('assessment.submit');
+
     Route::get('/riwayat', [StudentPageController::class, 'riwayat'])->name('riwayat');
     Route::get('/profil', [StudentPageController::class, 'profil'])->name('profil');
 

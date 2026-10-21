@@ -326,7 +326,7 @@
                     </div>
 
                     <a class="assessment-btn"
-                       href="{{ route('siswa.assessment.instructions', ['id' => $assessment->id]) }}">
+                    href="{{ route('siswa.assessment.instructions', $assessment->id) }}">
                         Lihat Petunjuk
                         <span class="material-symbols-outlined"
                               style="font-size:18px;">arrow_forward</span>

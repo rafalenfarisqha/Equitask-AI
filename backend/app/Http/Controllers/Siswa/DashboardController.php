@@ -8,14 +8,48 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    /**
+     * Query asesmen yang boleh dilihat siswa:
+     * 1. Asesmen publik yang sudah dipublikasikan.
+     * 2. Asesmen privat yang ditugaskan ke kelas siswa.
+     */
+    private function accessibleAssessments(int $studentId)
+    {
+        return DB::table('assessments as a')
+            ->where('a.status', 'Published')
+            ->where(function ($query) use ($studentId) {
+                $query->where('a.visibility', 'public')
+                    ->orWhereExists(function ($subquery) use ($studentId) {
+                        $subquery->selectRaw('1')
+                            ->from('assessment_class_assignments as aca')
+                            ->join(
+                                'class_members as cm',
+                                'cm.class_id',
+                                '=',
+                                'aca.class_id'
+                            )
+                            ->whereColumn(
+                                'aca.assessment_id',
+                                'a.id'
+                            )
+                            ->where('cm.student_id', $studentId);
+                    });
+            });
+    }
+
+    /**
+     * Dashboard utama siswa.
+     */
     public function index()
     {
         $user = Auth::user();
 
-        // Pastikan halaman ini hanya digunakan oleh akun siswa.
-        abort_unless($user && $user->role === 'siswa', 403);
+        abort_unless(
+            $user && in_array($user->role, ['siswa', 'student'], true),
+            403,
+            'Halaman ini hanya untuk siswa.'
+        );
 
-        // Ambil kelas yang diikuti siswa yang sedang login.
         $classes = DB::table('class_members as cm')
             ->join('classes as c', 'c.id', '=', 'cm.class_id')
             ->where('cm.student_id', $user->id)
@@ -25,27 +59,23 @@ class DashboardController extends Controller
 
         $totalKelas = $classes->count();
 
-        // Ambil assessment yang sudah dipublikasikan untuk umum.
-        $assessmentQuery = DB::table('assessments')
-            ->where('status', 'Published')
-            ->where('visibility', 'public');
+        $assessmentQuery = $this->accessibleAssessments($user->id);
 
         $totalAssessment = (clone $assessmentQuery)->count();
 
         $assessments = (clone $assessmentQuery)
             ->select(
-                'id',
-                'nama',
-                'mapel',
-                'icon',
-                'color',
-                'created_at'
+                'a.id',
+                'a.nama',
+                'a.mapel',
+                'a.icon',
+                'a.color',
+                'a.created_at'
             )
-            ->latest('created_at')
+            ->latest('a.created_at')
             ->limit(3)
             ->get();
 
-        // Buat inisial nama untuk avatar siswa.
         $initials = collect(explode(' ', trim($user->name)))
             ->filter()
             ->take(2)
@@ -59,22 +89,34 @@ class DashboardController extends Controller
             'totalAssessment',
             'assessments',
             'initials'
-        ));       
+        ));
     }
 
+    /**
+     * Daftar asesmen siswa.
+     */
     public function assessments()
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    abort_unless($user && $user->role === 'siswa', 403);
+        abort_unless(
+            $user && in_array($user->role, ['siswa', 'student'], true),
+            403,
+            'Halaman ini hanya untuk siswa.'
+        );
 
-    $assessments = DB::table('assessments')
-        ->where('status', 'Published')
-        ->where('visibility', 'public')
-        ->select('id', 'nama', 'mapel', 'icon', 'color', 'created_at')
-        ->latest('created_at')
-        ->get();
+        $assessments = $this->accessibleAssessments($user->id)
+            ->select(
+                'a.id',
+                'a.nama',
+                'a.mapel',
+                'a.icon',
+                'a.color',
+                'a.created_at'
+            )
+            ->latest('a.created_at')
+            ->get();
 
-    return view('student.assessment-list', compact('assessments'));
-}
+        return view('student.assessment-list', compact('assessments'));
+    }
 }

@@ -59,8 +59,8 @@
             </div>
         </section>
 
-        <form method="POST"
-              action="{{ route('siswa.assessment.mulai', $assessment->id) }}"
+        <form method="GET"
+              action="{{ route('siswa.assessment.start', $assessment->id) }}"
               id="versionForm">
             @csrf
 
