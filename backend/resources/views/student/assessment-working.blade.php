@@ -4,12 +4,20 @@
 @section('title', 'Pengerjaan Assessment')
 
 @section('content')
+
+<link rel="stylesheet" href="{{ asset('css/easy-read.css') }}">
+
 <style>
+    /* ========================================
+       HALAMAN PENGERJAAN ASESMEN SISWA
+       ======================================== */
+
     .aw-page {
         --aw-blue: #2563eb;
         --aw-teal: #0d9488;
         --aw-ink: #182337;
         --aw-muted: #718096;
+
         max-width: 900px;
         margin: 0 auto;
         padding: 24px 18px 45px;
@@ -49,7 +57,9 @@
         margin: 12px 0 7px;
     }
 
-    .aw-muted { color: var(--aw-muted); }
+    .aw-muted {
+        color: var(--aw-muted);
+    }
 
     .aw-progress {
         height: 8px;
@@ -62,7 +72,11 @@
     .aw-progress-bar {
         height: 100%;
         width: 0;
-        background: linear-gradient(90deg, var(--aw-blue), var(--aw-teal));
+        background: linear-gradient(
+            90deg,
+            var(--aw-blue),
+            var(--aw-teal)
+        );
         transition: width .2s ease;
     }
 
@@ -73,12 +87,13 @@
         align-items: start;
     }
 
-    .aw-card, .aw-sidebar {
+    .aw-card,
+    .aw-sidebar {
         background: white;
         border: 1px solid #e6edf5;
         border-radius: 22px;
         padding: 24px;
-        box-shadow: 0 8px 30px rgba(25,50,90,.04);
+        box-shadow: 0 8px 30px rgba(25, 50, 90, .04);
     }
 
     .aw-number {
@@ -97,6 +112,10 @@
         overflow-wrap: anywhere;
     }
 
+    /* ========================================
+       PILIHAN JAWABAN REGULER
+       ======================================== */
+
     .aw-options {
         display: grid;
         gap: 12px;
@@ -104,13 +123,16 @@
 
     .aw-option {
         display: flex;
-        align-items: flex-start;
-        gap: 13px;
-        padding: 15px;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        min-height: 68px;
+        padding: 14px 16px;
+
         border: 1.5px solid #e0e7f0;
         border-radius: 15px;
+        background: white;
         cursor: pointer;
-        line-height: 1.6;
         transition: .15s ease;
     }
 
@@ -124,22 +146,121 @@
         background: #eff6ff;
     }
 
-    .aw-option input {
-        margin-top: 5px;
+    .aw-option input[type="radio"] {
+        flex-shrink: 0;
+        width: 17px;
+        height: 17px;
+        margin: 0;
         accent-color: var(--aw-blue);
+        cursor: pointer;
     }
 
     .aw-letter {
-        display: inline-grid;
+        display: grid;
         place-items: center;
-        flex-shrink: 0;
-        width: 28px;
-        height: 28px;
+
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+
         border-radius: 9px;
         background: #edf2f8;
+        color: #2458cb;
+
+        font-size: 14px;
         font-weight: 800;
-        font-size: 12px;
+        line-height: 1;
     }
+
+    .aw-option-text {
+        display: block;
+        flex: 1;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 1.6;
+        white-space: normal;
+        overflow-wrap: break-word;
+    }
+
+    /* ========================================
+       EASY READ KHUSUS VERSI ADAPTIF
+       ======================================== */
+
+    .aw-page.easy-read-assessment .aw-question {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 21px;
+        font-weight: 600;
+        line-height: 1.75;
+        letter-spacing: .2px;
+        word-spacing: 1px;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+        max-width: 65ch;
+    }
+
+    .aw-page.easy-read-assessment .aw-options {
+        gap: 14px;
+    }
+
+    .aw-page.easy-read-assessment .aw-option {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 14px;
+        min-height: 74px;
+        padding: 16px 18px;
+        border-radius: 16px;
+        background: #ffffff;
+    }
+
+    .aw-page.easy-read-assessment .aw-option.selected {
+        background: #eff6ff;
+    }
+
+    .aw-page.easy-read-assessment .aw-letter {
+        display: grid;
+        place-items: center;
+
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+
+        border-radius: 11px;
+        background: #e5edff;
+        color: #2458cb;
+
+        font-size: 17px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .aw-page.easy-read-assessment .aw-option-text {
+        display: block;
+        flex: 1;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1.65;
+        letter-spacing: .2px;
+        word-spacing: .5px;
+
+        color: #172238;
+        white-space: normal;
+        overflow-wrap: break-word;
+    }
+
+    /* ========================================
+       NAVIGASI SOAL
+       ======================================== */
 
     .aw-nav {
         display: flex;
@@ -168,7 +289,9 @@
         cursor: not-allowed;
     }
 
-    .aw-nav .aw-btn { flex: 1; }
+    .aw-nav .aw-btn {
+        flex: 1;
+    }
 
     .aw-sidebar h3 {
         font-size: 15px;
@@ -208,6 +331,10 @@
         color: white;
     }
 
+    /* ========================================
+       TOMBOL AKSESIBILITAS
+       ======================================== */
+
     .aw-tools {
         display: flex;
         flex-wrap: wrap;
@@ -242,43 +369,129 @@
         cursor: pointer;
     }
 
-    .aw-page.large-text .aw-question,
-    .aw-page.large-text .aw-option {
+    .aw-submit:disabled {
+        opacity: .65;
+        cursor: not-allowed;
+    }
+
+    /* Tombol A+ untuk semua versi */
+
+    .aw-page.large-text .aw-question {
+        font-size: 23px;
+    }
+
+    .aw-page.large-text .aw-option-text {
+        font-size: 20px;
+    }
+
+    /* Tombol A+ pada Adaptif */
+
+    .aw-page.easy-read-assessment.large-text .aw-question {
+        font-size: 25px;
+    }
+
+    .aw-page.easy-read-assessment.large-text .aw-option-text {
         font-size: 22px;
     }
 
+    /* Mode kontras */
+
     .aw-page.high-contrast {
-        --aw-ink: #000;
+        --aw-ink: #000000;
         --aw-muted: #303030;
     }
 
     .aw-page.high-contrast .aw-card,
     .aw-page.high-contrast .aw-sidebar,
     .aw-page.high-contrast .aw-option {
-        border-color: #333;
+        border-color: #333333;
     }
 
+    .aw-page.high-contrast .aw-question,
+    .aw-page.high-contrast .aw-option-text {
+        color: #000000;
+    }
+
+    /* ========================================
+       RESPONSIF HP
+       ======================================== */
+
     @media (max-width: 700px) {
-        .aw-page { padding: 17px 12px 30px; }
-        .aw-layout { grid-template-columns: 1fr; }
-        .aw-sidebar { order: -1; padding: 17px; }
-        .aw-numbers { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-        .aw-card { padding: 19px; }
-        .aw-question { font-size: 17px; }
+        .aw-page {
+            padding: 17px 12px 30px;
+        }
+
+        .aw-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .aw-sidebar {
+            order: -1;
+            padding: 17px;
+        }
+
+        .aw-numbers {
+            grid-template-columns: repeat(
+                5,
+                minmax(0, 1fr)
+            );
+        }
+
+        .aw-card {
+            padding: 19px;
+        }
+
+        .aw-question {
+            font-size: 17px;
+        }
+
+        .aw-page.easy-read-assessment .aw-question {
+            font-size: 19px;
+        }
+
+        .aw-page.easy-read-assessment .aw-option {
+            min-height: 64px;
+            padding: 13px;
+            gap: 11px;
+        }
+
+        .aw-page.easy-read-assessment .aw-option-text {
+            font-size: 17px;
+        }
+
+        .aw-page.easy-read-assessment.large-text .aw-question {
+            font-size: 23px;
+        }
+
+        .aw-page.easy-read-assessment.large-text .aw-option-text {
+            font-size: 21px;
+        }
     }
 </style>
 
-<div class="aw-page" id="assessmentApp">
+<div
+    class="aw-page {{ $version === 'adaptif' ? 'easy-read-assessment' : '' }}"
+    id="assessmentApp">
+
+    {{-- HEADER HALAMAN --}}
+
     <div class="aw-top">
+
         <a href="{{ route('siswa.assessment.instructions', $assessment->id) }}"
-           class="aw-back">← Petunjuk asesmen</a>
+           class="aw-back">
+            ← Petunjuk asesmen
+        </a>
 
         <span class="aw-tag">
-            {{ $version === 'adaptif' ? '✦ Versi Adaptif' : '● Versi Reguler' }}
+            {{ $version === 'adaptif'
+                ? '✦ Versi Adaptif'
+                : '● Versi Reguler' }}
         </span>
+
     </div>
 
     <div class="aw-heading">
+
         <p class="aw-muted" style="font-size:13px;margin:0">
             {{ $assessment->mapel }} · {{ $assessment->nama }}
         </p>
@@ -290,265 +503,619 @@
         </p>
 
         <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px">
-            <span id="progressText">Soal 1 dari {{ $questions->count() }}</span>
-            <span id="elapsedTime" style="font-weight:800;color:#2563eb">00:00</span>
+
+            <span id="progressText">
+                Soal 1 dari {{ $questions->count() }}
+            </span>
+
+            <span
+                id="elapsedTime"
+                style="font-weight:800;color:#2563eb">
+                00:00
+            </span>
+
         </div>
 
         <div class="aw-progress">
             <div class="aw-progress-bar" id="progressBar"></div>
         </div>
+
     </div>
 
-    <form id="assessmentForm"
-      method="POST"
-      action="{{ route('siswa.assessment.submit', [
-          'id' => $assessment->id,
-      ]) }}">
+    {{-- FORM JAWABAN SISWA --}}
+
+    <form
+        id="assessmentForm"
+        method="POST"
+        action="{{ route('siswa.assessment.submit', [
+            'id' => $assessment->id,
+        ]) }}">
+
         @csrf
-        <input type="hidden" name="version_type" value="{{ $version }}">
+
+        <input
+            type="hidden"
+            name="version_type"
+            value="{{ $version }}">
 
         <div class="aw-layout">
+
             <main class="aw-card">
+
+                {{-- =====================================
+                     LOOP SOAL SISWA
+                     HANYA SATU LOOP UTAMA
+                     ===================================== --}}
+
                 @foreach($questions as $index => $question)
+
                     @php
+                        /*
+                         * Options dapat berupa:
+                         * - array PHP
+                         * - string JSON
+                         */
+
                         $options = is_array($question->options)
                             ? $question->options
-                            : json_decode($question->options ?? '{}', true);
+                            : json_decode(
+                                $question->options ?? '[]',
+                                true
+                            );
 
-                        $options = is_array($options) ? $options : [];
+                        $options = is_array($options)
+                            ? $options
+                            : [];
                     @endphp
 
-                    <section class="aw-question-panel"
-                             data-index="{{ $index }}"
-                             style="{{ $index === 0 ? '' : 'display:none' }}">
+                    <section
+                        class="aw-question-panel"
+                        data-index="{{ $index }}"
+                        style="{{ $index === 0 ? '' : 'display:none' }}">
 
                         <div class="aw-number">
-                            PERTANYAAN {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
+                            PERTANYAAN
+                            {{ str_pad(
+                                $index + 1,
+                                2,
+                                '0',
+                                STR_PAD_LEFT
+                            ) }}
                         </div>
 
-                        <div class="aw-question">{{ $question->question_text }}</div>
+                        {{-- PERTANYAAN REGULER / ADAPTIF --}}
 
-                        <div class="aw-options">
+                        <div class="aw-question {{ $version === 'adaptif' ? 'easy-read-question' : '' }}">{{ $question->question_text }}</div>
+
+                        {{-- PILIHAN JAWABAN --}}
+
+                        <div class="aw-options {{ $version === 'adaptif' ? 'easy-read-options' : '' }}">
+
+                            {{-- =====================================
+                                 LOOP PILIHAN JAWABAN
+                                 HANYA SATU LOOP
+                                 ===================================== --}}
+
                             @foreach($options as $key => $option)
+
+                                @php
+                                    /*
+                                     * Data dari Dify biasanya:
+                                     *
+                                     * {
+                                     *   "label": "A",
+                                     *   "teks": "Kerongkongan"
+                                     * }
+                                     *
+                                     * Tetapi tetap dukung
+                                     * pilihan jawaban string biasa.
+                                     */
+
+                                    $optionData = is_array($option)
+                                        ? $option
+                                        : [];
+
+                                    // Label yang tampil: A, B, C, D.
+                                    $optionLabel =
+                                        $optionData['label']
+                                        ?? (
+                                            is_numeric($key)
+                                                ? chr(65 + (int) $key)
+                                                : (string) $key
+                                        );
+
+                                    // Ambil teks jawaban saja.
+                                    $optionText =
+                                        $optionData['teks']
+                                        ?? $optionData['text']
+                                        ?? (
+                                            is_scalar($option)
+                                                ? (string) $option
+                                                : ''
+                                        );
+
+                                    /*
+                                     * Nilai input tetap menggunakan
+                                     * key asli seperti kode sebelumnya.
+                                     */
+                                    $optionValue = $key;
+
+                                    $isChecked =
+                                        (string) (
+                                            $savedAnswers[$question->id]
+                                            ?? ''
+                                        ) === (string) $optionValue;
+                                @endphp
+
                                 <label class="aw-option">
+
                                     <input
                                         type="radio"
                                         name="answers[{{ $question->id }}]"
-                                        value="{{ $key }}"
-                                        {{ (string)($savedAnswers[$question->id] ?? '') === (string)$key ? 'checked' : '' }}
-                                    >
+                                        value="{{ $optionValue }}"
+                                        {{ $isChecked ? 'checked' : '' }}>
 
-                                    <span class="aw-letter">{{ $key }}</span>
+                                    <span class="aw-letter">{{ $optionLabel }}</span>
 
-                                    <span>{{ is_scalar($option) ? $option : json_encode($option) }}</span>
+                                    <span class="aw-option-text">{{ $optionText }}</span>
+
                                 </label>
+
                             @endforeach
+
                         </div>
+
                     </section>
+
                 @endforeach
 
+                {{-- =====================================
+                     AKHIR LOOP SOAL
+                     ===================================== --}}
+
                 <div class="aw-nav">
-                    <button type="button" class="aw-btn" id="previousBtn">
+
+                    <button
+                        type="button"
+                        class="aw-btn"
+                        id="previousBtn">
                         ← Sebelumnya
                     </button>
 
-                    <button type="button" class="aw-btn primary" id="nextBtn">
+                    <button
+                        type="button"
+                        class="aw-btn primary"
+                        id="nextBtn">
                         Selanjutnya →
                     </button>
+
                 </div>
+
             </main>
 
+            {{-- =====================================
+                 SIDEBAR NAVIGASI SISWA
+                 ===================================== --}}
+
             <aside class="aw-sidebar">
+
                 <h3>Navigasi soal</h3>
-                <p class="aw-muted" style="font-size:12px;line-height:1.6">
+
+                <p
+                    class="aw-muted"
+                    style="font-size:12px;line-height:1.6">
                     Pilih nomor untuk berpindah soal.
                 </p>
 
-                <div class="aw-numbers" id="questionNumbers">
+                <div
+                    class="aw-numbers"
+                    id="questionNumbers">
+
                     @foreach($questions as $index => $question)
-                        <button type="button"
-                                class="aw-numbtn {{ $index === 0 ? 'current' : '' }}"
-                                data-go="{{ $index }}">
+
+                        <button
+                            type="button"
+                            class="aw-numbtn {{ $index === 0 ? 'current' : '' }}"
+                            data-go="{{ $index }}">
+
                             {{ $index + 1 }}
+
                         </button>
+
                     @endforeach
+
                 </div>
 
-                <div class="aw-muted" style="font-size:12px">
-                    <span style="color:#0d9488">●</span> Sudah dijawab<br>
-                    <span style="color:#2563eb">●</span> Soal aktif
+                <div
+                    class="aw-muted"
+                    style="font-size:12px">
+
+                    <span style="color:#0d9488">●</span>
+                    Sudah dijawab
+
+                    <br>
+
+                    <span style="color:#2563eb">●</span>
+                    Soal aktif
+
                 </div>
+
+                {{-- FITUR AKSESIBILITAS --}}
 
                 <div class="aw-tools">
-                    <button type="button" class="aw-tool" id="largeTextBtn">
+
+                    <button
+                        type="button"
+                        class="aw-tool"
+                        id="largeTextBtn">
                         A+ Teks besar
                     </button>
-                    <button type="button" class="aw-tool" id="contrastBtn">
+
+                    <button
+                        type="button"
+                        class="aw-tool"
+                        id="contrastBtn">
                         ◐ Kontras
                     </button>
-                    <button type="button" class="aw-tool" id="focusBtn">
+
+                    <button
+                        type="button"
+                        class="aw-tool"
+                        id="focusBtn">
                         ◎ Mode fokus
                     </button>
-                    <button type="button" class="aw-tool" id="readBtn">
+
+                    <button
+                        type="button"
+                        class="aw-tool"
+                        id="readBtn">
                         🔊 Bacakan
                     </button>
+
                 </div>
 
-                <button type="button" class="aw-submit" id="submitBtn">
+                {{-- SUBMIT JAWABAN --}}
+
+                <button
+                    type="button"
+                    class="aw-submit"
+                    id="submitBtn">
                     Kumpulkan jawaban
                 </button>
+
             </aside>
+
         </div>
+
     </form>
+
 </div>
+
+{{-- ========================================
+     JAVASCRIPT PENGERJAAN SISWA
+     ======================================== --}}
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
     const app = document.getElementById('assessmentApp');
     const form = document.getElementById('assessmentForm');
-    const panels = [...document.querySelectorAll('.aw-question-panel')];
-    const numberButtons = [...document.querySelectorAll('.aw-numbtn')];
-    const previousBtn = document.getElementById('previousBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const progressText = document.getElementById('progressText');
-    const progressBar = document.getElementById('progressBar');
+
+    const panels = [
+        ...document.querySelectorAll('.aw-question-panel')
+    ];
+
+    const numberButtons = [
+        ...document.querySelectorAll('.aw-numbtn')
+    ];
+
+    const previousBtn =
+        document.getElementById('previousBtn');
+
+    const nextBtn =
+        document.getElementById('nextBtn');
+
+    const progressText =
+        document.getElementById('progressText');
+
+    const progressBar =
+        document.getElementById('progressBar');
+
     const total = panels.length;
+
     let current = 0;
     let focusMode = false;
 
+    /*
+     * Perbarui warna nomor soal terjawab.
+     */
     function updateAnswered() {
+
         panels.forEach((panel, index) => {
-            const answered = panel.querySelector('input[type="radio"]:checked');
-            numberButtons[index].classList.toggle('answered', !!answered);
+
+            const answered = panel.querySelector(
+                'input[type="radio"]:checked'
+            );
+
+            if (numberButtons[index]) {
+
+                numberButtons[index].classList.toggle(
+                    'answered',
+                    !!answered
+                );
+
+            }
         });
     }
 
+    /*
+     * Tampilkan soal sesuai nomor.
+     */
     function showQuestion(index) {
-        if (index < 0 || index >= total) return;
+
+        if (index < 0 || index >= total) {
+            return;
+        }
 
         current = index;
 
         panels.forEach((panel, i) => {
-            panel.style.display = i === current ? '' : 'none';
+
+            panel.style.display =
+                i === current ? '' : 'none';
+
         });
 
         numberButtons.forEach((button, i) => {
-            button.classList.toggle('current', i === current);
+
+            button.classList.toggle(
+                'current',
+                i === current
+            );
+
         });
 
         previousBtn.disabled = current === 0;
-        nextBtn.textContent = current === total - 1
-            ? 'Soal terakhir ✓'
-            : 'Selanjutnya →';
 
-        progressText.textContent = `Soal ${current + 1} dari ${total}`;
-        progressBar.style.width = `${((current + 1) / total) * 100}%`;
+        nextBtn.textContent =
+            current === total - 1
+                ? 'Soal terakhir ✓'
+                : 'Selanjutnya →';
+
+        progressText.textContent =
+            `Soal ${current + 1} dari ${total}`;
+
+        progressBar.style.width =
+            `${((current + 1) / total) * 100}%`;
 
         updateAnswered();
     }
 
+    /*
+     * Klik nomor soal di sidebar.
+     */
     numberButtons.forEach(button => {
+
         button.addEventListener('click', () => {
-            showQuestion(Number(button.dataset.go));
+
+            showQuestion(
+                Number(button.dataset.go)
+            );
+
         });
+
     });
 
-    previousBtn.addEventListener('click', () => showQuestion(current - 1));
+    /*
+     * Navigasi sebelumnya.
+     */
+    previousBtn.addEventListener('click', () => {
 
+        showQuestion(current - 1);
+
+    });
+
+    /*
+     * Navigasi selanjutnya.
+     */
     nextBtn.addEventListener('click', () => {
-        if (current < total - 1) showQuestion(current + 1);
+
+        if (current < total - 1) {
+
+            showQuestion(current + 1);
+
+        }
+
     });
 
-    form.querySelectorAll('input[type="radio"]').forEach(input => {
-        input.addEventListener('change', () => {
-            const panel = input.closest('.aw-question-panel');
+    /*
+     * Saat siswa memilih jawaban.
+     */
+    form.querySelectorAll(
+        'input[type="radio"]'
+    ).forEach(input => {
 
-            panel.querySelectorAll('.aw-option').forEach(option => {
+        input.addEventListener('change', () => {
+
+            const panel = input.closest(
+                '.aw-question-panel'
+            );
+
+            panel.querySelectorAll(
+                '.aw-option'
+            ).forEach(option => {
+
                 option.classList.toggle(
                     'selected',
                     option.querySelector('input').checked
                 );
+
             });
 
             updateAnswered();
+
         });
+
     });
 
-    document.getElementById('largeTextBtn').addEventListener('click', function () {
-        app.classList.toggle('large-text');
-        this.classList.toggle('active');
-    });
+    /*
+     * Tombol A+.
+     */
+    document.getElementById('largeTextBtn')
+        .addEventListener('click', function () {
 
-    document.getElementById('contrastBtn').addEventListener('click', function () {
-        app.classList.toggle('high-contrast');
-        this.classList.toggle('active');
-    });
+            app.classList.toggle('large-text');
+            this.classList.toggle('active');
 
-    document.getElementById('focusBtn').addEventListener('click', function () {
-        focusMode = !focusMode;
-        app.querySelector('.aw-sidebar').style.display = focusMode ? 'none' : '';
-        this.classList.toggle('active');
-    });
+        });
 
-    document.getElementById('readBtn').addEventListener('click', function () {
-        if (!('speechSynthesis' in window)) {
-            alert('Fitur pembaca teks tidak didukung browser ini.');
-            return;
-        }
+    /*
+     * Tombol kontras.
+     */
+    document.getElementById('contrastBtn')
+        .addEventListener('click', function () {
 
-        window.speechSynthesis.cancel();
+            app.classList.toggle('high-contrast');
+            this.classList.toggle('active');
 
-        const activePanel = panels[current];
-        const text = activePanel.querySelector('.aw-question').innerText
-            + '. '
-            + [...activePanel.querySelectorAll('.aw-option')]
-                .map(option => option.innerText).join('. ');
+        });
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'id-ID';
-        window.speechSynthesis.speak(utterance);
-    });
+    /*
+     * Mode fokus.
+     */
+    document.getElementById('focusBtn')
+        .addEventListener('click', function () {
 
-    document.getElementById('submitBtn').addEventListener('click', function () {
-        const unanswered = panels.filter(panel =>
-            !panel.querySelector('input[type="radio"]:checked')
-        ).length;
+            focusMode = !focusMode;
 
-        const message = unanswered > 0
-            ? `Masih ada ${unanswered} soal yang belum dijawab. Tetap kumpulkan?`
-            : 'Yakin ingin mengumpulkan jawaban? Setelah dikumpulkan, asesmen tidak dapat dilanjutkan.';
+            app.querySelector('.aw-sidebar').style.display =
+                focusMode ? 'none' : '';
 
-        if (confirm(message)) {
-            this.disabled = true;
-            this.textContent = 'Mengumpulkan...';
-            form.submit();
-        }
-    });
+            this.classList.toggle('active');
 
-    // Timer berjalan untuk menunjukkan durasi pengerjaan.
-    // Timer ini belum menjadi batas waktu server.
+        });
+
+    /*
+     * Pembaca soal.
+     */
+    document.getElementById('readBtn')
+        .addEventListener('click', function () {
+
+            if (!('speechSynthesis' in window)) {
+
+                alert(
+                    'Fitur pembaca teks tidak didukung browser ini.'
+                );
+
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+
+            if (panels.length === 0) {
+                return;
+            }
+
+            const activePanel = panels[current];
+
+            const questionText =
+                activePanel.querySelector('.aw-question')
+                    ?.innerText ?? '';
+
+            const optionTexts = [
+                ...activePanel.querySelectorAll('.aw-option')
+            ].map(option => option.innerText)
+             .join('. ');
+
+            const utterance =
+                new SpeechSynthesisUtterance(
+                    questionText + '. ' + optionTexts
+                );
+
+            utterance.lang = 'id-ID';
+
+            window.speechSynthesis.speak(utterance);
+
+        });
+
+    /*
+     * Konfirmasi pengumpulan jawaban.
+     */
+    document.getElementById('submitBtn')
+        .addEventListener('click', function () {
+
+            const unanswered = panels.filter(
+                panel => !panel.querySelector(
+                    'input[type="radio"]:checked'
+                )
+            ).length;
+
+            const message = unanswered > 0
+                ? `Masih ada ${unanswered} soal yang belum dijawab. Tetap kumpulkan?`
+                : 'Yakin ingin mengumpulkan jawaban? Setelah dikumpulkan, asesmen tidak dapat dilanjutkan.';
+
+            if (confirm(message)) {
+
+                this.disabled = true;
+                this.textContent = 'Mengumpulkan...';
+
+                form.submit();
+
+            }
+        });
+
+    /*
+     * Timer tampilan pengerjaan.
+     * Bukan batas waktu server.
+     */
     let elapsed = 0;
 
     setInterval(() => {
+
         elapsed++;
-        const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
-        const seconds = String(elapsed % 60).padStart(2, '0');
-        document.getElementById('elapsedTime').textContent =
-            `${minutes}:${seconds}`;
+
+        const minutes = String(
+            Math.floor(elapsed / 60)
+        ).padStart(2, '0');
+
+        const seconds = String(
+            elapsed % 60
+        ).padStart(2, '0');
+
+        const elapsedElement =
+            document.getElementById('elapsedTime');
+
+        if (elapsedElement) {
+
+            elapsedElement.textContent =
+                `${minutes}:${seconds}`;
+
+        }
+
     }, 1000);
 
+    /*
+     * Inisialisasi halaman.
+     */
     showQuestion(0);
 
     panels.forEach(panel => {
-        panel.querySelectorAll('.aw-option').forEach(option => {
-            option.classList.toggle(
-                'selected',
-                option.querySelector('input').checked
-            );
-        });
+
+        panel.querySelectorAll('.aw-option')
+            .forEach(option => {
+
+                option.classList.toggle(
+                    'selected',
+                    option.querySelector('input').checked
+                );
+
+            });
+
     });
 
     updateAnswered();
+
 });
 </script>
+
 @endsection
