@@ -12,6 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AssessmentController extends Controller
 {
@@ -535,6 +538,8 @@ class AssessmentController extends Controller
         ];
 
         $materiPath = null;
+        $gambarPaths = [];
+        $sudahTersimpanDiDatabase = false;
 
         try {
             // 1. Jalankan workflow Dify.
@@ -614,7 +619,55 @@ class AssessmentController extends Controller
                 );
             }
 
-            // 3. Simpan materi ajar.
+            // 3. Unduh dan simpan file gambar AKTUAL saat URL Dify masih valid.
+            // Kegagalan salah satu gambar membatalkan pembuatan asesmen,
+            // sehingga tidak ada soal adaptif yang tersimpan tanpa gambar.
+            $gambarRaw = $outputs['gambar_asesmen_revisi']
+                ?? $outputs['gambar_asesmen']
+                ?? [];
+            $daftarGambar = $this->normalisasiGambarDify($gambarRaw);
+
+            $idSoalAdaptif = [];
+            foreach ($soalAdaptif as $soal) {
+                if (!is_array($soal)) {
+                    continue;
+                }
+                $id = trim((string) ($soal['id_soal_asal'] ?? $soal['id'] ?? ''));
+                if ($id === '') {
+                    throw new \RuntimeException('ID soal adaptif kosong.');
+                }
+                $idSoalAdaptif[$id] = true;
+            }
+
+            $gambarLokal = [];
+            foreach ($daftarGambar as $gambar) {
+                $id = trim((string) ($gambar['id_soal_asal'] ?? ''));
+                if (!isset($idSoalAdaptif[$id])) {
+                    continue;
+                }
+                $tersimpan = $this->unduhGambarDify($gambar);
+                $gambarPaths[] = $tersimpan['path_gambar'];
+                $gambarLokal[] = $tersimpan;
+            }
+
+            foreach (array_keys($idSoalAdaptif) as $id) {
+                $jumlah = count(array_filter(
+                    $gambarLokal,
+                    static fn (array $g): bool => $g['id_soal_asal'] === $id
+                ));
+                if ($jumlah < 1) {
+                    throw new \RuntimeException(
+                        "Soal adaptif {$id} belum mempunyai gambar aktual yang tersimpan."
+                    );
+                }
+            }
+
+            // URL pada hasil yang DISIMPAN adalah URL Laravel, bukan Dify.
+            // Bentuk array ini juga dapat dibaca oleh method show() lama.
+            $outputs['gambar_asesmen'] = $gambarLokal;
+            $outputs['gambar_asesmen_revisi'] = $gambarLokal;
+
+            // 4. Simpan materi ajar.
             $materiPath = $request->file('materi_ajar')
                 ->store('materi-ajar', 'local');
 
@@ -743,6 +796,7 @@ class AssessmentController extends Controller
 
                         $jenis = strtolower(
                             (string) $ambilNilai($soal, [
+                                'jenis',
                                 'question_type',
                                 'jenis_soal',
                                 'tipe_soal',
@@ -756,7 +810,7 @@ class AssessmentController extends Controller
                             str_contains($jenis, 'uraian') ||
                             str_contains($jenis, 'essay')
                         )
-                            ? 'esai'
+                            ? 'essay'
                             : 'pilihan_ganda';
 
                         $jawaban = $ambilNilai($soal, [
@@ -772,6 +826,46 @@ class AssessmentController extends Controller
                                 $jawaban,
                                 JSON_UNESCAPED_UNICODE
                             );
+                        }
+
+                        // Metadata analitik hanya berasal dari field Dify
+                        // yang benar-benar tersedia pada masing-masing soal.
+                        // assessment.materi_ajar adalah path PDF, bukan nama materi.
+                        $normalisasiMetadata = static function ($value): ?string {
+                            if (!is_string($value) && !is_numeric($value)) {
+                                return null;
+                            }
+
+                            $value = trim((string) $value);
+
+                            return $value === ''
+                                ? null
+                                : mb_substr($value, 0, 255);
+                        };
+
+                        $materiSoal = $normalisasiMetadata(
+                            $ambilNilai($soal, [
+                                'materi',
+                                'nama_materi',
+                                'materi_pembelajaran',
+                                'material',
+                            ])
+                        );
+
+                        $topikSoal = $normalisasiMetadata(
+                            $ambilNilai($soal, [
+                                'topik',
+                                'subtopik',
+                                'sub_topik',
+                                'topic',
+                                'kompetensi',
+                            ])
+                        );
+
+                        // Topik yang tersedia dapat menjadi label materi;
+                        // jangan menebak subtopik dari teks pertanyaan.
+                        if ($materiSoal === null && $topikSoal !== null) {
+                            $materiSoal = $topikSoal;
                         }
 
                         $now = now();
@@ -805,6 +899,8 @@ class AssessmentController extends Controller
                                         'pembahasan',
                                         'penjelasan',
                                     ]),
+                                'materi' => $materiSoal,
+                                'topik' => $topikSoal,
                                 'created_at' => $now,
                                 'updated_at' => $now,
                             ]);
@@ -815,7 +911,7 @@ class AssessmentController extends Controller
                             'question_order' => ++$nomor,
                             'points' => (float) $ambilNilai(
                                 $soal,
-                                ['points', 'poin', 'bobot'],
+                                ['skor_maksimum', 'points', 'poin', 'bobot'],
                                 1
                             ),
                         ]);
@@ -853,6 +949,8 @@ class AssessmentController extends Controller
                 return $assessment;
             });
 
+            $sudahTersimpanDiDatabase = true;
+
             NotificationHelper::send(
                 Auth::id(),
                 'Asesmen AI Selesai',
@@ -869,6 +967,16 @@ class AssessmentController extends Controller
                 );
 
         } catch (\Throwable $e) {
+            // Hanya bersihkan jika transaksi database BELUM berhasil.
+            if (!$sudahTersimpanDiDatabase) {
+                foreach ($gambarPaths as $path) {
+                    Storage::disk('public')->delete($path);
+                }
+                if ($materiPath !== null) {
+                    Storage::disk('local')->delete($materiPath);
+                }
+            }
+
             Log::error('Gagal membuat asesmen AI', [
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
@@ -1089,4 +1197,160 @@ class AssessmentController extends Controller
                 'Judul paket asesmen berhasil diperbarui.'
             );
     }
+
+    /**
+     * Normalisasi output gambar dari Dify Iteration/Code node.
+     * Mendukung JSON Array, JSON String, serta wrapper output/gambar_per_soal.
+     */
+    private function normalisasiGambarDify(mixed $raw): array
+    {
+        if (is_string($raw)) {
+            $raw = json_decode($raw, true);
+        }
+
+        $hasil = [];
+        $queue = [$raw];
+
+        while ($queue !== []) {
+            $item = array_shift($queue);
+            if (is_string($item)) {
+                $item = json_decode($item, true);
+            }
+            if (!is_array($item)) {
+                continue;
+            }
+
+            // Daftar item (termasuk output Iteration).
+            if (array_is_list($item)) {
+                foreach ($item as $child) {
+                    $queue[] = $child;
+                }
+                continue;
+            }
+
+            foreach (['output', 'gambar_per_soal', 'gambar_asesmen', 'files'] as $key) {
+                if (array_key_exists($key, $item)) {
+                    $queue[] = $item[$key];
+                }
+            }
+
+            $url = $item['url'] ?? $item['gambar_url']
+                ?? $item['download_url'] ?? $item['preview_url'] ?? null;
+
+            if (!is_string($url) || $url === '') {
+                continue;
+            }
+
+            $idSoal = trim((string) ($item['id_soal_asal'] ?? ''));
+            if ($idSoal === '') {
+                continue;
+            }
+
+            $hasil[] = [
+                'id_soal_asal' => $idSoal,
+                'id_visual' => (string) ($item['id_visual'] ?? ''),
+                'url' => $url,
+                'filename' => (string) ($item['filename'] ?? ''),
+                'reference' => $item['reference'] ?? null,
+                'teks_alternatif' => $item['teks_alternatif'] ?? null,
+            ];
+        }
+
+        return $hasil;
+    }
+
+    /**
+     * Unduh gambar Dify dan simpan permanen ke disk public Laravel.
+     * Jangan terima URL dari input pengguna; hanya dari hasil workflow.
+     */
+    private function unduhGambarDify(array $gambar): array
+    {
+        $url = $gambar['url'];
+        $parts = parse_url($url);
+        $host = strtolower((string) ($parts['host'] ?? ''));
+
+        // Tambahkan host lain hanya bila server Dify milik sendiri
+        // memang menggunakan domain penyimpanan yang berbeda.
+        $hostDiizinkan = ['upload.dify.ai'];
+
+        if (
+            !is_array($parts) ||
+            strtolower((string) ($parts['scheme'] ?? '')) !== 'https' ||
+            !in_array($host, $hostDiizinkan, true) ||
+            isset($parts['user']) || isset($parts['pass']) ||
+            isset($parts['port'])
+        ) {
+            throw new \RuntimeException('Host URL gambar Dify tidak diizinkan.');
+        }
+
+        // Hindari redirect menuju alamat yang tidak diizinkan.
+        // Timeout lebih longgar untuk file gambar Dify yang lambat.
+        // Retry hanya untuk gangguan koneksi, HTTP 429, atau HTTP 5xx.
+        // HTTP 403 tidak diulang karena URL bertanda tangan mungkin kedaluwarsa.
+        $response = Http::connectTimeout(15)
+            ->timeout(120)
+            ->withOptions(['allow_redirects' => false])
+            ->retry(3, 2000, function ($exception) {
+                if ($exception instanceof \Illuminate\Http\Client\ConnectionException) {
+                    return true;
+                }
+
+                if ($exception instanceof \Illuminate\Http\Client\RequestException) {
+                    $status = $exception->response->status();
+                    return $status === 429 || $status >= 500;
+                }
+
+                return false;
+            }, throw: false)
+            ->get($url);
+
+        if (!$response->successful()) {
+            throw new \RuntimeException(
+                'Unduh gambar Dify gagal (HTTP ' . $response->status() .
+                ') untuk ' . $gambar['id_soal_asal'] .
+                '. Jalankan ulang generator jika URL sudah kedaluwarsa.'
+            );
+        }
+
+        $bytes = $response->body();
+        if ($bytes === '' || strlen($bytes) > 10 * 1024 * 1024) {
+            throw new \RuntimeException('Gambar Dify kosong atau melebihi 10 MB.');
+        }
+
+        // Cek tipe gambar dari isi file, bukan ekstensi URL saja.
+        $imageInfo = @getimagesizefromstring($bytes);
+        $mime = $imageInfo['mime'] ?? null;
+        $extensions = [
+            'image/png' => 'png',
+            'image/jpeg' => 'jpg',
+            'image/webp' => 'webp',
+        ];
+        if (!isset($extensions[$mime])) {
+            throw new \RuntimeException('Dify mengembalikan file bukan gambar valid.');
+        }
+
+        $path = 'asesmen-gambar/' . Str::uuid() . '.' . $extensions[$mime];
+
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+        if (!$disk->put($path, $bytes)) {
+            throw new \RuntimeException('Tidak berhasil menyimpan gambar ke storage.');
+        }
+
+        $urlPermanen = $disk->url($path);
+
+        return [
+            'id_soal_asal' => $gambar['id_soal_asal'],
+            'id_visual' => $gambar['id_visual'],
+            'url' => $urlPermanen,
+            'gambar_url' => $urlPermanen,
+            'path_gambar' => $path,
+            'filename' => basename($path),
+            'reference' => $gambar['reference'],
+            'teks_alternatif' => $gambar['teks_alternatif'],
+            'tersimpan' => true,
+            'type' => 'image',
+        ];
+    }
+
 }
