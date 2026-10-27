@@ -19,6 +19,7 @@ use App\Http\Controllers\Siswa\DashboardController;
 use App\Http\Controllers\Siswa\StudentPageController;
 use App\Http\Controllers\Siswa\AssessmentController as SiswaAssessmentController;
 use App\Http\Controllers\Siswa\NotificationController as SiswaNotificationController;
+use App\Http\Controllers\AssessmentPdfController;
 
 /*
 |--------------------------------------------------------------------------
@@ -120,17 +121,27 @@ Route::middleware(['auth'])
         |--------------------------------------------------------------------------
         */
 
+        // Daftar Bank Soal Komunitas
         Route::get(
             '/bank-soal',
             [BankSoalController::class, 'index']
         )->name('bank-soal');
 
-        Route::post(
-            '/bank-soal/{id}/gunakan',
-            [BankSoalController::class, 'gunakanSoal']
+        // Detail soal publik (hanya lihat)
+        Route::get(
+            '/bank-soal/{id}',
+            [BankSoalController::class, 'detail']
         )
             ->whereNumber('id')
-            ->name('bank-soal.gunakan');
+            ->name('bank-soal.detail');
+
+        // Download PDF dari Bank Soal publik
+        Route::get(
+            '/bank-soal/{id}/download-pdf',
+            [AssessmentPdfController::class, 'downloadPublic']
+        )
+            ->whereNumber('id')
+            ->name('bank-soal.download-pdf');
 
         /*
         |--------------------------------------------------------------------------
@@ -239,7 +250,7 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------------------
-        | ANALITIK AI GURU PER ASESMEN
+        | ANALITIK AI GURU PER ASESMEN DAN DOWNLOAD PDF
         |--------------------------------------------------------------------------
         */
 
@@ -249,6 +260,13 @@ Route::middleware(['auth'])
         )
             ->whereNumber('assessmentId')
             ->name('assessments.analitik-ai');
+
+        Route::get(
+            '/assessments/{assessment}/download-pdf',
+            [AssessmentPdfController::class, 'download']
+        )
+            ->whereNumber('assessment')
+            ->name('assessments.download-pdf');
 
         /*
         |--------------------------------------------------------------------------

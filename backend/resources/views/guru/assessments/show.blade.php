@@ -489,6 +489,34 @@
                 </div>
 
                 <div class="assessment-actions">
+                    
+                    {{-- DOWNLOAD PDF REGULER --}}
+                    <a href="{{ route('guru.assessments.download-pdf', [
+                        'assessment' => $assessment->id,
+                        'format' => 'regular'
+                    ]) }}"
+                    class="btn btn-outline-primary assessment-action-btn">
+
+                        <span class="material-symbols-outlined">
+                            picture_as_pdf
+                        </span>
+
+                        PDF Reguler
+                    </a>
+
+                    {{-- DOWNLOAD PDF EASY READ --}}
+                    <a href="{{ route('guru.assessments.download-pdf', [
+                        'assessment' => $assessment->id,
+                        'format' => 'easy_read'
+                    ]) }}"
+                    class="btn btn-outline-success assessment-action-btn">
+
+                        <span class="material-symbols-outlined">
+                            picture_as_pdf
+                        </span>
+
+                        PDF Easy Read
+                    </a>
 
                     {{-- ANALITIK AI: data hasil pengerjaan siswa --}}
                     <a href="{{ route('guru.assessments.analitik-ai', $assessment->id) }}"
