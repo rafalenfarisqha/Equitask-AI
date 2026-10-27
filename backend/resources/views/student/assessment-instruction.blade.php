@@ -93,7 +93,7 @@
                         <div class="eq-version-inner">
                             <div class="eq-version-icon adaptive">♿</div>
                             <span class="eq-version-tag">FORMAT 02</span>
-                            <h3>Versi Adaptif</h3>
+                            <h3>Versi Soal Modifikasi</h3>
                             <p>Penyajian soal yang dirancang lebih aksesibel dan mudah diikuti.</p>
                             <span class="eq-radio-indicator"></span>
                         </div>
