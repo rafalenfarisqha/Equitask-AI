@@ -193,7 +193,6 @@
 
                     <div class="form-text">
                         Pilih Asesmen Awal atau Asesmen Utama
-                        sesuai alur workflow Dify.
                     </div>
 
                 </div>
@@ -454,8 +453,7 @@
                 <strong>EquiTask AI sedang bekerja.</strong>
 
                 <div class="small mt-1">
-                    Materi sedang dikirim ke Dify dan workflow AI
-                    sedang dijalankan. Proses ini mungkin memerlukan
+                    Materi sedang diproses. Proses ini mungkin memerlukan
                     beberapa menit. Jangan tutup halaman dahulu.
                 </div>
             </div>

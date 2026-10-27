@@ -1,22 +1,18 @@
 @extends('layouts.app')
-
 @section('title', 'Pengerjaan Assessment')
 
 @section('content')
-
 <link rel="stylesheet" href="{{ asset('css/easy-read.css') }}">
 
 <style>
     /* =========================================
        DASAR HALAMAN SISWA
        ========================================= */
-
     .aw-page {
         --aw-blue: #2563eb;
         --aw-teal: #0d9488;
         --aw-ink: #182337;
         --aw-muted: #718096;
-
         max-width: 1200px;
         margin: 0 auto;
         padding: 24px 18px 45px;
@@ -115,7 +111,6 @@
     /* =========================================
        PILIHAN GANDA
        ========================================= */
-
     .aw-options {
         display: grid;
         gap: 12px;
@@ -127,14 +122,11 @@
         flex-wrap: nowrap;
         align-items: center;
         gap: 12px;
-
         min-height: 68px;
         padding: 14px 16px;
-
         background: #fff;
         border: 1.5px solid #e0e7f0;
         border-radius: 15px;
-
         cursor: pointer;
         transition: .15s ease;
     }
@@ -161,15 +153,12 @@
     .aw-letter {
         display: grid;
         place-items: center;
-
         flex: 0 0 34px;
         width: 34px;
         height: 34px;
-
         background: #edf2f8;
         color: #2458cb;
         border-radius: 9px;
-
         font-size: 14px;
         font-weight: 800;
         line-height: 1;
@@ -180,7 +169,6 @@
         flex: 1;
         min-width: 0;
         margin: 0;
-
         font-size: 16px;
         font-weight: 500;
         line-height: 1.6;
@@ -191,7 +179,6 @@
     /* =========================================
        EASY READ ADAPTIF
        ========================================= */
-
     .aw-page.easy-read-assessment .aw-question {
         font-family: Arial, Helvetica, sans-serif;
         font-size: 21px;
@@ -235,7 +222,6 @@
     /* =========================================
        GAMBAR SOAL ADAPTIF
        ========================================= */
-
     .student-question-images {
         display: grid;
         gap: 16px;
@@ -279,7 +265,6 @@
     /* =========================================
        INPUT JAWABAN ESAI
        ========================================= */
-
     .student-essay-wrapper {
         display: block;
         margin-top: 8px;
@@ -299,16 +284,13 @@
         width: 100%;
         min-height: 230px;
         padding: 18px 20px;
-
         background: #fff;
         color: #172238;
         border: 1.5px solid #d5e1f2;
         border-radius: 15px;
-
         font-family: Arial, Helvetica, sans-serif;
         font-size: 17px;
         line-height: 1.8;
-
         resize: vertical;
         white-space: pre-wrap;
         overflow-wrap: break-word;
@@ -341,11 +323,9 @@
     /* =========================================
        DUKUNGAN BELAJAR ADAPTIF
        ========================================= */
-
     .student-scaffolding-box {
         margin-top: 26px;
         padding: 22px 24px;
-
         background: #eff6ff;
         border: 1px solid #bfdbfe;
         border-left: 4px solid #2563eb;
@@ -356,10 +336,8 @@
         display: flex;
         align-items: center;
         gap: 10px;
-
         margin: 0 0 12px;
         color: #1e40af;
-
         font-family: Arial, Helvetica, sans-serif;
         font-size: 18px;
         font-weight: 700;
@@ -370,11 +348,9 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-
         flex: 0 0 36px;
         width: 36px;
         height: 36px;
-
         background: #dbeafe;
         border-radius: 11px;
         font-size: 19px;
@@ -396,7 +372,6 @@
         margin-bottom: 12px;
         padding-left: 4px;
         color: #172238;
-
         font-family: Arial, Helvetica, sans-serif;
         font-size: 17px;
         font-weight: 500;
@@ -413,7 +388,6 @@
     /* =========================================
        NAVIGASI
        ========================================= */
-
     .aw-nav {
         display: flex;
         gap: 10px;
@@ -424,12 +398,10 @@
         flex: 1;
         min-height: 48px;
         padding: 12px 17px;
-
         background: white;
         color: var(--aw-ink);
         border: 1px solid #dce5f0;
         border-radius: 12px;
-
         font-weight: 700;
         cursor: pointer;
     }
@@ -486,7 +458,6 @@
     /* =========================================
        AKSESIBILITAS
        ========================================= */
-
     .aw-tools {
         display: flex;
         flex-wrap: wrap;
@@ -513,12 +484,10 @@
         width: 100%;
         margin-top: 16px;
         padding: 13px;
-
         background: var(--aw-teal);
         color: white;
         border: none;
         border-radius: 12px;
-
         font-weight: 800;
         cursor: pointer;
     }
@@ -529,7 +498,6 @@
     }
 
     /* Tombol perbesar teks */
-
     .aw-page.large-text .aw-question {
         font-size: 23px;
     }
@@ -560,7 +528,6 @@
     }
 
     /* Mode kontras */
-
     .aw-page.high-contrast {
         --aw-ink: #000;
         --aw-muted: #303030;
@@ -582,7 +549,6 @@
     }
 
     /* Mode fokus */
-
     .aw-page.focus-mode .aw-layout {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -596,7 +562,6 @@
     /* =========================================
        RESPONSIF HP
        ========================================= */
-
     @media (max-width: 700px) {
         .aw-page {
             padding: 17px 12px 30px;
@@ -661,10 +626,12 @@
             font-size: 18px;
         }
     }
+
     /* NORMAL: layout asli — soal di kiri, navigasi di kanan. */
     .aw-page:not(.focus-mode) .aw-layout {
         grid-template-columns: minmax(0, 1fr) 250px;
     }
+
     .aw-page:not(.focus-mode) .aw-sidebar {
         display: block;
         position: static;
@@ -678,10 +645,12 @@
         overflow: visible;
         border-radius: 22px;
     }
+
     .aw-page:not(.focus-mode) .aw-nav-toggle,
     .aw-page:not(.focus-mode) .aw-close-nav {
         display: none;
     }
+
     .aw-page:not(.focus-mode) .aw-card {
         width: auto;
         max-width: none;
@@ -692,12 +661,14 @@
     .aw-page.focus-mode .aw-layout {
         grid-template-columns: minmax(0, 1fr);
     }
+
     .aw-page.focus-mode .aw-card {
         width: 100%;
         max-width: 850px;
         margin-inline: auto;
         box-sizing: border-box;
     }
+
     .aw-page.focus-mode .aw-sidebar {
         display: block !important;
         position: fixed;
@@ -717,11 +688,13 @@
         transform: translateX(100%);
         transition: transform .3s ease, visibility .3s;
     }
+
     .aw-page.focus-mode .aw-sidebar.nav-open {
         visibility: visible;
         pointer-events: auto;
         transform: translateX(0);
     }
+
     .aw-nav-toggle {
         display: none;
         position: fixed;
@@ -744,20 +717,24 @@
         box-shadow: 0 4px 16px rgba(0,0,0,.15);
         transition: right .3s ease;
     }
+
     .aw-page.focus-mode .aw-nav-toggle { display: flex; }
     .aw-page.focus-mode.nav-is-open .aw-nav-toggle {
         right: min(355px, 90vw);
     }
+
     .aw-nav-toggle-label {
         font-size: 11px;
         font-weight: 700;
         writing-mode: vertical-rl;
     }
+
     .aw-nav-toggle:focus-visible,
     .aw-close-nav:focus-visible {
         outline: 3px solid #f59e0b;
         outline-offset: 3px;
     }
+
     .aw-nav-backdrop { display: none !important; }
     .aw-close-nav {
         display: none;
@@ -768,6 +745,7 @@
         background: #f8fafc;
         cursor: pointer;
     }
+
     .aw-page.focus-mode .aw-close-nav { display: block; }
     #unansweredCount {
         clear: both;
@@ -776,68 +754,140 @@
         font-weight: 700;
         color: #334155;
     }
+
     .aw-numbtn.unanswered:not(.current) {
         background: #fff7ed;
         color: #9a3412;
         border-color: #fdba74;
     }
+
     .aw-btn.submit-final {
         background: #0d9488;
         border-color: #0d9488;
         color: white;
     }
+
     @media (max-width: 700px) {
         .aw-page:not(.focus-mode) .aw-layout { grid-template-columns: 1fr; }
         .aw-page:not(.focus-mode) .aw-sidebar { order: -1; }
     }
+
     @media (prefers-reduced-motion: reduce) {
         .aw-page.focus-mode .aw-sidebar,
         .aw-nav-toggle { transition: none; }
     }
-</style>
+    }
 
+    /* Samakan font Dukungan Belajar dengan soal modifikasi */
+    .aw-page.easy-read-assessment .student-scaffolding-box {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 21px;
+        font-weight: 600;
+        line-height: 1.75;
+        letter-spacing: 0.2px;
+        word-spacing: 1px;
+        color: #172238;
+    }
+
+    /* Judul Dukungan Belajar */
+    .aw-page.easy-read-assessment .student-scaffolding-title {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 21px;
+        font-weight: 700;
+        line-height: 1.75;
+        letter-spacing: 0.2px;
+        word-spacing: 1px;
+        margin-bottom: 14px;
+    }
+
+    /* Deskripsi Dukungan Belajar */
+    .aw-page.easy-read-assessment .student-scaffolding-description {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 21px;
+        font-weight: 600;
+        line-height: 1.75;
+        letter-spacing: 0.2px;
+        word-spacing: 1px;
+        color: #172238;
+        margin-bottom: 14px;
+    }
+
+    /* Isi petunjuk Dukungan Belajar */
+    .aw-page.easy-read-assessment .student-scaffolding-list {
+        padding-left: 26px;
+    }
+
+    .aw-page.easy-read-assessment .student-scaffolding-list li {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 21px;
+        font-weight: 600;
+        line-height: 1.75;
+        letter-spacing: 0.2px;
+        word-spacing: 1px;
+        color: #172238;
+        margin-bottom: 14px;
+        padding-left: 4px;
+    }
+
+    /* Tampilan HP */
+    @media (max-width: 700px) {
+        .aw-page.easy-read-assessment .student-scaffolding-box {
+            padding: 18px;
+        }
+
+        .aw-page.easy-read-assessment .student-scaffolding-title,
+        .aw-page.easy-read-assessment .student-scaffolding-description,
+        .aw-page.easy-read-assessment .student-scaffolding-list li {
+            font-size: 19px;
+            line-height: 1.75;
+        }
+    }
+
+        .accessibility-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .accessibility-actions button {
+        width: 100%;
+        min-height: 48px;
+        margin: 0;
+        justify-content: center;
+    }
+
+</style>
 <div
     id="assessmentApp"
     class="aw-page {{ $version === 'adaptif' ? 'easy-read-assessment' : '' }}">
 
     {{-- HEADER --}}
-
     <div class="aw-top">
         <a
             href="{{ route('siswa.assessment.instructions', $assessment->id) }}"
             class="aw-back">
             ← Petunjuk asesmen
         </a>
-
-        <span class="aw-tag">
-            {{ $version === 'adaptif'
-                ? '✦ Versi Adaptif'
-                : '● Versi Reguler' }}
-        </span>
     </div>
-
     <div class="aw-heading">
         <p class="aw-muted" style="font-size:13px;margin:0">
             {{ $assessment->mapel }} · {{ $assessment->nama }}
         </p>
-
         <h1>Fokus pada pemahamanmu.</h1>
-
         <p class="aw-muted" style="font-size:14px">
             Kerjakan dengan tenang dan periksa kembali jawabanmu.
         </p>
-
         <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px">
             <span id="progressText">
                 Soal 1 dari {{ $questions->count() }}
             </span>
-
             <span id="elapsedTime"
                   style="font-weight:800;color:#2563eb">
                 00:00
             </span>
         </div>
-
         <div class="aw-progress">
             <div
                 id="progressBar"
@@ -845,7 +895,6 @@
             </div>
         </div>
     </div>
-
     @if($errors->any())
         <div
             role="alert"
@@ -853,21 +902,16 @@
             {{ $errors->first() }}
         </div>
     @endif
-
     {{-- FORM PENGERJAAN --}}
-
     <form
         id="assessmentForm"
         method="POST"
         action="{{ route('siswa.assessment.submit', ['id' => $assessment->id]) }}">
-
         @csrf
-
         <input
             type="hidden"
             name="attempt_id"
             value="{{ $attemptId }}">
-
         <input
             type="hidden"
             name="version_type"
@@ -878,13 +922,10 @@
                 aria-label="Buka navigasi soal" aria-controls="questionSidebar"
                 aria-expanded="false"><span id="navToggleArrow" aria-hidden="true">❮</span><span class="aw-nav-toggle-label">Nomor soal</span></button>
         <div id="navBackdrop" class="aw-nav-backdrop" aria-hidden="true"></div>
-
         <div class="aw-layout">
-
             <main class="aw-card">
 
                 {{-- LOOP SOAL --}}
-
                 @foreach($questions as $index => $question)
                     @php
                         /*
@@ -896,11 +937,9 @@
                                 $question->options ?? '[]',
                                 true
                             );
-
                         $options = is_array($options)
                             ? $options
                             : [];
-
                         /*
                          * 2. Periksa jenis soal.
                          *
@@ -914,14 +953,11 @@
                                 $question->question_type ?? ''
                             ))
                         );
-
                         $typeSaysEssay =
                             str_contains($tipeSoal, 'esai')
                             || str_contains($tipeSoal, 'essay')
                             || str_contains($tipeSoal, 'uraian');
-
                         $isEssay = $typeSaysEssay || empty($options);
-
                         /*
                          * 3. Ambil jawaban tersimpan.
                          */
@@ -929,7 +965,6 @@
                             'answers.' . $question->id,
                             $savedAnswers[$question->id] ?? ''
                         );
-
                         /*
                          * 4. Ambil scaffolding Adaptif.
                          */
@@ -939,11 +974,9 @@
                                 ?? []
                             )
                             : [];
-
                         $petunjukAdaptif = is_array($petunjukAdaptif)
                             ? $petunjukAdaptif
                             : [];
-
                         /*
                          * 5. Ambil gambar Adaptif.
                          */
@@ -953,17 +986,14 @@
                                 ?? []
                             )
                             : [];
-
                         $gambarSoal = is_array($gambarSoal)
                             ? $gambarSoal
                             : [];
                     @endphp
-
                     <section
                         class="aw-question-panel"
                         data-index="{{ $index }}"
                         style="{{ $index === 0 ? '' : 'display:none' }}">
-
                         <div class="aw-number">
                             PERTANYAAN
                             {{ str_pad(
@@ -975,23 +1005,19 @@
                         </div>
 
                         {{-- TEKS PERTANYAAN --}}
-
                         <div class="aw-question {{ $version === 'adaptif' ? 'easy-read-question' : '' }}">{{ $question->question_text }}</div>
 
                         {{-- GAMBAR KHUSUS ADAPTIF --}}
-
                         @if(
                             $version === 'adaptif'
                             && !empty($gambarSoal)
                         )
                             <div class="student-question-images">
-
                                 @foreach($gambarSoal as $gambar)
                                     @php
                                         $imageUrl = is_array($gambar)
                                             ? ($gambar['url'] ?? null)
                                             : null;
-
                                         $imageAlt = is_array($gambar)
                                             ? (
                                                 $gambar['alt']
@@ -999,7 +1025,6 @@
                                             )
                                             : 'Ilustrasi pendukung soal';
                                     @endphp
-
                                     @if(
                                         is_string($imageUrl)
                                         && filter_var($imageUrl, FILTER_VALIDATE_URL)
@@ -1012,37 +1037,28 @@
                                                 loading="lazy"
                                                 referrerpolicy="no-referrer"
                                                 onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
-
                                             <div class="student-image-error">
                                                 Ilustrasi belum dapat dimuat.
                                             </div>
-
                                             <figcaption>
                                                 {{ $imageAlt }}
                                             </figcaption>
                                         </figure>
                                     @endif
                                 @endforeach
-
                             </div>
                         @endif
-
                         {{-- ======================================
                              JAWABAN SISWA
                              ====================================== --}}
-
                         @if($isEssay)
-
                             {{-- ESAI: SELALU TAMPILKAN TEXTAREA --}}
-
                             <div class="student-essay-wrapper">
-
                                 <label
                                     for="essay-answer-{{ $question->id }}"
                                     class="student-essay-label">
                                     Tulis jawabanmu di sini
                                 </label>
-
                                 <textarea
                                     id="essay-answer-{{ $question->id }}"
                                     name="answers[{{ $question->id }}]"
@@ -1051,26 +1067,19 @@
                                     maxlength="5000"
                                     placeholder="Tuliskan jawaban dengan bahasamu sendiri..."
                                     aria-label="Jawaban esai pertanyaan {{ $index + 1 }}">{{ $jawabanTersimpan }}</textarea>
-
                                 <p class="student-essay-hint">
                                     Kamu dapat menulis beberapa kalimat.
                                     Periksa kembali jawaban sebelum dikumpulkan.
                                 </p>
-
                             </div>
-
                         @else
-
                             {{-- PILIHAN GANDA --}}
-
                             <div class="aw-options {{ $version === 'adaptif' ? 'easy-read-options' : '' }}">
-
                                 @foreach($options as $key => $option)
                                     @php
                                         $optionData = is_array($option)
                                             ? $option
                                             : [];
-
                                         $optionLabel =
                                             $optionData['label']
                                             ?? (
@@ -1078,7 +1087,6 @@
                                                     ? chr(65 + (int) $key)
                                                     : (string) $key
                                             );
-
                                         $optionText =
                                             $optionData['teks']
                                             ?? $optionData['text']
@@ -1087,65 +1095,45 @@
                                                     ? (string) $option
                                                     : ''
                                             );
-
                                         /*
                                          * Format key asli dipertahankan.
                                          */
                                         $optionValue = (string) $key;
-
                                         $isChecked =
                                             (string) $jawabanTersimpan
                                             === $optionValue;
                                     @endphp
-
                                     <label class="aw-option">
-
                                         <input
                                             type="radio"
                                             name="answers[{{ $question->id }}]"
                                             value="{{ $optionValue }}"
                                             {{ $isChecked ? 'checked' : '' }}>
-
                                         <span class="aw-letter">
                                             {{ $optionLabel }}
                                         </span>
-
                                         <span class="aw-option-text">
                                             {{ $optionText }}
                                         </span>
-
                                     </label>
                                 @endforeach
-
                             </div>
-
                         @endif
-
                         {{-- DUKUNGAN BELAJAR ADAPTIF --}}
-
                         @if(
                             $version === 'adaptif'
                             && !empty($petunjukAdaptif)
                         )
                             <div class="student-scaffolding-box">
-
                                 <h3 class="student-scaffolding-title">
                                     <span
                                         class="student-scaffolding-icon"
                                         aria-hidden="true">
                                         💡
                                     </span>
-
-                                    Dukungan Belajar Adaptif
+                                    Dukungan Belajar
                                 </h3>
-
-                                <p class="student-scaffolding-description">
-                                    Gunakan petunjuk berikut untuk
-                                    membantu memahami pertanyaan.
-                                </p>
-
                                 <ol class="student-scaffolding-list">
-
                                     @foreach($petunjukAdaptif as $petunjuk)
                                         @if(
                                             is_string($petunjuk)
@@ -1154,50 +1142,39 @@
                                             <li>{{ $petunjuk }}</li>
                                         @endif
                                     @endforeach
-
                                 </ol>
-
                             </div>
                         @endif
-
                     </section>
                 @endforeach
-
                 {{-- NAVIGASI SEBELUMNYA/SELANJUTNYA --}}
-
                 <div class="aw-nav">
                     <button
                         type="button"
                         class="aw-btn"
                         id="previousBtn">
-                        ← Sebelumnya
+                        ⬅️ Sebelumnya
                     </button>
-
                     <button
                         type="button"
                         class="aw-btn primary"
                         id="nextBtn">
-                        Selanjutnya →
+                        Selanjutnya ➡️
                     </button>
                 </div>
-
             </main>
 
             {{-- SIDEBAR --}}
-
             <aside class="aw-sidebar" id="questionSidebar" aria-label="Navigasi dan bantuan soal"
                    >
-
                 <button type="button" id="closeQuestionNav" class="aw-close-nav"
                         aria-label="Tutup navigasi soal">✕ Tutup</button>
                 <h3>Navigasi soal</h3>
-                <p id="unansweredCount" role="status" aria-live="polite">Memeriksa jawaban...</p>
-
+                <p id="unansweredCount" role="status" aria-live="polite">Memeriksa jawaban...</p*>
                 <p class="aw-muted"
                    style="font-size:12px;line-height:1.6">
                     Pilih nomor untuk berpindah soal.
                 </p>
-
                 <div class="aw-numbers" id="questionNumbers">
                     @foreach($questions as $index => $question)
                         <button
@@ -1208,39 +1185,32 @@
                         </button>
                     @endforeach
                 </div>
-
                 <div class="aw-muted" style="font-size:12px">
                     <span style="color:#0d9488">●</span>
                     Sudah dijawab
-
                     <br>
-
                     <span style="color:#2563eb">●</span>
                     Soal aktif
                 </div>
-
-                <div class="aw-tools">
+                <div class="accessibility-actions">
                     <button
                         type="button"
                         class="aw-tool"
                         id="largeTextBtn">
                         A+ Teks besar
                     </button>
-
                     <button
                         type="button"
                         class="aw-tool"
                         id="contrastBtn">
                         ◐ Kontras
                     </button>
-
                     <button
                         type="button"
                         class="aw-tool"
                         id="focusBtn">
                         ◎ Mode fokus
                     </button>
-
                     <button
                         type="button"
                         class="aw-tool"
@@ -1248,19 +1218,15 @@
                         🔊 Bacakan
                     </button>
                 </div>
-
                 <button
                     type="button"
                     class="aw-submit"
                     id="submitBtn">
                     Kumpulkan jawaban
                 </button>
-
             </aside>
-
         </div>
     </form>
-
 </div>
 
 {{-- ==========================================
@@ -1269,30 +1235,23 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-
     const app = document.getElementById('assessmentApp');
     const form = document.getElementById('assessmentForm');
-
     const panels = Array.from(
         document.querySelectorAll('.aw-question-panel')
     );
-
     const numberButtons = Array.from(
         document.querySelectorAll('.aw-numbtn')
     );
-
     const previousBtn = document.getElementById('previousBtn');
     const nextBtn = document.getElementById('nextBtn');
     const progressText = document.getElementById('progressText');
     const progressBar = document.getElementById('progressBar');
     const sidebar = app.querySelector('.aw-sidebar');
     const submitBtn = document.getElementById('submitBtn');
-
     const total = panels.length;
-
     let current = 0;
     let focusMode = false;
-
     /*
      * Status terjawab untuk PG dan esai.
      */
@@ -1300,11 +1259,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const checkedRadio = panel.querySelector(
             'input[type="radio"]:checked'
         );
-
         const essayInput = panel.querySelector(
             '.student-essay-input'
         );
-
         return Boolean(
             checkedRadio ||
             (
@@ -1335,54 +1292,42 @@ document.addEventListener('DOMContentLoaded', function () {
         if (index < 0 || index >= total) {
             return;
         }
-
         current = index;
-
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
         }
-
         panels.forEach((panel, i) => {
             panel.style.display = i === current
                 ? ''
                 : 'none';
         });
-
         numberButtons.forEach((button, i) => {
             button.classList.toggle(
                 'current',
                 i === current
             );
         });
-
         previousBtn.disabled = current === 0;
-
         const isLastQuestion = current === total - 1;
         nextBtn.disabled = total === 0;
         nextBtn.textContent = isLastQuestion
             ? 'Kumpulkan Jawaban ✓'
             : 'Selanjutnya →';
         nextBtn.classList.toggle('submit-final', isLastQuestion);
-
         progressText.textContent =
             `Soal ${current + 1} dari ${total}`;
-
         progressBar.style.width =
             `${((current + 1) / total) * 100}%`;
-
         updateAnswered();
     }
-
     numberButtons.forEach(button => {
         button.addEventListener('click', function () {
             showQuestion(Number(this.dataset.go));
         });
     });
-
     previousBtn.addEventListener('click', function () {
         showQuestion(current - 1);
     });
-
     nextBtn.addEventListener('click', function () {
         if (current === total - 1) {
             submitBtn.click(); // Tetap menggunakan konfirmasi dan validasi yang sudah ada.
@@ -1390,32 +1335,26 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         showQuestion(current + 1);
     });
-
     /*
      * Pilihan ganda.
      */
     form.querySelectorAll('input[type="radio"]')
         .forEach(input => {
-
             input.addEventListener('change', function () {
                 const panel = this.closest('.aw-question-panel');
-
                 panel.querySelectorAll('.aw-option')
                     .forEach(option => {
                         const radio = option.querySelector(
                             'input[type="radio"]'
                         );
-
                         option.classList.toggle(
                             'selected',
                             Boolean(radio && radio.checked)
                         );
                     });
-
                 updateAnswered();
             });
         });
-
     /*
      * ESAI:
      * Status terjawab berubah saat mengetik.
@@ -1427,7 +1366,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 updateAnswered
             );
         });
-
     /*
      * Tombol perbesar teks.
      */
@@ -1436,7 +1374,6 @@ document.addEventListener('DOMContentLoaded', function () {
             app.classList.toggle('large-text');
             this.classList.toggle('active');
         });
-
     /*
      * Tombol kontras.
      */
@@ -1445,29 +1382,54 @@ document.addEventListener('DOMContentLoaded', function () {
             app.classList.toggle('high-contrast');
             this.classList.toggle('active');
         });
-
     /*
      * Mode fokus.
      */
+    let focusExitBtn = null;
+    function setFocusMode(enabled) {
+        focusMode = enabled;
+        app.classList.toggle('focus-mode', focusMode);
+        // Sidebar tetap ada agar panel geser dapat dibuka saat mode fokus.
+        document.getElementById('focusBtn')
+            .classList.toggle('active', focusMode);
+        if (focusMode) {
+            if (!focusExitBtn) {
+                focusExitBtn = document.createElement('button');
+                focusExitBtn.type = 'button';
+                focusExitBtn.textContent = '✕ Keluar Mode Fokus';
+                Object.assign(focusExitBtn.style, {
+                    position: 'fixed',
+                    top: '16px',
+                    right: '16px',
+                    zIndex: '99999',
+                    padding: '12px 18px',
+                    background: '#2563eb',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '12px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,.15)'
+                });
+                focusExitBtn.addEventListener('click', function () {
+                    setFocusMode(false);
+                });
+                document.body.appendChild(focusExitBtn);
+            }
+        } else {
+            if (focusExitBtn) {
+                focusExitBtn.remove();
+                focusExitBtn = null;
+            }
+        }
+    }
     document.getElementById('focusBtn')
         .addEventListener('click', function () {
-            focusMode = !focusMode;
-
-            app.classList.toggle('focus-mode', focusMode);
-
-            // Hanya pada Mode Fokus, navigasi masuk ke panel geser.
-            // Mode biasa mengembalikan sidebar asli yang selalu terlihat.
+            setFocusMode(!focusMode);
             closeQuestionNav(false);
-            if (!focusMode) {
-                sidebar.inert = false;
-                sidebar.removeAttribute('aria-hidden');
-            }
-
-            this.classList.toggle('active', focusMode);
             this.textContent = focusMode ? '✕ Keluar Mode Fokus' : '◎ Mode fokus';
             this.setAttribute('aria-pressed', String(focusMode));
         });
-
     /*
      * Panel navigasi samping — tetap dapat dibuka di Mode Fokus.
      */
@@ -1476,7 +1438,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const navBackdrop = document.getElementById('navBackdrop');
     const unansweredCount = document.getElementById('unansweredCount');
     let navWasOpenedFrom = null;
-
     function updateUnansweredCount() {
         const remaining = panels.filter(panel => !isPanelAnswered(panel)).length;
         unansweredCount.textContent = remaining === 0
@@ -1489,9 +1450,7 @@ document.addEventListener('DOMContentLoaded', function () {
             button.classList.toggle('unanswered', !answered);
         });
     }
-
     const navToggleArrow = document.getElementById('navToggleArrow');
-
     function openQuestionNav() {
         updateUnansweredCount();
         navWasOpenedFrom = document.activeElement;
@@ -1504,7 +1463,6 @@ document.addEventListener('DOMContentLoaded', function () {
         openNavBtn.setAttribute('aria-expanded', 'true');
         closeNavBtn.focus();
     }
-
     function closeQuestionNav(restoreFocus = true) {
         sidebar.classList.remove('nav-open');
         app.classList.remove('nav-is-open');
@@ -1520,7 +1478,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (restoreFocus && focusMode) openNavBtn.focus();
     }
-
     // Panah yang sama membuka DAN menutup panel.
     openNavBtn.addEventListener('click', function () {
         if (!focusMode) return;
@@ -1542,128 +1499,118 @@ document.addEventListener('DOMContentLoaded', function () {
     }));
     form.addEventListener('change', updateUnansweredCount);
     form.addEventListener('input', updateUnansweredCount);
-
     /*
      * Pembaca soal dan petunjuk.
      */
     document.getElementById('readBtn')
-        .addEventListener('click', function () {
-
-            if (!('speechSynthesis' in window)) {
-                alert(
-                    'Fitur pembaca teks tidak didukung browser ini.'
-                );
-                return;
-            }
-
+        const readBtn = document.getElementById('readBtn');
+        let isReading = false;
+        function stopReading() {
             window.speechSynthesis.cancel();
-
-            const panel = panels[current];
-
-            if (!panel) {
+            isReading = false;
+            readBtn.classList.remove('active');
+            readBtn.textContent = '🔊 Bacakan';
+        }
+        readBtn.addEventListener('click', function () {
+            // Jika sedang membaca, klik kedua menghentikan suara.
+            if (isReading) {
+                stopReading();
                 return;
             }
-
+            if (!('speechSynthesis' in window)) {
+                alert('Fitur pembaca teks tidak didukung browser ini.');
+                return;
+            }
+            const panel = panels[current];
+            if (!panel) return;
             const questionText =
-                panel.querySelector('.aw-question')
-                    ?.innerText ?? '';
-
+                panel.querySelector('.aw-question')?.innerText ?? '';
             const optionText = Array.from(
                 panel.querySelectorAll('.aw-option')
             ).map(option => option.innerText).join('. ');
-
             const imageText = Array.from(
                 panel.querySelectorAll('.student-question-image')
             ).map(img => img.alt).filter(Boolean).join('. ');
-
             const scaffoldingText =
-                panel.querySelector('.student-scaffolding-box')
-                    ?.innerText ?? '';
-
+                panel.querySelector('.student-scaffolding-box')?.innerText ?? '';
             const textToRead = [
                 questionText,
                 optionText,
                 imageText,
                 scaffoldingText
             ].filter(Boolean).join('. ');
-
-            const utterance =
-                new SpeechSynthesisUtterance(textToRead);
-
+            if (!textToRead.trim()) return;
+            const utterance = new SpeechSynthesisUtterance(textToRead);
             utterance.lang = 'id-ID';
-
+            utterance.onend = function () {
+                isReading = false;
+                readBtn.classList.remove('active');
+                readBtn.textContent = '🔊 Bacakan';
+            };
+            utterance.onerror = function () {
+                isReading = false;
+                readBtn.classList.remove('active');
+                readBtn.textContent = '🔊 Bacakan';
+            };
+            isReading = true;
+            readBtn.classList.add('active');
+            readBtn.textContent = '⏹ Hentikan bacaan';
             window.speechSynthesis.speak(utterance);
         });
-
     /*
      * Kirim jawaban.
      */
     submitBtn.addEventListener('click', function () {
-
         const unanswered = panels.filter(
             panel => !isPanelAnswered(panel)
         ).length;
-
         const message = unanswered > 0
             ? `Masih ada ${unanswered} soal yang belum dijawab. Tetap kumpulkan?`
             : 'Yakin ingin mengumpulkan jawaban? Setelah dikumpulkan, asesmen tidak dapat dilanjutkan.';
-
         if (!confirm(message)) {
             return;
         }
-
         submitBtn.disabled = true;
         submitBtn.textContent = 'Mengumpulkan...';
-
         form.submit();
     });
-
     /*
      * Timer tampilan, bukan batas waktu server.
      */
     let elapsed = 0;
-
     setInterval(function () {
         elapsed++;
-
         const minutes = String(
             Math.floor(elapsed / 60)
         ).padStart(2, '0');
-
         const seconds = String(
             elapsed % 60
         ).padStart(2, '0');
-
         document.getElementById('elapsedTime')
             .textContent = `${minutes}:${seconds}`;
-
     }, 1000);
-
     /*
      * Inisialisasi awal.
      */
     if (total > 0) {
         showQuestion(0);
     }
-
     panels.forEach(panel => {
         panel.querySelectorAll('.aw-option')
             .forEach(option => {
                 const radio = option.querySelector(
                     'input[type="radio"]'
                 );
-
                 option.classList.toggle(
                     'selected',
                     Boolean(radio && radio.checked)
                 );
             });
     });
-
     updateAnswered();
     updateUnansweredCount();
-
 });
+
 </script>
 
 @endsection

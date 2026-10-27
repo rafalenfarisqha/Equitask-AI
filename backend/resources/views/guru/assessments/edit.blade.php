@@ -479,7 +479,7 @@
                             <div class="border rounded-3 bg-light p-3">
 
                                 <h6 class="fw-bold">
-                                    Rencana Ilustrasi dari Dify
+                                    Rencana Ilustrasi
                                 </h6>
 
                                 @foreach($soal['rencana_visual'] as $visual)

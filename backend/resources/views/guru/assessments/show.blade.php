@@ -95,12 +95,88 @@
         font-weight: 700;
     }
 
+
+    /* Dukungan Belajar — Soal Modifikasi */
     .scaffolding-box {
-        padding: 18px;
-        border-radius: 12px;
+        padding: 18px 20px;
+        margin-top: 20px;
+
+        border: 1px solid #bfdbfe;
         border-left: 4px solid #2563eb;
+        border-radius: 16px;
         background: #eff6ff;
+
+        font-family: Arial, sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1.6;
+        letter-spacing: normal;
+        word-spacing: normal;
+        color: #172238;
     }
+
+    /* Judul Dukungan Belajar */
+    .scaffolding-box h6 {
+        margin: 0 0 14px;
+        font-family: Arial, sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.5;
+        color: #1e40af;
+    }
+
+    /* Daftar langkah belajar */
+    .scaffolding-box ol,
+    .scaffolding-box ul {
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-left: 24px;
+    }
+
+    .scaffolding-box li {
+        margin-bottom: 10px;
+        font-family: Arial, sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1.6;
+        letter-spacing: normal;
+        word-spacing: normal;
+        color: #172238;
+    }
+
+    .scaffolding-box li:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Jika langkah ditulis dalam paragraf */
+    .scaffolding-box p {
+        margin-bottom: 10px;
+        font-family: Arial, sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1.6;
+        letter-spacing: normal;
+        word-spacing: normal;
+        color: #172238;
+    }
+
+    .scaffolding-box p:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Tampilan HP */
+    @media (max-width: 575px) {
+        .scaffolding-box {
+            padding: 16px;
+        }
+
+        .scaffolding-box h6,
+        .scaffolding-box li,
+        .scaffolding-box p {
+            font-size: 15px;
+        }
+    }
+
 
     .answer-box {
         padding: 18px;
@@ -152,12 +228,14 @@
         text-align: center;
     }
 
+
     /* ========================================
-       EASY READ KHUSUS SOAL ADAPTIF
-       ======================================== */
+    SOAL MODIFIKASI — EASY READ
+    Tipografi mengikuti mockup Equitask AI
+    ======================================== */
 
     #panelAdaptif.easy-read-assessment {
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: Arial, "Plus Jakarta Sans", sans-serif;
         color: #172238;
     }
 
@@ -167,25 +245,24 @@
         max-width: 100%;
         margin: 0 0 24px !important;
         padding: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 21px;
-        font-weight: 600;
+
+        font-family: Arial, "Plus Jakarta Sans", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
         line-height: 1.75;
-        letter-spacing: .2px;
-        word-spacing: 1px;
-        text-align: left;
+
+        letter-spacing: normal;
+        word-spacing: normal;
+
+        text-align: justify;
+        text-justify: inter-word;
         white-space: pre-line;
-        overflow-wrap: break-word;
+        overflow-wrap: anywhere;
     }
 
     #panelAdaptif .adaptive-illustrations {
-        margin-bottom: 28px;
+        margin-bottom: 24px;
     }
-
-    /*
-     * Satu pilihan = satu baris flex.
-     * Tidak menggunakan grid untuk label dan teks.
-     */
 
     #panelAdaptif .easy-read-options {
         display: flex;
@@ -200,50 +277,40 @@
         flex-wrap: nowrap !important;
         align-items: center !important;
         justify-content: flex-start !important;
-        gap: 16px !important;
+        gap: 12px !important;
 
         width: 100%;
-        min-height: 74px;
+        min-height: 64px;
         margin: 0 !important;
-        padding: 16px 18px !important;
+        padding: 18px !important;
 
         border: 1.5px solid #dce5f0;
-        border-radius: 15px;
+        border-radius: 16px;
         background: #ffffff;
     }
-
-    /*
-     * Label A/B/C/D tepat di tengah.
-     */
 
     #panelAdaptif .easy-read-options .question-label {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
 
-        flex: 0 0 40px !important;
-        width: 40px !important;
-        min-width: 40px !important;
-        height: 40px !important;
+        flex: 0 0 26px !important;
+        width: 26px !important;
+        min-width: 26px !important;
+        height: 26px !important;
 
         margin: 0 !important;
         padding: 0 !important;
 
-        border-radius: 11px;
-        background: #e5edff;
-        color: #2458cb;
+        border-radius: 8px;
+        background: #dfe8f7;
+        color: #2563eb;
 
-        font-size: 17px;
-        font-weight: 700;
+        font-family: Arial, "Plus Jakarta Sans", sans-serif;
+        font-size: 12px;
+        font-weight: 800;
         line-height: 1;
     }
-
-    /*
-     * Teks jawaban di samping label.
-     *
-     * Class question-text sengaja tidak digunakan
-     * agar white-space: pre-line tidak mengganggu.
-     */
 
     #panelAdaptif .easy-read-options .easy-read-option {
         display: block !important;
@@ -255,26 +322,23 @@
         margin: 0 !important;
         padding: 0 !important;
 
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 18px;
+        font-family: Arial, "Plus Jakarta Sans", sans-serif;
+        font-size: 15px;
         font-weight: 600;
         line-height: 1.5;
-        letter-spacing: .2px;
-        word-spacing: .5px;
+
+        letter-spacing: normal;
+        word-spacing: normal;
 
         color: #172238;
         white-space: normal !important;
         text-align: left;
-        overflow-wrap: break-word;
+        overflow-wrap: anywhere;
     }
-
-    /* ========================================
-       SCAFFOLDING ADAPTIF
-       ======================================== */
 
     #panelAdaptif .scaffolding-box {
         margin-top: 22px;
-        padding: 22px 24px;
+        padding: 18px;
         background: #eff6ff;
         border: 1px solid #bfdbfe;
         border-left: 4px solid #2563eb;
@@ -282,24 +346,28 @@
     }
 
     #panelAdaptif .scaffolding-box h6 {
-        font-size: 18px;
+        font-family: Arial, "Plus Jakarta Sans", sans-serif;
+        font-size: 15px;
         font-weight: 700;
         line-height: 1.5;
         color: #1e40af;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
     }
 
     #panelAdaptif .scaffolding-box ol {
-        padding-left: 26px;
+        padding-left: 24px;
         margin-bottom: 0;
     }
 
     #panelAdaptif .scaffolding-box li {
-        font-size: 17px;
+        font-family: Arial, "Plus Jakarta Sans", sans-serif;
+        font-size: 15px;
         font-weight: 500;
         line-height: 1.75;
-        letter-spacing: .2px;
-        word-spacing: .7px;
+
+        letter-spacing: normal;
+        word-spacing: normal;
+
         color: #172238;
         margin-bottom: 12px;
     }
@@ -308,52 +376,34 @@
         margin-bottom: 0;
     }
 
-    /* ========================================
-       RESPONSIF HP
-       ======================================== */
-
     @media (max-width: 575px) {
-        .assessment-actions {
-            width: 100%;
-        }
-
-        .assessment-action-btn {
-            flex: 1;
-        }
-
-        .assessment-card {
-            border-radius: 14px;
-        }
-
         #panelAdaptif .easy-read-question {
-            font-size: 19px;
+            font-size: 15px;
             line-height: 1.75;
         }
 
         #panelAdaptif .easy-read-options .question-choice {
-            min-height: 64px;
-            padding: 13px 14px !important;
+            min-height: 60px;
+            padding: 18px !important;
             gap: 12px !important;
         }
 
         #panelAdaptif .easy-read-options .easy-read-option {
-            font-size: 17px;
-        }
-
-        .assessment-image-frame {
-            padding: 12px;
+            font-size: 15px;
+            line-height: 1.5;
         }
 
         #panelAdaptif .scaffolding-box {
-            padding: 18px;
+            padding: 16px;
         }
 
         #panelAdaptif .scaffolding-box h6 {
-            font-size: 17px;
+            font-size: 15px;
         }
 
         #panelAdaptif .scaffolding-box li {
-            font-size: 16px;
+            font-size: 15px;
+            line-height: 1.75;
         }
     }
 
@@ -410,7 +460,232 @@
         text-align: left;
     }
 
-</style>
+    /* Perbaikan jarak Dukungan Belajar */
+    #panelAdaptif .scaffolding-box h6 {
+        margin-bottom: 12px !important;
+        font-size: 15px !important;
+        line-height: 1.5 !important;
+    }
+
+    #panelAdaptif .scaffolding-box p,
+    #panelAdaptif .scaffolding-box li,
+    #panelAdaptif .scaffolding-box div {
+        margin-top: 0 !important;
+        margin-bottom: 10px !important;
+        font-size: 15px !important;
+        line-height: 1.6 !important;
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
+    }
+
+    #panelAdaptif .scaffolding-box ol,
+    #panelAdaptif .scaffolding-box ul {
+        margin-bottom: 0 !important;
+        padding-left: 24px !important;
+    }
+
+    #panelAdaptif .scaffolding-box > *:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    /* Dukungan Belajar - tipografi Soal Modifikasi */
+    #panelAdaptif .scaffolding-box {
+        box-sizing: border-box;
+        padding: 18px 20px;
+        margin-top: 22px;
+
+        font-family: Arial, sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1.6;
+        letter-spacing: normal;
+        word-spacing: normal;
+        color: #172238;
+
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-left: 4px solid #2563eb;
+        border-radius: 16px;
+    }
+
+    /* Judul */
+    #panelAdaptif .scaffolding-box h6 {
+        margin: 0 0 14px !important;
+        padding: 0;
+
+        font-family: Arial, sans-serif;
+        font-size: 15px !important;
+        font-weight: 700;
+        line-height: 1.5;
+        letter-spacing: normal;
+        word-spacing: normal;
+        color: #1e40af;
+    }
+
+    /* Samakan font Dukungan Belajar dengan Soal Modifikasi */
+    #panelAdaptif .scaffolding-box,
+    #panelAdaptif .scaffolding-box h6,
+    #panelAdaptif .scaffolding-box .scaffolding-step {
+        font-family: inherit !important;
+        letter-spacing: inherit !important;
+        word-spacing: inherit !important;
+    }
+
+
+    /* Tipografi isi Dukungan Belajar */
+    #panelAdaptif .scaffolding-box .scaffolding-step {
+        font-family: inherit;
+        font-size: 16px !important;
+        font-weight: 500 !important;
+        line-height: 1.5 !important;
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
+        text-align: left;
+        margin: 0 0 10px !important;
+        padding: 0 !important;
+    }
+
+    #panelAdaptif .scaffolding-box .scaffolding-step:last-child {
+        margin-bottom: 0 !important;
+    }
+
+
+    @media (max-width: 575px) {
+        #panelAdaptif .scaffolding-box {
+            padding: 16px;
+        }
+    }
+
+
+    /* =========================================
+    FINAL FIX: DUKUNGAN BELAJAR SOAL MODIFIKASI
+    Samakan font dan jarak dengan pertanyaan
+    ========================================= */
+
+    #panelAdaptif .scaffolding-box {
+        box-sizing: border-box;
+        width: 100%;
+        margin: 22px 0 24px !important;
+        padding: 18px 20px !important;
+
+        font-family: Arial, "Plus Jakarta Sans", sans-serif !important;
+        font-size: 15px !important;
+        font-weight: 500 !important;
+        line-height: 1.75 !important;
+
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
+        text-align: left !important;
+
+        color: #172238 !important;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-left: 4px solid #2563eb;
+        border-radius: 16px;
+    }
+
+    /* Judul Dukungan Belajar */
+    #panelAdaptif .scaffolding-box h6 {
+        margin: 0 0 14px !important;
+        padding: 0 !important;
+
+        font-family: Arial, "Plus Jakarta Sans", sans-serif !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        line-height: 1.75 !important;
+
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
+        text-align: left !important;
+        color: #1e40af !important;
+    }
+
+    /* Hilangkan indentasi bawaan daftar */
+    #panelAdaptif .scaffolding-box ol,
+    #panelAdaptif .scaffolding-box ul {
+        margin: 0 !important;
+        padding: 0 !important;
+        list-style: none !important;
+    }
+
+    /* Isi setiap langkah Dukungan Belajar */
+    #panelAdaptif .scaffolding-box li,
+    #panelAdaptif .scaffolding-box .scaffolding-step,
+    #panelAdaptif .scaffolding-box p {
+        margin: 0 0 12px !important;
+        padding: 0 !important;
+
+        font-family: Arial, "Plus Jakarta Sans", sans-serif !important;
+        font-size: 15px !important;
+        font-weight: 500 !important;
+        line-height: 1.75 !important;
+
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
+        text-align: left !important;
+
+        color: #172238 !important;
+    }
+
+    /* Hapus jarak setelah langkah terakhir */
+    #panelAdaptif .scaffolding-box li:last-child,
+    #panelAdaptif .scaffolding-box p:last-child,
+    #panelAdaptif .scaffolding-box .scaffolding-step:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    /* Tampilan layar HP */
+    @media (max-width: 575px) {
+        #panelAdaptif .scaffolding-box {
+            padding: 16px !important;
+            margin-top: 18px !important;
+        }
+
+        #panelAdaptif .scaffolding-box h6,
+        #panelAdaptif .scaffolding-box li,
+        #panelAdaptif .scaffolding-box p,
+        #panelAdaptif .scaffolding-box .scaffolding-step {
+            font-size: 15px !important;
+        }
+    }
+
+
+    /* Samakan font Dukungan Belajar dengan pertanyaan Soal Modifikasi */
+    #panelAdaptif .scaffolding-box .scaffolding-step,
+    #panelAdaptif .scaffolding-box li,
+    #panelAdaptif .scaffolding-box p {
+        font-family: Arial, "Plus Jakarta Sans", sans-serif !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        line-height: 1.75 !important;
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
+        text-align: justify !important;
+        text-justify: inter-word;
+    }
+
+    /* Jarak antarpetunjuk */
+    #panelAdaptif .scaffolding-box li,
+    #panelAdaptif .scaffolding-box .scaffolding-step,
+    #panelAdaptif .scaffolding-box p {
+        margin-bottom: 12px !important;
+        padding: 0 !important;
+    }
+
+    #panelAdaptif .scaffolding-box li:last-child,
+    #panelAdaptif .scaffolding-box p:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    /* Judul tetap tegas dan rapi */
+    #panelAdaptif .scaffolding-box h6 {
+        font-family: Arial, "Plus Jakarta Sans", sans-serif !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        line-height: 1.75 !important;
+    }
+
+    </style>
 
 <div class="container py-4 py-md-5 assessment-page">
 
@@ -489,7 +764,7 @@
                 </div>
 
                 <div class="assessment-actions">
-                    
+
                     {{-- DOWNLOAD PDF REGULER --}}
                     <a href="{{ route('guru.assessments.download-pdf', [
                         'assessment' => $assessment->id,
@@ -501,7 +776,7 @@
                             picture_as_pdf
                         </span>
 
-                        PDF Reguler
+                        PDF Soal Reguler
                     </a>
 
                     {{-- DOWNLOAD PDF EASY READ --}}
@@ -515,7 +790,7 @@
                             picture_as_pdf
                         </span>
 
-                        PDF Easy Read
+                        PDF Soal Modifikasi
                     </a>
 
                     {{-- ANALITIK AI: data hasil pengerjaan siswa --}}
@@ -656,14 +931,14 @@
                         id="tabReguler"
                         class="btn btn-primary"
                         aria-pressed="true">
-                    Reguler
+                    Soal Reguler
                 </button>
 
                 <button type="button"
                         id="tabAdaptif"
                         class="btn btn-outline-primary"
                         aria-pressed="false">
-                    Adaptif
+                    Soal Modifikasi
                 </button>
 
             </div>
@@ -961,7 +1236,7 @@
                             </strong>
 
                             <p class="small text-muted mt-2 mb-0">
-                                Dify memiliki rencana visual untuk soal ini,
+                                Sistem memiliki rencana visual untuk soal ini,
                                 tetapi belum ada gambar dengan ID soal
                                 yang sesuai dalam output tersimpan.
                             </p>
@@ -1010,7 +1285,7 @@
                         <div class="scaffolding-box mb-4">
 
                             <h6 class="fw-bold mb-3">
-                                Dukungan Belajar Adaptif
+                                Dukungan Belajar (Easy Read)
                             </h6>
 
                             <ol class="mb-0">
@@ -1020,7 +1295,7 @@
                                     as $petunjuk
                                 )
 
-                                    <li class="mb-2 question-text">
+                                    <li class="scaffolding-step">
                                         {{ $petunjuk }}
                                     </li>
 
@@ -1039,7 +1314,7 @@
                         <details class="bg-light border rounded-3 p-3 mb-4">
 
                             <summary class="fw-semibold">
-                                Detail Rencana Ilustrasi Dify
+                                Detail Rencana Ilustrasi
                             </summary>
 
                             <div class="mt-3">
@@ -1107,7 +1382,7 @@
             @empty
 
                 <div class="alert alert-secondary">
-                    Belum ada soal Adaptif yang tersimpan.
+                    Belum ada soal Modifikasi yang tersimpan.
                 </div>
 
             @endforelse
@@ -1422,7 +1697,7 @@
             </h5>
 
             <p class="small text-muted">
-                Gambar berikut tidak memiliki ID soal dari Dify.
+                Gambar berikut tidak memiliki ID soal.
                 Gambar tidak dipasangkan otomatis agar tidak tertukar.
             </p>
 

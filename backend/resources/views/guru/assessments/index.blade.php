@@ -846,7 +846,7 @@
         <p class="as-modal-description">
             Paket salinan akan menggunakan soal Reguler
             dan Adaptif dari paket asli, tanpa Generate
-            Dify ulang. Salinan disimpan sebagai Draft
+            ulang. Salinan disimpan sebagai Draft
             sampai kamu memublikasikannya.
         </p>
 
@@ -912,7 +912,7 @@
 
         <p class="as-modal-description">
             Perubahan judul tidak akan mengubah
-            pertanyaan, pilihan jawaban, atau hasil Dify.
+            pertanyaan, pilihan jawaban, atau hasil.
         </p>
 
         <form method="POST" id="editTitleForm">
