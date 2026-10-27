@@ -661,6 +661,139 @@
             font-size: 18px;
         }
     }
+    /* NORMAL: layout asli — soal di kiri, navigasi di kanan. */
+    .aw-page:not(.focus-mode) .aw-layout {
+        grid-template-columns: minmax(0, 1fr) 250px;
+    }
+    .aw-page:not(.focus-mode) .aw-sidebar {
+        display: block;
+        position: static;
+        width: auto;
+        max-width: none;
+        height: auto;
+        margin: 0;
+        visibility: visible;
+        pointer-events: auto;
+        transform: none;
+        overflow: visible;
+        border-radius: 22px;
+    }
+    .aw-page:not(.focus-mode) .aw-nav-toggle,
+    .aw-page:not(.focus-mode) .aw-close-nav {
+        display: none;
+    }
+    .aw-page:not(.focus-mode) .aw-card {
+        width: auto;
+        max-width: none;
+        margin: 0;
+    }
+
+    /* FOKUS: area soal melebar, sidebar meluncur ke kanan. */
+    .aw-page.focus-mode .aw-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .aw-page.focus-mode .aw-card {
+        width: 100%;
+        max-width: 850px;
+        margin-inline: auto;
+        box-sizing: border-box;
+    }
+    .aw-page.focus-mode .aw-sidebar {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1101;
+        box-sizing: border-box;
+        width: min(355px, 90vw);
+        max-width: none;
+        height: 100dvh;
+        margin: 0;
+        overflow-y: auto;
+        border-radius: 20px 0 0 20px;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateX(100%);
+        transition: transform .3s ease, visibility .3s;
+    }
+    .aw-page.focus-mode .aw-sidebar.nav-open {
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateX(0);
+    }
+    .aw-nav-toggle {
+        display: none;
+        position: fixed;
+        top: 46%;
+        right: 0;
+        z-index: 1102;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 44px;
+        min-height: 80px;
+        padding: 9px 4px;
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 12px 0 0 12px;
+        font-size: 22px;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(0,0,0,.15);
+        transition: right .3s ease;
+    }
+    .aw-page.focus-mode .aw-nav-toggle { display: flex; }
+    .aw-page.focus-mode.nav-is-open .aw-nav-toggle {
+        right: min(355px, 90vw);
+    }
+    .aw-nav-toggle-label {
+        font-size: 11px;
+        font-weight: 700;
+        writing-mode: vertical-rl;
+    }
+    .aw-nav-toggle:focus-visible,
+    .aw-close-nav:focus-visible {
+        outline: 3px solid #f59e0b;
+        outline-offset: 3px;
+    }
+    .aw-nav-backdrop { display: none !important; }
+    .aw-close-nav {
+        display: none;
+        float: right;
+        padding: 9px 13px;
+        border-radius: 9px;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        cursor: pointer;
+    }
+    .aw-page.focus-mode .aw-close-nav { display: block; }
+    #unansweredCount {
+        clear: both;
+        padding-top: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #334155;
+    }
+    .aw-numbtn.unanswered:not(.current) {
+        background: #fff7ed;
+        color: #9a3412;
+        border-color: #fdba74;
+    }
+    .aw-btn.submit-final {
+        background: #0d9488;
+        border-color: #0d9488;
+        color: white;
+    }
+    @media (max-width: 700px) {
+        .aw-page:not(.focus-mode) .aw-layout { grid-template-columns: 1fr; }
+        .aw-page:not(.focus-mode) .aw-sidebar { order: -1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .aw-page.focus-mode .aw-sidebar,
+        .aw-nav-toggle { transition: none; }
+    }
 </style>
 
 <div
@@ -739,6 +872,12 @@
             type="hidden"
             name="version_type"
             value="{{ $version }}">
+
+        {{-- Tombol panel navigasi tetap tersedia saat Mode Fokus aktif. --}}
+        <button type="button" id="openQuestionNav" class="aw-nav-toggle"
+                aria-label="Buka navigasi soal" aria-controls="questionSidebar"
+                aria-expanded="false"><span id="navToggleArrow" aria-hidden="true">❮</span><span class="aw-nav-toggle-label">Nomor soal</span></button>
+        <div id="navBackdrop" class="aw-nav-backdrop" aria-hidden="true"></div>
 
         <div class="aw-layout">
 
@@ -1046,9 +1185,13 @@
 
             {{-- SIDEBAR --}}
 
-            <aside class="aw-sidebar">
+            <aside class="aw-sidebar" id="questionSidebar" aria-label="Navigasi dan bantuan soal"
+                   >
 
+                <button type="button" id="closeQuestionNav" class="aw-close-nav"
+                        aria-label="Tutup navigasi soal">✕ Tutup</button>
                 <h3>Navigasi soal</h3>
+                <p id="unansweredCount" role="status" aria-live="polite">Memeriksa jawaban...</p>
 
                 <p class="aw-muted"
                    style="font-size:12px;line-height:1.6">
@@ -1214,11 +1357,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         previousBtn.disabled = current === 0;
 
-        nextBtn.disabled = current === total - 1;
-
-        nextBtn.textContent = current === total - 1
-            ? 'Soal terakhir ✓'
+        const isLastQuestion = current === total - 1;
+        nextBtn.disabled = total === 0;
+        nextBtn.textContent = isLastQuestion
+            ? 'Kumpulkan Jawaban ✓'
             : 'Selanjutnya →';
+        nextBtn.classList.toggle('submit-final', isLastQuestion);
 
         progressText.textContent =
             `Soal ${current + 1} dari ${total}`;
@@ -1240,6 +1384,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     nextBtn.addEventListener('click', function () {
+        if (current === total - 1) {
+            submitBtn.click(); // Tetap menggunakan konfirmasi dan validasi yang sudah ada.
+            return;
+        }
         showQuestion(current + 1);
     });
 
@@ -1307,12 +1455,93 @@ document.addEventListener('DOMContentLoaded', function () {
 
             app.classList.toggle('focus-mode', focusMode);
 
-            sidebar.style.display = focusMode
-                ? 'none'
-                : '';
+            // Hanya pada Mode Fokus, navigasi masuk ke panel geser.
+            // Mode biasa mengembalikan sidebar asli yang selalu terlihat.
+            closeQuestionNav(false);
+            if (!focusMode) {
+                sidebar.inert = false;
+                sidebar.removeAttribute('aria-hidden');
+            }
 
             this.classList.toggle('active', focusMode);
+            this.textContent = focusMode ? '✕ Keluar Mode Fokus' : '◎ Mode fokus';
+            this.setAttribute('aria-pressed', String(focusMode));
         });
+
+    /*
+     * Panel navigasi samping — tetap dapat dibuka di Mode Fokus.
+     */
+    const openNavBtn = document.getElementById('openQuestionNav');
+    const closeNavBtn = document.getElementById('closeQuestionNav');
+    const navBackdrop = document.getElementById('navBackdrop');
+    const unansweredCount = document.getElementById('unansweredCount');
+    let navWasOpenedFrom = null;
+
+    function updateUnansweredCount() {
+        const remaining = panels.filter(panel => !isPanelAnswered(panel)).length;
+        unansweredCount.textContent = remaining === 0
+            ? 'Semua soal sudah dijawab ✓'
+            : `${remaining} soal belum dijawab`;
+        numberButtons.forEach((button, index) => {
+            const answered = isPanelAnswered(panels[index]);
+            button.setAttribute('aria-label',
+                `Soal ${index + 1}, ${answered ? 'sudah dijawab' : 'belum dijawab'}`);
+            button.classList.toggle('unanswered', !answered);
+        });
+    }
+
+    const navToggleArrow = document.getElementById('navToggleArrow');
+
+    function openQuestionNav() {
+        updateUnansweredCount();
+        navWasOpenedFrom = document.activeElement;
+        sidebar.inert = false;
+        sidebar.removeAttribute('aria-hidden');
+        sidebar.classList.add('nav-open');
+        app.classList.add('nav-is-open');
+        navToggleArrow.textContent = '❯';
+        openNavBtn.setAttribute('aria-label', 'Sembunyikan navigasi soal ke kanan');
+        openNavBtn.setAttribute('aria-expanded', 'true');
+        closeNavBtn.focus();
+    }
+
+    function closeQuestionNav(restoreFocus = true) {
+        sidebar.classList.remove('nav-open');
+        app.classList.remove('nav-is-open');
+        navToggleArrow.textContent = '❮';
+        openNavBtn.setAttribute('aria-label', 'Buka navigasi soal dari kanan');
+        openNavBtn.setAttribute('aria-expanded', 'false');
+        if (focusMode) {
+            sidebar.inert = true;
+            sidebar.setAttribute('aria-hidden', 'true');
+        } else {
+            sidebar.inert = false;
+            sidebar.removeAttribute('aria-hidden');
+        }
+        if (restoreFocus && focusMode) openNavBtn.focus();
+    }
+
+    // Panah yang sama membuka DAN menutup panel.
+    openNavBtn.addEventListener('click', function () {
+        if (!focusMode) return;
+        if (sidebar.classList.contains('nav-open')) {
+            closeQuestionNav();
+        } else {
+            openQuestionNav();
+        }
+    });
+    closeNavBtn.addEventListener('click', () => closeQuestionNav());
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && sidebar.classList.contains('nav-open')) {
+            closeQuestionNav();
+        }
+    });
+    // Klik nomor tetap berpindah soal; setelah itu panel bergeser ke kanan.
+    numberButtons.forEach(button => button.addEventListener('click', () => {
+        if (focusMode) closeQuestionNav();
+    }));
+    form.addEventListener('change', updateUnansweredCount);
+    form.addEventListener('input', updateUnansweredCount);
 
     /*
      * Pembaca soal dan petunjuk.
@@ -1432,6 +1661,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     updateAnswered();
+    updateUnansweredCount();
 
 });
 </script>
