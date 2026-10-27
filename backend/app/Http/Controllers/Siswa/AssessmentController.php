@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
+use App\Services\DifyAnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AssessmentController extends Controller
@@ -26,6 +28,11 @@ class AssessmentController extends Controller
         );
     }
 
+    /**
+     * Hanya asesmen Published yang benar-benar ditugaskan
+     * ke salah satu kelas siswa. Visibilitas public saja
+     * tidak berarti otomatis menjadi tugas siswa.
+     */
     private function studentCanAccessAssessment(
         int $assessmentId,
         int $studentId
@@ -33,28 +40,12 @@ class AssessmentController extends Controller
         return DB::table('assessments as a')
             ->where('a.id', $assessmentId)
             ->where('a.status', 'Published')
-            ->where(function ($query) use ($studentId) {
-                $query
-                    ->where('a.visibility', 'public')
-                    ->orWhereExists(function ($subquery) use ($studentId) {
-                        $subquery
-                            ->selectRaw('1')
-                            ->from('assessment_class_assignments as aca')
-                            ->join(
-                                'class_members as cm',
-                                'cm.class_id',
-                                '=',
-                                'aca.class_id'
-                            )
-                            ->whereColumn(
-                                'aca.assessment_id',
-                                'a.id'
-                            )
-                            ->where(
-                                'cm.student_id',
-                                $studentId
-                            );
-                    });
+            ->whereExists(function ($query) use ($studentId) {
+                $query->selectRaw('1')
+                    ->from('assessment_class_assignments as aca')
+                    ->join('class_members as cm', 'cm.class_id', '=', 'aca.class_id')
+                    ->whereColumn('aca.assessment_id', 'a.id')
+                    ->where('cm.student_id', $studentId);
             })
             ->exists();
     }
@@ -413,6 +404,42 @@ class AssessmentController extends Controller
     |--------------------------------------------------------------------------
     */
 
+    /**
+     * Jalur asesmen ditentukan oleh guru pada anggota kelas.
+     * Tanpa penugasan kelas, akses ditolak.
+     * Konflik profil pada beberapa kelas harus diselesaikan guru.
+     */
+    private function getStudentAssessmentTrack(int $assessmentId, int $studentId): string
+    {
+        $tracks = DB::table('assessment_class_assignments as aca')
+            ->join('class_members as cm', 'cm.class_id', '=', 'aca.class_id')
+            ->where('aca.assessment_id', $assessmentId)
+            ->where('cm.student_id', $studentId)
+            ->distinct()
+            ->pluck('cm.assessment_track')
+            ->map(fn ($track) => strtolower(trim((string) ($track ?? 'reguler'))))
+            ->unique()
+            ->values();
+
+        abort_if(
+            $tracks->count() > 1,
+            409,
+            'Profil asesmen di beberapa kelas berbeda. Hubungi guru kelas.'
+        );
+
+        abort_if($tracks->isEmpty(), 404, 'Asesmen tidak ditugaskan ke kelasmu.');
+
+        $track = $tracks->first();
+
+        abort_unless(
+            in_array($track, ['reguler', 'adaptif'], true),
+            409,
+            'Profil asesmen belum valid. Hubungi guru kelas.'
+        );
+
+        return $track;
+    }
+
     private function getQuestionsForStudent(
         int $assessmentId,
         string $version
@@ -487,49 +514,25 @@ class AssessmentController extends Controller
             'Asesmen tidak ditemukan.'
         );
 
-        $versions = DB::table('assessment_questions as aq')
-            ->join(
-                'questions as q',
-                'q.id',
-                '=',
-                'aq.question_id'
-            )
-            ->where(
-                'aq.assessment_id',
-                $assessment->id
-            )
-            ->distinct()
-            ->pluck('q.version_type')
-            ->map(
-                fn ($value) =>
-                    strtolower(trim((string) $value))
-            );
-
-        $hasRegular = $versions->contains('reguler');
-        $hasAdaptive = $versions->contains('adaptif');
-
-        abort_unless(
-            $hasRegular || $hasAdaptive,
-            404,
-            'Soal untuk asesmen ini belum tersedia.'
+        $version = $this->getStudentAssessmentTrack(
+            (int) $assessment->id,
+            (int) Auth::id()
         );
 
-        $questionCount = DB::table('assessment_questions as aq')
-            ->join(
-                'questions as q',
-                'q.id',
-                '=',
-                'aq.question_id'
-            )
-            ->where(
-                'aq.assessment_id',
-                $assessment->id
-            )
-            ->whereRaw(
-                'LOWER(TRIM(q.version_type)) IN (?, ?)',
-                ['reguler', 'adaptif']
-            )
-            ->count();
+        // Variabel kompatibilitas Blade lama: hanya satu yang true.
+        $hasRegular = $version === 'reguler';
+        $hasAdaptive = $version === 'adaptif';
+
+        $questionCount = $this->getQuestionsForStudent(
+            (int) $assessment->id,
+            $version
+        )->count();
+
+        abort_if(
+            $questionCount === 0,
+            404,
+            'Soal sesuai profilmu belum tersedia. Hubungi guru.'
+        );
 
         return view(
             'student.assessment-instruction',
@@ -537,7 +540,8 @@ class AssessmentController extends Controller
                 'assessment',
                 'hasRegular',
                 'hasAdaptive',
-                'questionCount'
+                'questionCount',
+                'version'
             )
         );
     }
@@ -553,14 +557,11 @@ class AssessmentController extends Controller
         $this->ensureStudent();
         $this->ensureAssessmentAccessible((int) $id);
 
-        $validated = $request->validate([
-            'version_type' => [
-                'required',
-                'in:reguler,adaptif',
-            ],
-        ]);
-
-        $version = $validated['version_type'];
+        // Tidak menerima pilihan versi soal dari siswa.
+        $version = $this->getStudentAssessmentTrack(
+            (int) $id,
+            (int) Auth::id()
+        );
 
         $assessment = DB::table('assessments')
             ->where('id', $id)
@@ -1073,7 +1074,7 @@ class AssessmentController extends Controller
                      * Nilai teknis sementara.
                      * Bukan berarti esainya salah.
                      */
-                    $isCorrect = false;
+                    $isCorrect = null;
                     $points = 0.0;
 
                 } else {
@@ -1210,25 +1211,11 @@ class AssessmentController extends Controller
             'assessment_version_' . $attemptId,
         ]);
 
-        return view(
-            'student.assessment-result',
-            compact(
-                'score',
-                'earnedPoints',
-                'totalPoints',
-                'hasEssay',
-                'nilaiPG',
-                'benar',
-                'salah',
-                'belumDijawab',
-                'jumlahPG',
-                'jumlahEsai',
-                'esaiTerisi',
-                'esaiBelumTerisi',
-                'kategoriHasil',
-                'kalimatHasil',
-                'catatanEsai'
-            )
+        // Setelah submit, baca ulang hasil dari database dan tampilkan
+        // nilai + Analitik AI dalam halaman yang sama.
+        return redirect()->route(
+            'siswa.assessment.result',
+            ['attemptId' => $attemptId]
         );
     }
 
@@ -1350,15 +1337,16 @@ class AssessmentController extends Controller
             $attempt->attempt_id
         );
 
-        abort_unless(
-            in_array(
-                $version,
-                ['reguler', 'adaptif'],
-                true
-            ),
-            403,
-            'Versi asesmen tidak ditemukan di sesi ini. Silakan pilih versi melalui halaman petunjuk.'
-        );
+        if (!in_array($version, ['reguler', 'adaptif'], true)) {
+            $version = $this->getStudentAssessmentTrack(
+                (int) $attempt->assessment_id,
+                (int) Auth::id()
+            );
+            session([
+                'assessment_attempt_id' => $attempt->attempt_id,
+                'assessment_version_' . $attempt->attempt_id => $version,
+            ]);
+        }
 
         $questions = $this->getQuestionsForStudent(
             (int) $attempt->assessment_id,
@@ -1423,7 +1411,10 @@ class AssessmentController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function result(int $attemptId)
+    public function result(
+        int $attemptId,
+        DifyAnalyticsService $dify
+    )
     {
         $this->ensureStudent();
 
@@ -1498,7 +1489,9 @@ class AssessmentController extends Controller
                 'q.options',
                 'q.correct_answer',
                 'aq.points',
-                'ans.answer'
+                'ans.answer',
+                'ans.points_obtained',
+                'ans.is_correct'
             )
             ->get();
 
@@ -1524,6 +1517,8 @@ class AssessmentController extends Controller
          */
         $jumlahEsai = 0;
         $esaiTerisi = 0;
+        $esaiBelumDinilai = 0;
+        $poinEsai = 0.0;
 
         $totalPoints = 0.0;
 
@@ -1548,6 +1543,14 @@ class AssessmentController extends Controller
                     && $jawaban !== ''
                 ) {
                     $esaiTerisi++;
+                }
+
+                // Nilai esai yang sudah disimpan AI/guru harus
+                // tetap terbaca pada halaman hasil siswa.
+                if ($row->is_correct === null) {
+                    $esaiBelumDinilai++;
+                } else {
+                    $poinEsai += max(0.0, (float) $row->points_obtained);
                 }
 
                 continue;
@@ -1615,12 +1618,14 @@ class AssessmentController extends Controller
         $kalimatHasil = $feedback['pesan'];
 
         $catatanEsai = $hasEssay
-            ? 'Jawaban pilihan ganda telah diperiksa otomatis. ' .
-              'Jawaban esai masih menunggu koreksi guru, ' .
-              'sehingga nilai keseluruhan belum final.'
+            ? ($esaiBelumDinilai > 0
+                ? 'Jawaban pilihan ganda telah diperiksa. ' .
+                  'Sebagian jawaban esai masih menunggu penilaian; ' .
+                  'nilai keseluruhan belum final.'
+                : 'Seluruh jawaban termasuk esai telah mendapatkan skor.')
             : 'Seluruh soal pilihan ganda telah diperiksa otomatis.';
 
-        $earnedPoints = $poinPG;
+        $earnedPoints = $poinPG + $poinEsai;
 
         /*
          * Kompatibilitas dengan halaman hasil lama.
@@ -1632,9 +1637,127 @@ class AssessmentController extends Controller
             )
             : 0;
 
+        /*
+         * Analitik Dify: dijalankan untuk asesmen yang telah dikumpulkan,
+         * termasuk jika terdapat esai yang belum diberi skor.
+         *
+         * Penting: analisis naratif BUKAN penilaian esai otomatis.
+         * Angka nilai akhir tidak boleh diperlakukan sebagai final
+         * sampai seluruh skor esai benar-benar tersedia di database.
+         */
+        $analisis = null;
+
+        $questionIds = $rows->pluck('id')->all();
+        $metadataSoal = DB::table('questions')
+            ->whereIn('id', $questionIds)
+            ->get(['id', 'question_text', 'materi', 'topik'])
+            ->keyBy('id');
+
+        $rekapMateri = [];
+        $rekapTopik = [];
+        $esaiUntukAnalitik = [];
+
+        foreach ($rows as $row) {
+            $metadata = $metadataSoal->get($row->id);
+            $namaMateri = trim((string) ($metadata->materi ?? ''));
+            $namaTopik = trim((string) ($metadata->topik ?? ''));
+            $bobot = max(0.0, (float) $row->points);
+            $isEssay = $this->isEssayQuestion($row);
+            $jawabanSiswa = trim((string) ($row->answer ?? ''));
+
+            if ($isEssay) {
+                $esaiUntukAnalitik[] = [
+                    'question_id' => (int) $row->id,
+                    'pertanyaan' => (string) ($metadata->question_text ?? ''),
+                    'jawaban_siswa' => $jawabanSiswa,
+                    'materi' => $namaMateri,
+                    'topik' => $namaTopik,
+                    'skor_maksimum' => $bobot,
+                    'status_penilaian' => $row->is_correct === null ? 'belum_dinilai' : 'sudah_dinilai',
+                ];
+                continue;
+            }
+
+            $opsi = $this->decodeArray($row->options);
+            $tepat = $jawabanSiswa !== ''
+                && array_key_exists($jawabanSiswa, $opsi)
+                && $this->checkMultipleChoiceAnswer(
+                    $jawabanSiswa,
+                    $opsi,
+                    $row->correct_answer
+                );
+
+            if ($namaMateri !== '') {
+                if (!isset($rekapMateri[$namaMateri])) {
+                    $rekapMateri[$namaMateri] = [
+                        'nama' => $namaMateri, 'benar' => 0, 'salah' => 0,
+                        'skor_diperoleh' => 0, 'skor_maksimum_dinilai' => 0,
+                    ];
+                }
+                $rekapMateri[$namaMateri][$tepat ? 'benar' : 'salah']++;
+                $rekapMateri[$namaMateri]['skor_diperoleh'] += $tepat ? $bobot : 0;
+                $rekapMateri[$namaMateri]['skor_maksimum_dinilai'] += $bobot;
+            }
+            if ($namaTopik !== '') {
+                if (!isset($rekapTopik[$namaTopik])) {
+                    $rekapTopik[$namaTopik] = [
+                        'nama' => $namaTopik, 'benar' => 0, 'salah' => 0,
+                        'skor_diperoleh' => 0, 'skor_maksimum_dinilai' => 0,
+                    ];
+                }
+                $rekapTopik[$namaTopik][$tepat ? 'benar' : 'salah']++;
+                $rekapTopik[$namaTopik]['skor_diperoleh'] += $tepat ? $bobot : 0;
+                $rekapTopik[$namaTopik]['skor_maksimum_dinilai'] += $bobot;
+            }
+        }
+
+        $formatRekap = static function (array $rekap): array {
+            foreach ($rekap as &$item) {
+                $maksimum = $item['skor_maksimum_dinilai'];
+                $item['ketepatan'] = $maksimum > 0
+                    ? round($item['skor_diperoleh'] / $maksimum * 100, 2)
+                    : null;
+            }
+            unset($item);
+            return array_values($rekap);
+        };
+
+        $laporan = [
+            'jenis' => 'siswa',
+            'hasil' => [
+                'mapel' => $attempt->mapel,
+                'score' => $esaiBelumDinilai > 0 ? null : $score,
+                'nilai_pg' => $nilaiPG,
+                'penilaian_lengkap' => $esaiBelumDinilai === 0,
+                'benar' => $benar,
+                'salah' => $salah,
+                'belum_dijawab' => $belumDijawab,
+                'belum_dinilai' => $esaiBelumDinilai,
+                'jumlah_jawaban' => $rows->count(),
+                'materi' => $formatRekap($rekapMateri),
+                'topik' => $formatRekap($rekapTopik),
+                'esai' => $esaiUntukAnalitik,
+            ],
+        ];
+
+        $cacheKey = 'equitask:analitik:siswa:' . $attemptId . ':'
+            . hash('sha256', json_encode(
+                $laporan,
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+            ));
+
+        $analisis = Cache::get($cacheKey);
+        if (!is_array($analisis)) {
+            $analisis = $dify->analisis('siswa', $laporan);
+            if (is_array($analisis)) {
+                Cache::put($cacheKey, $analisis, now()->addHours(6));
+            }
+        }
+
         return view(
             'student.assessment-result',
             compact(
+                'attemptId',
                 'score',
                 'earnedPoints',
                 'totalPoints',
@@ -1649,7 +1772,8 @@ class AssessmentController extends Controller
                 'esaiBelumTerisi',
                 'kategoriHasil',
                 'kalimatHasil',
-                'catatanEsai'
+                'catatanEsai',
+                'analisis'
             )
         );
     }
