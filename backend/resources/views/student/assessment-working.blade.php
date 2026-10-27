@@ -661,6 +661,85 @@
             font-size: 18px;
         }
     }
+
+    /* Samakan font Dukungan Belajar dengan soal modifikasi */
+    .aw-page.easy-read-assessment .student-scaffolding-box {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 21px;
+        font-weight: 600;
+        line-height: 1.75;
+        letter-spacing: 0.2px;
+        word-spacing: 1px;
+        color: #172238;
+    }
+
+    /* Judul Dukungan Belajar */
+    .aw-page.easy-read-assessment .student-scaffolding-title {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 21px;
+        font-weight: 700;
+        line-height: 1.75;
+        letter-spacing: 0.2px;
+        word-spacing: 1px;
+        margin-bottom: 14px;
+    }
+
+    /* Deskripsi Dukungan Belajar */
+    .aw-page.easy-read-assessment .student-scaffolding-description {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 21px;
+        font-weight: 600;
+        line-height: 1.75;
+        letter-spacing: 0.2px;
+        word-spacing: 1px;
+        color: #172238;
+        margin-bottom: 14px;
+    }
+
+    /* Isi petunjuk Dukungan Belajar */
+    .aw-page.easy-read-assessment .student-scaffolding-list {
+        padding-left: 26px;
+    }
+
+    .aw-page.easy-read-assessment .student-scaffolding-list li {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 21px;
+        font-weight: 600;
+        line-height: 1.75;
+        letter-spacing: 0.2px;
+        word-spacing: 1px;
+        color: #172238;
+        margin-bottom: 14px;
+        padding-left: 4px;
+    }
+
+    /* Tampilan HP */
+    @media (max-width: 700px) {
+        .aw-page.easy-read-assessment .student-scaffolding-box {
+            padding: 18px;
+        }
+
+        .aw-page.easy-read-assessment .student-scaffolding-title,
+        .aw-page.easy-read-assessment .student-scaffolding-description,
+        .aw-page.easy-read-assessment .student-scaffolding-list li {
+            font-size: 19px;
+            line-height: 1.75;
+        }
+    }
+        .accessibility-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .accessibility-actions button {
+        width: 100%;
+        min-height: 48px;
+        margin: 0;
+        justify-content: center;
+    }
 </style>
 
 <div
@@ -676,11 +755,6 @@
             ← Petunjuk asesmen
         </a>
 
-        <span class="aw-tag">
-            {{ $version === 'adaptif'
-                ? '✦ Versi Adaptif'
-                : '● Versi Reguler' }}
-        </span>
     </div>
 
     <div class="aw-heading">
@@ -997,13 +1071,8 @@
                                         💡
                                     </span>
 
-                                    Dukungan Belajar Adaptif
+                                    Dukungan Belajar
                                 </h3>
-
-                                <p class="student-scaffolding-description">
-                                    Gunakan petunjuk berikut untuk
-                                    membantu memahami pertanyaan.
-                                </p>
 
                                 <ol class="student-scaffolding-list">
 
@@ -1031,14 +1100,14 @@
                         type="button"
                         class="aw-btn"
                         id="previousBtn">
-                        ← Sebelumnya
+                        ⬅️ Sebelumnya
                     </button>
 
                     <button
                         type="button"
                         class="aw-btn primary"
                         id="nextBtn">
-                        Selanjutnya →
+                        Selanjutnya ➡️
                     </button>
                 </div>
 
@@ -1076,7 +1145,7 @@
                     Soal aktif
                 </div>
 
-                <div class="aw-tools">
+                <div class="accessibility-actions">
                     <button
                         type="button"
                         class="aw-tool"
@@ -1212,13 +1281,15 @@ document.addEventListener('DOMContentLoaded', function () {
             );
         });
 
+
         previousBtn.disabled = current === 0;
 
-        nextBtn.disabled = current === total - 1;
+        nextBtn.disabled = false;
 
         nextBtn.textContent = current === total - 1
-            ? 'Soal terakhir ✓'
-            : 'Selanjutnya →';
+            ? 'Kumpulkan Jawaban ✅️'
+            : 'Selanjutnya ➡️';
+
 
         progressText.textContent =
             `Soal ${current + 1} dari ${total}`;
@@ -1239,7 +1310,15 @@ document.addEventListener('DOMContentLoaded', function () {
         showQuestion(current - 1);
     });
 
+
     nextBtn.addEventListener('click', function () {
+        // Jika berada di soal terakhir, jalankan proses pengumpulan.
+        if (current === total - 1) {
+            submitBtn.click();
+            return;
+        }
+
+        // Jika belum soal terakhir, lanjut ke soal berikutnya.
         showQuestion(current + 1);
     });
 
@@ -1301,43 +1380,90 @@ document.addEventListener('DOMContentLoaded', function () {
     /*
      * Mode fokus.
      */
+    let focusExitBtn = null;
+
+    function setFocusMode(enabled) {
+        focusMode = enabled;
+
+        app.classList.toggle('focus-mode', focusMode);
+        sidebar.style.display = focusMode ? 'none' : '';
+        document.getElementById('focusBtn')
+            .classList.toggle('active', focusMode);
+
+        if (focusMode) {
+            if (!focusExitBtn) {
+                focusExitBtn = document.createElement('button');
+                focusExitBtn.type = 'button';
+                focusExitBtn.textContent = '✕ Keluar Mode Fokus';
+
+                Object.assign(focusExitBtn.style, {
+                    position: 'fixed',
+                    top: '16px',
+                    right: '16px',
+                    zIndex: '99999',
+                    padding: '12px 18px',
+                    background: '#2563eb',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '12px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,.15)'
+                });
+
+                focusExitBtn.addEventListener('click', function () {
+                    setFocusMode(false);
+                });
+
+                document.body.appendChild(focusExitBtn);
+            }
+        } else {
+            if (focusExitBtn) {
+                focusExitBtn.remove();
+                focusExitBtn = null;
+            }
+        }
+    }
+
     document.getElementById('focusBtn')
         .addEventListener('click', function () {
-            focusMode = !focusMode;
-
-            app.classList.toggle('focus-mode', focusMode);
-
-            sidebar.style.display = focusMode
-                ? 'none'
-                : '';
-
-            this.classList.toggle('active', focusMode);
+            setFocusMode(!focusMode);
         });
+
 
     /*
      * Pembaca soal dan petunjuk.
      */
     document.getElementById('readBtn')
-        .addEventListener('click', function () {
 
-            if (!('speechSynthesis' in window)) {
-                alert(
-                    'Fitur pembaca teks tidak didukung browser ini.'
-                );
+        const readBtn = document.getElementById('readBtn');
+        let isReading = false;
+
+        function stopReading() {
+            window.speechSynthesis.cancel();
+            isReading = false;
+            readBtn.classList.remove('active');
+            readBtn.textContent = '🔊 Bacakan';
+        }
+
+        readBtn.addEventListener('click', function () {
+            // Jika sedang membaca, klik kedua menghentikan suara.
+            if (isReading) {
+                stopReading();
                 return;
             }
 
-            window.speechSynthesis.cancel();
+            if (!('speechSynthesis' in window)) {
+                alert('Fitur pembaca teks tidak didukung browser ini.');
+                return;
+            }
 
             const panel = panels[current];
 
-            if (!panel) {
-                return;
-            }
+            if (!panel) return;
 
             const questionText =
-                panel.querySelector('.aw-question')
-                    ?.innerText ?? '';
+                panel.querySelector('.aw-question')?.innerText ?? '';
 
             const optionText = Array.from(
                 panel.querySelectorAll('.aw-option')
@@ -1348,8 +1474,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ).map(img => img.alt).filter(Boolean).join('. ');
 
             const scaffoldingText =
-                panel.querySelector('.student-scaffolding-box')
-                    ?.innerText ?? '';
+                panel.querySelector('.student-scaffolding-box')?.innerText ?? '';
 
             const textToRead = [
                 questionText,
@@ -1358,13 +1483,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 scaffoldingText
             ].filter(Boolean).join('. ');
 
-            const utterance =
-                new SpeechSynthesisUtterance(textToRead);
+            if (!textToRead.trim()) return;
 
+            const utterance = new SpeechSynthesisUtterance(textToRead);
             utterance.lang = 'id-ID';
+
+            utterance.onend = function () {
+                isReading = false;
+                readBtn.classList.remove('active');
+                readBtn.textContent = '🔊 Bacakan';
+            };
+
+            utterance.onerror = function () {
+                isReading = false;
+                readBtn.classList.remove('active');
+                readBtn.textContent = '🔊 Bacakan';
+            };
+
+            isReading = true;
+            readBtn.classList.add('active');
+            readBtn.textContent = '⏹ Hentikan bacaan';
 
             window.speechSynthesis.speak(utterance);
         });
+
 
     /*
      * Kirim jawaban.
