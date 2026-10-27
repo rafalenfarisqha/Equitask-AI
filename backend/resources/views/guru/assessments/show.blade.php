@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'Detail Asesmen')
@@ -490,6 +489,16 @@
                 </div>
 
                 <div class="assessment-actions">
+
+                    {{-- ANALITIK AI: data hasil pengerjaan siswa --}}
+                    <a href="{{ route('guru.assessments.analitik-ai', $assessment->id) }}"
+                       class="btn btn-outline-info assessment-action-btn"
+                       title="Lihat ringkasan nilai dan rekomendasi pembelajaran AI">
+                        <span class="material-symbols-outlined" aria-hidden="true">
+                            monitoring
+                        </span>
+                        Lihat Analitik AI
+                    </a>
 
                     <a href="{{ route('guru.assessments.edit', $assessment->id) }}"
                        class="btn btn-outline-primary assessment-action-btn">
