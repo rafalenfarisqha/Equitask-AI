@@ -47,7 +47,8 @@ return [
     | Dify - Generate Asesmen
     |--------------------------------------------------------------------------
     |
-    | Workflow untuk menghasilkan asesmen. Tetap terpisah dari Analytics.
+    | Workflow untuk menghasilkan soal Reguler dan Adaptif.
+    | Tetap terpisah dari workflow Analytics.
     |
     */
 
@@ -56,9 +57,18 @@ return [
             'DIFY_BASE_URL',
             'https://api.dify.ai/v1'
         ),
+
         'api_key' => env('DIFY_API_KEY'),
-        'file_variable' => env('DIFY_FILE_VARIABLE', 'materi_ajar'),
-        'timeout' => (int) env('DIFY_TIMEOUT', 3600),
+
+        'file_variable' => env(
+            'DIFY_FILE_VARIABLE',
+            'materi_ajar'
+        ),
+
+        'timeout' => (int) env(
+            'DIFY_TIMEOUT',
+            3600
+        ),
     ],
 
     /*
@@ -66,15 +76,16 @@ return [
     | Dify - AI Analytics dan AI Essay Grading
     |--------------------------------------------------------------------------
     |
-    | Workflow bersama untuk analitik siswa, analitik guru, dan penilaian esai.
+    | Workflow bersama untuk:
+    | - Analitik hasil belajar siswa
+    | - Analitik hasil asesmen guru
+    | - Penilaian jawaban esai dengan AI
     |
-    | Input analitik : jenis_analisis, laporan_json
-    | Input grading  : jenis_analisis, laporan_json, esai_json
-    | Output analitik: analisis_json
-    | Output grading : penilaian_esai_json
+    | Input:
+    | jenis_analisis, laporan_json, esai_json
     |
-    | DifyEssayGradingService menggunakan konfigurasi dify_analytics ini.
-    | Nama input/output di atas harus sesuai dengan workflow Dify.
+    | Output:
+    | analisis_json, penilaian_esai_json
     |
     */
 
@@ -83,8 +94,57 @@ return [
             'DIFY_ANALYTICS_BASE_URL',
             'https://api.dify.ai/v1'
         ),
-        'api_key' => env('DIFY_ANALYTICS_API_KEY'),
-        'timeout' => (int) env('DIFY_ANALYTICS_TIMEOUT', 90),
+
+        'api_key' => env(
+            'DIFY_ANALYTICS_API_KEY'
+        ),
+
+        'timeout' => (int) env(
+            'DIFY_ANALYTICS_TIMEOUT',
+            90
+        ),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | PDF - Gambar Soal Adaptif
+    |--------------------------------------------------------------------------
+    |
+    | DomPDF dapat mengambil gambar HTTPS eksternal
+    | hanya dari hostname yang diizinkan.
+    |
+    | Contoh .env:
+    |
+    | PDF_IMAGE_HOSTS=cdn.example.com
+    |
+    | Untuk beberapa hostname:
+    |
+    | PDF_IMAGE_HOSTS=cdn.example.com,images.example.com
+    |
+    | Gunakan hostname tepercaya saja.
+    | Jangan memasukkan URL lengkap atau wildcard.
+    |
+    */
+
+    'pdf_image_hosts' => array_values(
+        array_unique(
+            array_filter(
+                array_map(
+                    'trim',
+                    explode(
+                        ',',
+                        (string) env('PDF_IMAGE_HOSTS', '')
+                    )
+                ),
+                static function ($host) {
+                    return $host !== ''
+                        && (bool) preg_match(
+                            '/^(?=.{1,253}$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$/',
+                            $host
+                        );
+                }
+            )
+        )
+    ),
 
 ];
