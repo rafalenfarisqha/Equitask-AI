@@ -1227,7 +1227,7 @@
                             </strong>
 
                             <p class="small text-muted mt-2 mb-0">
-                                Dify memiliki rencana visual untuk soal ini,
+                                Sistem memiliki rencana visual untuk soal ini,
                                 tetapi belum ada gambar dengan ID soal
                                 yang sesuai dalam output tersimpan.
                             </p>
@@ -1305,7 +1305,7 @@
                         <details class="bg-light border rounded-3 p-3 mb-4">
 
                             <summary class="fw-semibold">
-                                Detail Rencana Ilustrasi Dify
+                                Detail Rencana Ilustrasi
                             </summary>
 
                             <div class="mt-3">
@@ -1688,7 +1688,7 @@
             </h5>
 
             <p class="small text-muted">
-                Gambar berikut tidak memiliki ID soal dari Dify.
+                Gambar berikut tidak memiliki ID soal.
                 Gambar tidak dipasangkan otomatis agar tidak tertukar.
             </p>
 
