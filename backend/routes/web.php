@@ -10,6 +10,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\BankSoalController;
+use App\Http\Controllers\AssessmentAnalyticsController;
+
+use App\Http\Controllers\Guru\StudentAssessmentTrackController;
+use App\Http\Controllers\Guru\EssayReviewController;
 
 use App\Http\Controllers\Siswa\DashboardController;
 use App\Http\Controllers\Siswa\StudentPageController;
@@ -18,7 +22,7 @@ use App\Http\Controllers\Siswa\NotificationController as SiswaNotificationContro
 
 /*
 |--------------------------------------------------------------------------
-| WEB ROUTES
+| HALAMAN UTAMA
 |--------------------------------------------------------------------------
 */
 
@@ -58,7 +62,7 @@ Route::post(
 
 /*
 |--------------------------------------------------------------------------
-| RUTE GURU
+| ROUTE GURU
 |--------------------------------------------------------------------------
 */
 
@@ -154,10 +158,6 @@ Route::middleware(['auth'])
         |--------------------------------------------------------------------------
         | GENERATE ASESMEN DIFY
         |--------------------------------------------------------------------------
-        |
-        | Alur Generate Dify tetap menggunakan store().
-        | Fitur duplikat tidak memanggil Dify.
-        |
         */
 
         Route::post(
@@ -169,14 +169,6 @@ Route::middleware(['auth'])
         |--------------------------------------------------------------------------
         | DUPLIKAT PAKET ASESMEN
         |--------------------------------------------------------------------------
-        |
-        | Menyalin paket Reguler dan Adaptif yang sudah
-        | tersimpan tanpa menjalankan Generate Dify ulang.
-        |
-        | Paket hasil duplikasi memiliki ID baru.
-        | Nama salinan dapat ditentukan oleh guru.
-        | Status awal paket salinan adalah Draft.
-        |
         */
 
         Route::post(
@@ -190,10 +182,6 @@ Route::middleware(['auth'])
         |--------------------------------------------------------------------------
         | EDIT JUDUL ASESMEN
         |--------------------------------------------------------------------------
-        |
-        | Mengubah nama paket tanpa mengubah isi soal,
-        | scaffolding, gambar, maupun hasil Dify.
-        |
         */
 
         Route::patch(
@@ -227,11 +215,6 @@ Route::middleware(['auth'])
         |--------------------------------------------------------------------------
         | PUBLIKASI ASESMEN KE KELAS
         |--------------------------------------------------------------------------
-        |
-        | Berlaku untuk paket asli dan paket hasil duplikasi.
-        | Siswa dapat mengakses paket setelah dipublikasikan
-        | dan ditugaskan ke kelas yang sesuai.
-        |
         */
 
         Route::post(
@@ -253,6 +236,19 @@ Route::middleware(['auth'])
         )
             ->whereNumber('id')
             ->name('assessments.share');
+
+        /*
+        |--------------------------------------------------------------------------
+        | ANALITIK AI GURU PER ASESMEN
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/assessments/{assessmentId}/analitik-ai',
+            [AssessmentAnalyticsController::class, 'guru']
+        )
+            ->whereNumber('assessmentId')
+            ->name('assessments.analitik-ai');
 
         /*
         |--------------------------------------------------------------------------
@@ -314,17 +310,65 @@ Route::middleware(['auth'])
         )
             ->whereNumber('id')
             ->name('kelas.importExcel');
+
+        /*
+        |--------------------------------------------------------------------------
+        | PENANDAAN SISWA ADAPTIF OLEH GURU
+        |--------------------------------------------------------------------------
+        |
+        | Semua siswa default Reguler.
+        | Guru hanya mencentang siswa Adaptif.
+        |
+        | Data disimpan pada:
+        | class_members.assessment_track
+        |
+        */
+
+        // Tugaskan asesmen Published yang sudah ada ke kelas ini.
+        Route::post(
+            '/kelas/{id}/assign-assessment',
+            [ClassroomController::class, 'assignAssessment']
+        )
+            ->whereNumber('id')
+            ->name('kelas.assign-assessment');
+
+        Route::patch(
+            '/kelas/{classId}/anggota/{studentId}/assessment-track',
+            [StudentAssessmentTrackController::class, 'update']
+        )
+            ->whereNumber('classId')
+            ->whereNumber('studentId')
+            ->name('kelas.anggota.assessment-track');
+
+        /*
+        |--------------------------------------------------------------------------
+        | ESSAY REVIEW GURU
+        |--------------------------------------------------------------------------
+        |
+        | Guru melihat jawaban esai dan mengoreksi skor.
+        |
+        */
+
+        Route::get(
+            '/essay-review/{attemptId}',
+            [EssayReviewController::class, 'show']
+        )
+            ->whereNumber('attemptId')
+            ->name('essay-review.show');
+
+        Route::put(
+            '/essay-review/{attemptId}/{questionId}',
+            [EssayReviewController::class, 'update']
+        )
+            ->whereNumber('attemptId')
+            ->whereNumber('questionId')
+            ->name('essay-review.update');
     });
 
 /*
 |--------------------------------------------------------------------------
-| RUTE SISWA
+| ROUTE SISWA
 |--------------------------------------------------------------------------
-|
-| Fitur lama tetap dipertahankan.
-| Fitur baru: melihat kembali hasil asesmen yang
-| sudah dikumpulkan tanpa mengerjakan ulang.
-|
 */
 
 Route::middleware(['auth'])
@@ -347,6 +391,10 @@ Route::middleware(['auth'])
         |--------------------------------------------------------------------------
         | DAFTAR ASESMEN SISWA
         |--------------------------------------------------------------------------
+        |
+        | Hanya asesmen yang ditugaskan ke kelas siswa,
+        | sesuai filter DashboardController.
+        |
         */
 
         Route::get(
@@ -359,7 +407,8 @@ Route::middleware(['auth'])
         | PETUNJUK ASESMEN
         |--------------------------------------------------------------------------
         |
-        | Siswa memilih versi Reguler atau Adaptif.
+        | Profil Reguler/Adaptif ditentukan oleh guru.
+        | Siswa tidak memilih versi soal.
         |
         */
 
@@ -374,6 +423,10 @@ Route::middleware(['auth'])
         |--------------------------------------------------------------------------
         | MULAI ASESMEN
         |--------------------------------------------------------------------------
+        |
+        | Controller memilih versi soal secara otomatis
+        | berdasarkan class_members.assessment_track.
+        |
         */
 
         Route::get(
@@ -387,10 +440,6 @@ Route::middleware(['auth'])
         |--------------------------------------------------------------------------
         | LANJUTKAN PENGERJAAN
         |--------------------------------------------------------------------------
-        |
-        | Mempertahankan URL lama supaya tidak mengganggu
-        | fitur yang sudah digunakan oleh anggota tim.
-        |
         */
 
         Route::get(
@@ -405,8 +454,8 @@ Route::middleware(['auth'])
         | KUMPULKAN JAWABAN
         |--------------------------------------------------------------------------
         |
-        | Backend menghitung jawaban pilihan ganda,
-        | menyimpan esai, dan menyiapkan pesan motivasi.
+        | Controller menyimpan jawaban.
+        | Essay Grading Dify ditangani oleh service.
         |
         */
 
@@ -419,21 +468,8 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------------------
-        | LIHAT HASIL ASESMEN SISWA
+        | HASIL ASESMEN SISWA
         |--------------------------------------------------------------------------
-        |
-        | ROUTE BARU.
-        |
-        | Membaca hasil pengerjaan yang sudah tersimpan.
-        | Tidak membuat attempt baru.
-        | Tidak mengubah jawaban siswa.
-        |
-        | Hanya pemilik attempt yang boleh melihat hasil.
-        | Validasi pemilik dilakukan di method result().
-        |
-        | Contoh URL:
-        | /siswa/assessment/pengerjaan/6/hasil
-        |
         */
 
         Route::get(
@@ -442,6 +478,19 @@ Route::middleware(['auth'])
         )
             ->whereNumber('attemptId')
             ->name('assessment.result');
+
+        /*
+        |--------------------------------------------------------------------------
+        | ANALITIK AI HASIL SISWA
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/hasil/{id}/analitik-ai',
+            [AssessmentAnalyticsController::class, 'siswa']
+        )
+            ->whereNumber('id')
+            ->name('hasil.analitik-ai');
 
         /*
         |--------------------------------------------------------------------------
@@ -478,7 +527,7 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------------------
-        | GABUNG KELAS
+        | GABUNG KELAS MELALUI LINK
         |--------------------------------------------------------------------------
         */
 
