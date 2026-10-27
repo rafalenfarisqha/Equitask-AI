@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'Hasil Asesmen')
@@ -254,6 +253,27 @@
             padding: 19px;
         }
     }
+
+    /* ANALITIK AI TERINTEGRASI - tanpa tombol tambahan */
+    .result-ai { margin-top: 26px; padding: 28px; border: 1px solid #dce6fa; border-radius: 22px; background: #fff; box-shadow: 0 10px 28px rgba(25,50,90,.04); }
+    .result-ai-heading { margin: 0 0 8px; font-size: 23px; font-weight: 800; color: #17233d; }
+    .result-ai-description { color: #64748b; font-size: 14px; line-height: 1.7; }
+    .result-ai-category { display: inline-block; margin: 12px 0; padding: 7px 15px; background: #eaf2ff; color: #1d4ed8; border-radius: 999px; font-size: 13px; font-weight: 800; }
+    .result-ai-summary { padding: 17px 19px; background: #f4f8ff; border-radius: 14px; line-height: 1.8; }
+    .result-ai-section { margin-top: 22px; padding: 19px; border-radius: 15px; border: 1px solid #e4eaf4; }
+    .result-ai-section h3 { margin: 0 0 12px; font-size: 17px; font-weight: 800; }
+    .result-ai-section ul, .result-ai-section ol { margin: 0; padding-left: 23px; line-height: 1.85; }
+    .result-ai-section li + li { margin-top: 7px; }
+    .result-ai-positive { background: #f0fdf9; border-color: #cceee1; }
+    .result-ai-positive h3 { color: #087f68; }
+    .result-ai-focus { background: #fffbeb; border-color: #f7e4a9; }
+    .result-ai-focus h3 { color: #9a6700; }
+    .result-ai-advice { background: #eff6ff; border-color: #bfdbfe; }
+    .result-ai-advice h3 { color: #1d4ed8; }
+    .result-ai-motivation { margin-top: 22px; padding: 19px; border-radius: 15px; color: #1e40af; background: #dbeafe; line-height: 1.8; }
+    .result-ai-limits { margin: 18px 0 0; font-size: 13px; color: #64748b; line-height: 1.75; }
+    .result-ai-waiting { margin-top: 26px; padding: 20px; border: 1px solid #dbe5f2; border-radius: 16px; color: #475569; background: white; line-height: 1.8; }
+    @media (max-width: 575px) { .result-ai { padding: 19px 16px; } .result-ai-heading { font-size: 20px; } .result-ai-section { padding: 15px; } }
 </style>
 
 @php
@@ -275,6 +295,8 @@
     $totalEsaiKosong = $esaiBelumTerisi ?? 0;
 
     $kategori = $kategoriHasil ?? 'Hasil Pengerjaan';
+
+    $analisisAi = is_array($analisis ?? null) ? $analisis : null;
 
     $motivasi = $kalimatHasil
         ?? 'Terima kasih telah menyelesaikan asesmen. Terus semangat belajar!';
@@ -427,6 +449,75 @@
 
             </div>
 
+        @endif
+
+
+        {{-- ANALITIK AI: LANGSUNG MUNCUL SETELAH KUMPULKAN JAWABAN --}}
+        @if($analisisAi)
+            <section class="result-ai" aria-labelledby="result-ai-title">
+                <h2 id="result-ai-title" class="result-ai-heading">✨ Analitik AI Hasil Belajar</h2>
+                <p class="result-ai-description">Analisis berdasarkan jawaban yang telah dinilai pada asesmen ini.</p>
+
+                @if(!empty($analisisAi['kategori_nilai']))
+                    <span class="result-ai-category">{{ $analisisAi['kategori_nilai'] }}</span>
+                @endif
+
+                <p class="result-ai-summary">{{ $analisisAi['ringkasan'] ?? 'Ringkasan AI belum tersedia.' }}</p>
+
+                <div class="result-ai-section result-ai-positive">
+                    <h3>✓ Yang Sudah Baik</h3>
+                    <ul>
+                        @forelse(($analisisAi['kelebihan'] ?? []) as $item)
+                            <li>{{ $item }}</li>
+                        @empty
+                            <li>Belum ada pola kekuatan yang dapat disimpulkan dari data yang tersedia.</li>
+                        @endforelse
+                    </ul>
+                </div>
+
+                <div class="result-ai-section result-ai-focus">
+                    <h3>📖 Materi yang Perlu Diperkuat</h3>
+                    <ul>
+                        @forelse(($analisisAi['perlu_diperkuat'] ?? []) as $item)
+                            <li>{{ $item }}</li>
+                        @empty
+                            <li>Belum ada materi yang dapat dipetakan untuk penguatan.</li>
+                        @endforelse
+                    </ul>
+                </div>
+
+                <div class="result-ai-section result-ai-advice">
+                    <h3>💡 Rekomendasi Belajar</h3>
+                    <ol>
+                        @forelse(($analisisAi['rekomendasi'] ?? []) as $item)
+                            <li>{{ $item }}</li>
+                        @empty
+                            <li>Rekomendasi khusus belum tersedia.</li>
+                        @endforelse
+                    </ol>
+                </div>
+
+                @if(!empty($analisisAi['pesan_motivasi']))
+                    <div class="result-ai-motivation">
+                        <strong>Pesan Semangat</strong>
+                        <p class="mb-0">{{ $analisisAi['pesan_motivasi'] }}</p>
+                    </div>
+                @endif
+
+                @if(!empty($analisisAi['catatan_keterbatasan']))
+                    <p class="result-ai-limits"><strong>Catatan analisis:</strong> {{ $analisisAi['catatan_keterbatasan'] }}</p>
+                @endif
+            </section>
+        @elseif($adaEsai)
+            <div class="result-ai-waiting" role="status">
+                <strong>Analitik AI lengkap menunggu penilaian esai.</strong>
+                <div>Hasil pilihan ganda tetap ditampilkan. Guru perlu menyelesaikan penilaian esai sebelum analisis keseluruhan dibuat.</div>
+            </div>
+        @else
+            <div class="result-ai-waiting" role="status">
+                <strong>Analitik AI belum tersedia saat ini.</strong>
+                <div>Hasil pengerjaanmu tetap tersimpan. Coba buka kembali hasil melalui Riwayat setelah layanan analitik tersedia.</div>
+            </div>
         @endif
 
         {{-- NAVIGASI --}}
