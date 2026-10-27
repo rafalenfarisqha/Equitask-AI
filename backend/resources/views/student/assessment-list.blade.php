@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'Daftar Assessment')
@@ -175,6 +174,11 @@
         color: #fff;
     }
 
+    .assessment-btn:focus-visible {
+        outline: 3px solid #93c5fd;
+        outline-offset: 3px;
+    }
+
     .assessment-empty {
         padding: 44px 24px;
         text-align: center;
@@ -202,13 +206,15 @@
         font-size: 17px;
         font-weight: 800;
         margin-bottom: 8px;
+        color: #0f172a;
     }
 
     .assessment-empty p {
         font-size: 13px;
         line-height: 1.7;
         color: #64748b;
-        margin: 0;
+        margin: 0 auto;
+        max-width: 440px;
     }
 
     @media (max-width: 640px) {
@@ -246,55 +252,92 @@
 @endpush
 
 @section('content')
+
+<!-- TOPBAR -->
 <div class="topbar">
-    <a href="{{ route('siswa.dashboard') }}"
-       aria-label="Kembali ke dashboard"
-       style="display:flex;align-items:center;color:#0f172a;text-decoration:none;">
-        <span class="material-symbols-outlined">arrow_back</span>
+    <a
+        href="{{ route('siswa.dashboard') }}"
+        aria-label="Kembali ke dashboard"
+        style="display:flex; align-items:center;
+               color:#0f172a; text-decoration:none;"
+    >
+        <span class="material-symbols-outlined">
+            arrow_back
+        </span>
     </a>
 
-    <div style="font-size:15px;font-weight:700;">Daftar Assessment</div>
+    <div style="font-size:15px; font-weight:700;">
+        Daftar Assessment
+    </div>
 </div>
 
+<!-- HALAMAN DAFTAR ASESMEN -->
 <div class="assessment-page">
+
+    <!-- JUDUL -->
     <div class="assessment-heading">
         <div>
             <div class="assessment-eyebrow">
-                <span class="material-symbols-outlined"
-                      style="font-size:16px;">school</span>
+                <span
+                    class="material-symbols-outlined"
+                    style="font-size:16px;"
+                >
+                    school
+                </span>
                 Ruang Belajar
             </div>
 
             <h1>Assessment untukmu</h1>
+
             <p>
-                Pilih assessment yang tersedia untuk melihat petunjuk
-                dan menentukan versi pengerjaan yang sesuai.
+                Pilih assessment yang ditugaskan oleh guru
+                untuk melihat petunjuk dan memulai pengerjaan.
+                Soal Reguler atau Adaptif akan ditentukan
+                secara otomatis berdasarkan pengaturan guru kelas.
             </p>
         </div>
 
+        <!-- JUMLAH ASESMEN -->
         <div class="assessment-count">
             <strong>{{ $assessments->count() }}</strong>
             <span>Assessment</span>
         </div>
     </div>
 
+    <!-- KONDISI BELUM ADA TUGAS -->
     @if ($assessments->isEmpty())
+
         <div class="assessment-empty">
+
             <div class="assessment-empty-icon">
-                <span class="material-symbols-outlined">assignment_late</span>
+                <span class="material-symbols-outlined">
+                    assignment_late
+                </span>
             </div>
 
-            <h2>Belum ada assessment</h2>
+            <h2>Belum ada assessment dari guru</h2>
+
             <p>
-                Belum ada assessment publik yang diterbitkan guru.
-                Assessment akan muncul di sini setelah tersedia.
+                Saat ini belum ada assessment yang ditugaskan
+                ke kelasmu. Assessment akan muncul di sini
+                setelah guru menerbitkan dan menugaskannya
+                ke kelas yang kamu ikuti.
             </p>
+
         </div>
+
     @else
+
+        <!-- DAFTAR ASESMEN -->
         <div class="assessment-list">
+
             @foreach ($assessments as $assessment)
+
                 <article class="assessment-card">
+
+                    <!-- NAMA DAN MATA PELAJARAN -->
                     <div class="assessment-card-top">
+
                         <div class="assessment-icon">
                             <span class="material-symbols-outlined">
                                 {{ $assessment->icon ?: 'assignment' }}
@@ -302,62 +345,119 @@
                         </div>
 
                         <div style="min-width:0;">
-                            <h2>{{ $assessment->nama }}</h2>
+
+                            <h2>
+                                {{ $assessment->nama }}
+                            </h2>
 
                             <div class="assessment-subject">
-                                <span class="material-symbols-outlined"
-                                      style="font-size:16px;">menu_book</span>
+                                <span
+                                    class="material-symbols-outlined"
+                                    style="font-size:16px;"
+                                >
+                                    menu_book
+                                </span>
+
                                 {{ $assessment->mapel ?: 'Mata pelajaran umum' }}
                             </div>
+
                         </div>
                     </div>
 
                     <hr class="assessment-divider">
 
+                    <!-- TANGGAL -->
                     <div class="assessment-meta">
-                        <span class="material-symbols-outlined">event</span>
+                        <span class="material-symbols-outlined">
+                            event
+                        </span>
 
                         Diterbitkan
+
                         @if ($assessment->created_at)
-                            {{ \Illuminate\Support\Carbon::parse($assessment->created_at)->format('d M Y') }}
+                            {{ \Illuminate\Support\Carbon::parse(
+                                $assessment->created_at
+                            )->translatedFormat('d M Y') }}
                         @else
                             oleh guru
                         @endif
                     </div>
 
-                    <a class="assessment-btn"
-                    href="{{ route('siswa.assessment.instructions', $assessment->id) }}">
+                    <!-- MENUJU PETUNJUK -->
+                    <a
+                        class="assessment-btn"
+                        href="{{ route(
+                            'siswa.assessment.instructions',
+                            $assessment->id
+                        ) }}"
+                    >
                         Lihat Petunjuk
-                        <span class="material-symbols-outlined"
-                              style="font-size:18px;">arrow_forward</span>
+
+                        <span
+                            class="material-symbols-outlined"
+                            style="font-size:18px;"
+                        >
+                            arrow_forward
+                        </span>
                     </a>
+
                 </article>
+
             @endforeach
+
         </div>
+
     @endif
+
 </div>
+
 @endsection
 
+<!-- NAVIGASI BAWAH SISWA -->
 @section('bottom_nav')
+
 <nav class="bottomnav" aria-label="Navigasi siswa">
-    <a class="navitem" href="{{ route('siswa.dashboard') }}">
-        <span class="material-symbols-outlined">home</span>
+
+    <a
+        class="navitem"
+        href="{{ route('siswa.dashboard') }}"
+    >
+        <span class="material-symbols-outlined">
+            home
+        </span>
         <span>Beranda</span>
     </a>
 
-    <a class="navitem active" href="{{ route('siswa.assessment') }}">
-        <span class="material-symbols-outlined">assignment</span>
+    <a
+        class="navitem active"
+        href="{{ route('siswa.assessment') }}"
+    >
+        <span class="material-symbols-outlined">
+            assignment
+        </span>
         <span>Assessment</span>
     </a>
 
-    <a class="navitem" href="{{ route('siswa.riwayat') }}">
-        <span class="material-symbols-outlined">history</span>
+    <a
+        class="navitem"
+        href="{{ route('siswa.riwayat') }}"
+    >
+        <span class="material-symbols-outlined">
+            history
+        </span>
         <span>Riwayat</span>
     </a>
 
-    <a class="navitem" href="{{ route('siswa.profil') }}">
-        <span class="material-symbols-outlined">person</span>
+    <a
+        class="navitem"
+        href="{{ route('siswa.profil') }}"
+    >
+        <span class="material-symbols-outlined">
+            person
+        </span>
         <span>Profil</span>
     </a>
+
 </nav>
+
 @endsection
